@@ -1,41 +1,49 @@
-# Prerequisites
-*.d
+# .NET build output
+bin/
+obj/
+**/bin/
+**/obj/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# User/IDE
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/settings.json
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# Precompiled Headers
-*.gch
-*.pch
+# OS
+.DS_Store
+Thumbs.db
 
-# Linker files
-*.ilk
+# Logs
+*.log
 
-# Debugger Files
-*.pdb
+# Test results / coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# NuGet cache artifacts (optional)
+*.nupkg
 
-# Fortran module files
-*.mod
-*.smod
+# Local app data / databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# CSV runtime data (keep templates if you want)
+data/
+*.csv
 
-# Executables
-*.exe
-*.out
-*.app
+# Publish output
+publish/
+**/publish/
 
-# debug information files
-*.dwo
