@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TheraPay.Core\TheraPay.Core.csproj" />
+    <ProjectReference Include="..\..\src\TheraPay.Domain\TheraPay.Domain.csproj" />
   </ItemGroup>
 
 </Project>
