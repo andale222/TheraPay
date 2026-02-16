@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E51D5559-C930-46AE-BFA4-9FBA70CB9B0C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6B1D2B3C-ACBE-4828-8806-595ACA8205B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheraPay.Core.Tests", "tests\TheraPay.Core.Tests\TheraPay.Core.Tests.csproj", "{E026BF73-F29C-4CA5-9B10-D2CB4468477C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheraPay.Core", "src\TheraPay.Core\TheraPay.Core.csproj", "{EA37D477-E64B-459F-A986-707E8F8FBE31}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E026BF73-F29C-4CA5-9B10-D2CB4468477C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E026BF73-F29C-4CA5-9B10-D2CB4468477C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E026BF73-F29C-4CA5-9B10-D2CB4468477C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E026BF73-F29C-4CA5-9B10-D2CB4468477C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA37D477-E64B-459F-A986-707E8F8FBE31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA37D477-E64B-459F-A986-707E8F8FBE31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA37D477-E64B-459F-A986-707E8F8FBE31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA37D477-E64B-459F-A986-707E8F8FBE31}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E026BF73-F29C-4CA5-9B10-D2CB4468477C} = {6B1D2B3C-ACBE-4828-8806-595ACA8205B3}
+		{EA37D477-E64B-459F-A986-707E8F8FBE31} = {E51D5559-C930-46AE-BFA4-9FBA70CB9B0C}
+	EndGlobalSection
+EndGlobal
