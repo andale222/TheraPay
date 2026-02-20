@@ -1,4 +1,3 @@
-using System.Reflection;
 using TheraPay.Domain;
 
 namespace TheraPay.Core.Tests;
@@ -6,11 +5,11 @@ namespace TheraPay.Core.Tests;
 
 public class PatientOperations_test
 {
-    Patient getFirstPatient( )
+    private Patient getFirstPatient( )
     {
         return new Patient("A", "J", "L5R");
     }
-    Patient getSecondPatient( )
+    private Patient getSecondPatient( )
     {
         return new Patient("second", "patient", "NR2");
     }
@@ -92,4 +91,6 @@ public class PatientOperations_test
         // maybe
         Assert.Equal("Patient with ID L5R already exists.", result2.Error);
     }
+
+
 }
