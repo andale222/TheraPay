@@ -57,8 +57,8 @@ public class PatientsViewModel : ViewModelBase
 
     private void Reload()
     {
-        // Patients.Clear();
-        // foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
-        //     Patients.Add(p);
+        Patients.Clear();
+        foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
+            Patients.Add(p);
     }
 }

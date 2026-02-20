@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TheraPay.UI.ViewModels"
              xmlns:domain="using:TheraPay.Domain"
+             xmlns:dataGrid="using:Avalonia.Controls"
              x:Class="TheraPay.UI.Views.PatientsView"
              x:DataType="vm:PatientsViewModel">
 
@@ -16,13 +17,17 @@
       <Button Content="Add" Click="Add_Click"/>
     </StackPanel>
 
-    <ListBox ItemsSource="{Binding Patients}">
-      <ListBox.ItemTemplate>
-        <DataTemplate x:DataType="domain:Patient">
-          <TextBlock Text="{Binding LastName}"/>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+    <dataGrid:DataGrid ItemsSource="{Binding Patients}"
+                       AutoGenerateColumns="False"
+                       IsReadOnly="True"
+                       Height="250">
+
+      <dataGrid:DataGrid.Columns>
+        <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding ID}" Width="*" />
+        <dataGrid:DataGridTextColumn Header="LastName" Binding="{Binding LastName}" Width="*" />
+        <dataGrid:DataGridTextColumn Header="FirstName" Binding="{Binding FirstName}" Width="*" />
+      </dataGrid:DataGrid.Columns>
+    </dataGrid:DataGrid>
 
   </StackPanel>
 </UserControl>
