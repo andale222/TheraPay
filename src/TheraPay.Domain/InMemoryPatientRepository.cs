@@ -25,6 +25,9 @@ public class InMemoryPatientRepository
         return _patients[index];
     }
 
+    public IReadOnlyList<Patient> GetAll()
+        => _patients.ToList();
+
     private bool PatientExists(string id)
     {
         return _patients.Any(p => p.ID == id);
