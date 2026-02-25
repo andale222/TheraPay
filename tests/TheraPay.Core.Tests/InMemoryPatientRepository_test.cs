@@ -6,14 +6,6 @@ namespace TheraPay.Core.Tests;
 
 public class PatientOperations_test
 {
-    private Patient getFirstPatient( )
-    {
-        return new Patient("A", "J", "L5R");
-    }
-    private Patient getSecondPatient( )
-    {
-        return new Patient("second", "patient", "NR2");
-    }
     [Fact]
     public void EmptyPatientRepository_AddPatient_Count1()
     {
@@ -21,7 +13,7 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        patients.Add(getFirstPatient( ));
+        patients.Add(TestData.Patient1( ));
 
         // THEN
         Assert.Equal(1, patients.Count());
@@ -34,8 +26,8 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        patients.Add(getFirstPatient( ));
-        patients.Add(getSecondPatient( ));
+        patients.Add(TestData.Patient1( ));
+        patients.Add(TestData.Patient2( ));
 
         // THEN
         Assert.Equal(2, patients.Count());
@@ -50,7 +42,7 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        Patient newPatient = getFirstPatient( );
+        Patient newPatient = TestData.Patient1( );
         patients.Add(newPatient);
 
         // THEN
@@ -64,8 +56,8 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        patients.Add(getFirstPatient( ));
-        Patient newPatient = getSecondPatient();
+        patients.Add(TestData.Patient1( ));
+        Patient newPatient = TestData.Patient2();
         patients.Add(newPatient);
 
         // THEN
@@ -79,8 +71,8 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        Result result = patients.Add(getFirstPatient( ));
-        Result result2 = patients.Add(getFirstPatient( ));
+        Result result = patients.Add(TestData.Patient1( ));
+        Result result2 = patients.Add(TestData.Patient1( ));
 
         // THEN
         Assert.True(result.Ok);
@@ -96,14 +88,14 @@ public class PatientOperations_test
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
 
         // WHEN
-        patients.Add(getFirstPatient( ));
-        patients.Add(getSecondPatient( ));
+        patients.Add(TestData.Patient1( ));
+        patients.Add(TestData.Patient2( ));
         IReadOnlyList<Patient> allPatients = patients.GetAll();
 
         // THEN
         Assert.Equal(2, allPatients.Count);
-        Assert.Equal(getFirstPatient( ).ID, allPatients[0].ID);
-        Assert.Equal(getSecondPatient( ).ID, allPatients[1].ID);
+        Assert.Equal(TestData.Patient1( ).ID, allPatients[0].ID);
+        Assert.Equal(TestData.Patient2( ).ID, allPatients[1].ID);
     }
 
 }
