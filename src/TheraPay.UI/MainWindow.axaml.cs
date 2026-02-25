@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using TheraPay.UI.Views;
 using TheraPay.UI.ViewModels;
-using TheraPay.Domain;
+using TheraPay.Core;
 
 namespace TheraPay.UI;
 
