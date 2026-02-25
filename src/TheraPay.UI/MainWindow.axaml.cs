@@ -10,8 +10,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+    }
 
-
+    public void AddPatient_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
         var store = new InMemoryPatientRepository();                 // dein InMemory (aus Core)
         var vm = new PatientsViewModel(store);
 
