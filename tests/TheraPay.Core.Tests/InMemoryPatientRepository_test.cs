@@ -1,3 +1,4 @@
+using TheraPay.Core;
 using TheraPay.Domain;
 
 namespace TheraPay.Core.Tests;

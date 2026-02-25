@@ -1,4 +1,6 @@
-namespace TheraPay.Domain;
+namespace TheraPay.Core;
+
+using TheraPay.Domain;
 
 public class InMemoryPatientRepository
 {

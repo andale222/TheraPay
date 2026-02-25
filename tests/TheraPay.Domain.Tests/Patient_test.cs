@@ -1,6 +1,6 @@
 using TheraPay.Domain;
 
-namespace TheraPay.Core.Tests;
+namespace TheraPay.Domain.Tests;
 
 
 public class Patient_test
