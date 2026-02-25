@@ -86,11 +86,27 @@ public class PatientOperations_test
         Result result2 = patients.Add(getFirstPatient( ));
 
         // THEN
-        Assert.Equal(true, result.Ok);
-        Assert.Equal(false, result2.Ok);
+        Assert.True(result.Ok);
+        Assert.False(result2.Ok);
         // maybe
         Assert.Equal("Patient with ID L5R already exists.", result2.Error);
     }
 
+    [Fact]
+    public void EmptyPatientRepository_Add2Patients_GetAll_ReturnsListWith2Patients()
+    {
+        // GIVEN
+        InMemoryPatientRepository patients = new InMemoryPatientRepository();
+
+        // WHEN
+        patients.Add(getFirstPatient( ));
+        patients.Add(getSecondPatient( ));
+        IReadOnlyList<Patient> allPatients = patients.GetAll();
+
+        // THEN
+        Assert.Equal(2, allPatients.Count);
+        Assert.Equal(getFirstPatient( ).ID, allPatients[0].ID);
+        Assert.Equal(getSecondPatient( ).ID, allPatients[1].ID);
+    }
 
 }
