@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             xmlns:domain="using:TheraPay.Domain"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             x:Class="TheraPay.UI.Views.PatientsView"
+             x:DataType="vm:PatientsViewModel">
+
+  <StackPanel Margin="16" Spacing="8">
+
+    <TextBlock Text="Patients" FontSize="18"/>
+
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <TextBox Width="160" Watermark="First name" Text="{Binding FirstName}"/>
+      <TextBox Width="160" Watermark="Last name"  Text="{Binding LastName}"/>
+      <TextBox Width="160" Watermark="Patient ID" Text="{Binding PatientID}"/>
+      <Button Content="Add" Click="Add_Click"/>
+    </StackPanel>
+
+    <dataGrid:DataGrid ItemsSource="{Binding Patients}"
+                       AutoGenerateColumns="False"
+                       IsReadOnly="True"
+                       Height="250">
+
+      <dataGrid:DataGrid.Columns>
+        <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding ID}" Width="*" />
+        <dataGrid:DataGridTextColumn Header="LastName" Binding="{Binding LastName}" Width="*" />
+        <dataGrid:DataGridTextColumn Header="FirstName" Binding="{Binding FirstName}" Width="*" />
+      </dataGrid:DataGrid.Columns>
+    </dataGrid:DataGrid>
+
+  </StackPanel>
+</UserControl>
