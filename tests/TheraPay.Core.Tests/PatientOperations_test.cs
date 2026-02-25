@@ -53,9 +53,7 @@ public class PatientOperations_test
         patients.Add(newPatient);
 
         // THEN
-        Assert.Equal(patients.GetPatient(0).LastName, newPatient.LastName);
-        Assert.Equal(patients.GetPatient(0).FirstName, newPatient.FirstName);
-        Assert.Equal(patients.GetPatient(0).ID, newPatient.ID);
+        Assert.Equal(patients.GetPatient(0), newPatient);
     }
 
     [Fact]
@@ -70,13 +68,11 @@ public class PatientOperations_test
         patients.Add(newPatient);
 
         // THEN
-        Assert.Equal(patients.GetPatient(1).LastName, newPatient.LastName);
-        Assert.Equal(patients.GetPatient(1).FirstName, newPatient.FirstName);
-        Assert.Equal(patients.GetPatient(1).ID, newPatient.ID);
+        Assert.Equal(patients.GetPatient(1), newPatient);
     }
 
     [Fact]
-    public void EmptyPatientRepository_Add2SimilarPatients_ThrowExceptionForSecond()
+    public void EmptyPatientRepository_Add2SimilarPatients_ReturnFailedResultForSecond()
     {
         // GIVEN
         InMemoryPatientRepository patients = new InMemoryPatientRepository();
