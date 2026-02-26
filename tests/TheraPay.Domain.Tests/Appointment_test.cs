@@ -8,7 +8,7 @@ public class Appointment_test
     public void GivenAppointmentData_CreateAppointment_AppointmentHasCorrectValues()
     {
         // GIVEN
-        DateTime date = new DateTime(2024, 6, 1, 14, 0, 0);
+        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Patient patient = new Patient("A", "J", "L5R");
 
         // WHEN

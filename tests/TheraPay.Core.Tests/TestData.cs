@@ -23,4 +23,9 @@ public static class TestData
         InMemoryPatientRepository repository = TestData.getInMemoryPatientRepositoryWithTwoPatients();
         return new PatientService(repository);
     }
+
+
+
+    public static Appointment Appointment1( ) => new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), Patient1());
+    public static Appointment Appointment2( ) => new Appointment(new DateTime(2026, 1, 8, 15, 0, 0), Patient2());
 }
