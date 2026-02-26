@@ -2,6 +2,7 @@ namespace TheraPay.Domain;
 
 public class Appointment
 {
+    public Guid Id { get; }
     public DateTime Date { get; private set; }
     public string PatientID { get; private set; }
 
@@ -9,5 +10,6 @@ public class Appointment
     {
         Date = date;
         PatientID = patientID;
+        Id = Guid.NewGuid();
     }
 }

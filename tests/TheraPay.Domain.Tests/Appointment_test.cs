@@ -17,5 +17,6 @@ public class Appointment_test
         // THEN
         Assert.Equal(date, appointment.Date);
         Assert.Equal(patient.ID, appointment.PatientID);
+        Assert.NotEqual(Guid.Empty, appointment.Id);
     }
 }
