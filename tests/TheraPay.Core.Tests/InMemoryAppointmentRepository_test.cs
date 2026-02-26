@@ -33,4 +33,23 @@ public class InMemoryAppointmentRepository_test
         Assert.Equal(1, repository.Count());
         Assert.Equal(appointment, repository.GetAppointment(0));
     }
+
+    [Fact]
+    public void GivenEmptyInMemoryAppointmentRepository_AddTwoAppointment_CountIsTwo()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        Appointment appointment1 = TestData.Appointment1();
+        Appointment appointment2 = TestData.Appointment2();
+
+        // WHEN
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+
+        // THEN
+        Assert.Equal(2, repository.Count());
+        Assert.Equal(appointment1, repository.GetAppointment(0));
+        Assert.Equal(appointment2, repository.GetAppointment(1));
+    }
+
 }
