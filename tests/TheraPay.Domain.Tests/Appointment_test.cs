@@ -12,10 +12,10 @@ public class Appointment_test
         Patient patient = new Patient("A", "J", "L5R");
 
         // WHEN
-        var appointment = new Appointment(date, patient);
+        var appointment = new Appointment(date, patient.ID);
 
         // THEN
         Assert.Equal(date, appointment.Date);
-        Assert.Equal(patient, appointment.Patient);
+        Assert.Equal(patient.ID, appointment.PatientID);
     }
 }
