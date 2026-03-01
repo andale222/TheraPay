@@ -3,11 +3,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using TheraPay.Core;
 using TheraPay.Domain;  
+using TheraPay.UI.Navigation;
 
 namespace TheraPay.UI.ViewModels;
 
 public class PatientsViewModel : ViewModelBase
 {
+    private INavigationService _navigationService;
     private readonly InMemoryPatientRepository _store;
 
     public ObservableCollection<Patient> Patients { get; } = new();
@@ -39,9 +41,10 @@ public class PatientsViewModel : ViewModelBase
     }
 }
 
-    public PatientsViewModel(InMemoryPatientRepository store)
+    public PatientsViewModel(InMemoryPatientRepository store, INavigationService navigationService)
     {
         _store = store;
+        _navigationService = navigationService;
         Reload();
     }
 
@@ -61,5 +64,10 @@ public class PatientsViewModel : ViewModelBase
         Patients.Clear();
         foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
             Patients.Add(p);
+    }
+
+    public void GoBack()
+    {
+        _navigationService.NavigateToMain();
     }
 }

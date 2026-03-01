@@ -5,8 +5,8 @@
         xmlns:vm="using:TheraPay.UI.ViewModels"
         xmlns:dataGrid="using:Avalonia.Controls"
         mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="200"
-        Width="900"
-        Height="600"
+        Width="1200"
+        Height="800"
         x:Class="TheraPay.UI.MainWindow"
         x:DataType="vm:PatientsViewModel"
         Title="TheraPay.UI">
