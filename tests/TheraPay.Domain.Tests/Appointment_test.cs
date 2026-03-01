@@ -64,5 +64,26 @@ public class Appointment_test
         // WHEN THEN
         Assert.Throws<ArgumentOutOfRangeException>(() => appointment.SetDuration(25 * 60)); // 25 hours is too long
     }
+    [Fact]
+    public void GivenAppointment_AddDuration_EndPropertyIsSetCorrectly()
+    {
+        // GIVEN
+        var appointment = CreateAppointment();
+        int durationInMinutes = 90;
+        DateTime expectedEnd = appointment.Date.AddMinutes(durationInMinutes);
+
+        // WHEN
+        appointment.SetDuration(durationInMinutes);
+
+        // THEN
+        Assert.Equal(expectedEnd, appointment.End);
+
+        // WHEN
+        appointment.SetDuration(10);
+        expectedEnd = appointment.Date.AddMinutes(10);
+
+        // THEN
+        Assert.Equal(expectedEnd, appointment.End);
+    }
 
 }
