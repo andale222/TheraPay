@@ -85,5 +85,77 @@ public class Appointment_test
         // THEN
         Assert.Equal(expectedEnd, appointment.End);
     }
+    [Fact]
+    public void GivenTwoAppointments_OverlappingEnd_ReturnsTrue()
+    {        // GIVEN
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 14, 30, 0), "patientID2");
+        appointment1.SetDuration(60);
+        appointment2.SetDuration(60);
+
+        // WHEN
+        bool overlaps = appointment1.OverlapsWith(appointment2);
+
+        // THEN
+        Assert.True(overlaps);
+    }
+    [Fact]
+    public void GivenTwoAppointments_OverlappingStart_ReturnsTrue()
+    {        // GIVEN
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 13, 30, 0), "patientID2");
+        appointment1.SetDuration(60);
+        appointment2.SetDuration(60);
+
+        // WHEN
+        bool overlaps = appointment1.OverlapsWith(appointment2);
+
+        // THEN
+        Assert.True(overlaps);
+    }
+    [Fact]
+    public void GivenTwoAppointments_OverlappingInternal_ReturnsTrue()
+    {        // GIVEN
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 14, 5, 0), "patientID2");
+        appointment1.SetDuration(60);
+        appointment2.SetDuration(30);
+
+        // WHEN
+        bool overlaps = appointment1.OverlapsWith(appointment2);
+
+        // THEN
+        Assert.True(overlaps);
+    }
+
+    [Fact]
+    public void GivenTwoAppointments_NonOverlappingBefore_ReturnsFalse()
+    {        // GIVEN
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 13, 0, 0), "patientID2");
+        appointment1.SetDuration(60);
+        appointment2.SetDuration(30);
+
+        // WHEN
+        bool overlaps = appointment1.OverlapsWith(appointment2);
+
+        // THEN
+        Assert.False(overlaps);
+    }
+
+    [Fact]
+    public void GivenTwoAppointments_NonOverlappingAfter_ReturnsFalse()
+    {        // GIVEN
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 15, 0, 0), "patientID2");
+        appointment1.SetDuration(60);
+        appointment2.SetDuration(30);
+
+        // WHEN
+        bool overlaps = appointment1.OverlapsWith(appointment2);
+
+        // THEN
+        Assert.False(overlaps);
+    }
 
 }
