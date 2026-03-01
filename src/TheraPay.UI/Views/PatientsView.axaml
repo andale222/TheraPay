@@ -3,31 +3,89 @@
              xmlns:vm="using:TheraPay.UI.ViewModels"
              xmlns:domain="using:TheraPay.Domain"
              xmlns:dataGrid="using:Avalonia.Controls"
+             Width="900"
+             Height="600"
              x:Class="TheraPay.UI.Views.PatientsView"
              x:DataType="vm:PatientsViewModel">
 
   <StackPanel Margin="16" Spacing="8">
+    <TextBlock Text="Patient hinzufügen/bearbeiten" FontSize="18"/>
 
-    <TextBlock Text="Patients" FontSize="18"/>
+    <Grid ColumnDefinitions="Auto,*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="16">
 
-    <StackPanel Orientation="Horizontal" Spacing="8">
-      <TextBox Width="160" Watermark="First name" Text="{Binding FirstName}"/>
-      <TextBox Width="160" Watermark="Last name"  Text="{Binding LastName}"/>
-      <TextBox Width="160" Watermark="Patient ID" Text="{Binding PatientID}"/>
-      <Button Content="Add" Click="Add_Click"/>
+    <StackPanel Orientation="Horizontal" Grid.Row= "0" Grid.Column="0" Spacing="8">
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Vorname" FontSize="15"/>
+       <TextBox Width="160" Watermark="First name" Text="{Binding FirstName}"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Nachname" FontSize="15"/>
+       <TextBox Width="160" Watermark="First name" Text="{Binding LastName}"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Patienten ID" FontSize="15"/>
+       <TextBox Width="160" Watermark="First name" Text="{Binding PatientID}"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="IC-Diagnose" FontSize="15"/>
+       <TextBox Width="160" Watermark="ICD code"/>
+      </StackPanel>
     </StackPanel>
 
-    <dataGrid:DataGrid ItemsSource="{Binding Patients}"
-                       AutoGenerateColumns="False"
-                       IsReadOnly="True"
-                       Height="250">
+    <StackPanel Orientation="Horizontal" Grid.Row= "1" Grid.Column="0" Spacing="8">
+      <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Vorname" FontSize="15"/>
+       <TextBox Width="160" Watermark="Straße + Hausnr." Text="{Binding }"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
+       <TextBlock Text="PLZ" FontSize="15"/>
+       <TextBox Width="160" Watermark="PLZ" Text="{Binding }"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Ort" FontSize="15"/>
+       <TextBox Width="160" Watermark="Ort" Text="{Binding }"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Land" FontSize="15"/>
+       <TextBox Width="160" Watermark="Land" Text="{Binding }"/>
+      </StackPanel>
+    </StackPanel>
 
-      <dataGrid:DataGrid.Columns>
-        <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding ID}" Width="*" />
-        <dataGrid:DataGridTextColumn Header="LastName" Binding="{Binding LastName}" Width="*" />
-        <dataGrid:DataGridTextColumn Header="FirstName" Binding="{Binding FirstName}" Width="*" />
-      </dataGrid:DataGrid.Columns>
-    </dataGrid:DataGrid>
+    <StackPanel Orientation="Horizontal" Grid.Row= "2" Grid.Column="0" Spacing="8">
+      <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
+       <TextBlock Text="E-Mail" FontSize="15"/>
+       <TextBox Width="160" Watermark="E-Mail" />
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Festnetz" FontSize="15"/>
+       <TextBox Width="160" Watermark="Festnetznummer" />
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Mobilnr." FontSize="15"/>
+       <TextBox Width="160" Watermark="mobile" />
+      </StackPanel>
+    </StackPanel>
 
+
+
+    <StackPanel Orientation="Horizontal" Grid.Row= "3" Grid.Column="0" Spacing="8">
+      <StackPanel Orientation="Vertical" Grid.Row= "3" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Notizen" FontSize="15"/>
+       <TextBox Width="500" Height="150" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Notizen" />
+      </StackPanel>
+    </StackPanel>
+
+
+    <StackPanel Orientation="Vertical" Spacing="8" Margin="8" Grid.Column="0" Grid.Row= "4" >
+      <TextBlock Text="Status:" FontSize="15"/>
+      <RadioButton GroupName="PatientenStatus" Content="aktiv"  IsChecked="True"/>
+      <RadioButton GroupName="PatientenStatus" Content="inaktiv" />
+    </StackPanel>
+    <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
+      <Button Content="Daten prüfen" Click="Add_Click" Background="#FAAC2D"/>
+      <Button Content="Hinzufügen" Click="Add_Click" Background="#71CE82"/>
+    </StackPanel>
+  
+    </Grid>
   </StackPanel>
 </UserControl>
