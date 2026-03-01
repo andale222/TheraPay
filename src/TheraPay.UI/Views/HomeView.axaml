@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             xmlns:domain="using:TheraPay.Domain"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             x:Class="TheraPay.UI.Views.HomeView"
+             x:DataType="vm:HomeViewModel">
+    
+    <Grid ColumnDefinitions="1*,1*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,*" >
+        <!-- Left: Calendar + label -->
+    <StackPanel Grid.Row= "0" Grid.Column="0" Spacing="8">
+      <TextBlock Text="Termine:" FontSize="18" FontWeight="Bold"/>
+      <Calendar/>
+    </StackPanel>
+    
+    <!-- Right: action groups -->
+    <StackPanel Grid.Row= "0" Grid.Column="1" Spacing="12">
+
+      <!-- Group 1 -->
+      <HeaderedContentControl>
+        <HeaderedContentControl.Header>
+        <TextBlock
+            Text="Actions:"
+            FontSize="18"
+            FontWeight="Bold" />
+    </HeaderedContentControl.Header>
+    <Border
+        Margin="0,8,0,0"
+        Padding="12"
+        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <StackPanel Spacing="8" Margin="8">
+          <Button Content="Patient:in hinzufügen" Command="{Binding NavigatePatientsCommand}"/>
+          <Button Content="Termin hinzufügen" />
+          <Button Content="Rechnungen erstellen" />
+        </StackPanel>
+    </Border>
+</HeaderedContentControl>
+
+<!-- Under-group / status area -->
+      <HeaderedContentControl>
+        <HeaderedContentControl.Header>
+        <TextBlock
+            Text="Status:"
+            FontSize="18"
+            FontWeight="Bold" />
+    </HeaderedContentControl.Header>
+    <Border
+        Margin="0,8,0,0"
+        Padding="12"
+        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <StackPanel Spacing="6" Margin="8">
+          <TextBlock Text="Overdue invoices: 0"/>
+          <TextBlock Text="Upcoming appointments: 0"/>
+        </StackPanel>
+    </Border>
+</HeaderedContentControl>
+
+    </StackPanel>
+
+
+    <!-- Patientenlisten Box mit mini filter -->
+     <StackPanel Grid.Row= "1" Grid.Column="0" Grid.ColumnSpan="2" Spacing="12">
+        <HeaderedContentControl>
+        <HeaderedContentControl.Header>
+        <TextBlock
+            Text="Patienten:"
+            FontSize="18"
+            FontWeight="Bold" />
+    </HeaderedContentControl.Header>
+    <Border
+        Margin="0,8,0,0"
+        Padding="12"
+        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <Grid ColumnDefinitions="Auto,1*,Auto" Margin="16" ColumnSpacing="16" RowDefinitions="*,Auto" >
+
+        <StackPanel Spacing="8" Margin="8" Grid.Column="0">
+          <RadioButton GroupName="PatientenFilter" Content="alle" />
+    <RadioButton GroupName="PatientenFilter" Content="aktiv" IsChecked="True" />
+    <RadioButton GroupName="PatientenFilter" Content="archiviert" />
+        </StackPanel>
+
+        <!-- Patientenliste placeholder. . .  -->
+        <StackPanel Spacing="8" Margin="8" Grid.Column="1">
+          <dataGrid:DataGrid ItemsSource="{Binding }"
+                       AutoGenerateColumns="False"
+                       IsReadOnly="True"
+                       Height="250">
+
+      <dataGrid:DataGrid.Columns>
+        <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding }" Width="*" />
+        <dataGrid:DataGridTextColumn Header="LastName" Binding="{Binding }" Width="*" />
+        <dataGrid:DataGridTextColumn Header="FirstName" Binding="{Binding }" Width="*" />
+      </dataGrid:DataGrid.Columns>
+    </dataGrid:DataGrid>
+        </StackPanel>
+
+        <StackPanel Spacing="8" Margin="8" Grid.Column="2">
+          <Button Content="Bearbeiten" />
+          <Button Content="(In)aktivieren" />
+          <Button Content="Löschen" />
+        </StackPanel>
+
+    </Grid>
+    </Border>
+</HeaderedContentControl>
+    </StackPanel>
+
+    </Grid>
+</UserControl>

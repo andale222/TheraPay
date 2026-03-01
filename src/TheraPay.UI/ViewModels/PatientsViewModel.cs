@@ -9,8 +9,8 @@ namespace TheraPay.UI.ViewModels;
 
 public class PatientsViewModel : ViewModelBase
 {
-    private INavigationService _navigationService;
     private readonly InMemoryPatientRepository _store;
+    public RelayCommand NavigateHomeViewCommand  { get; }
 
     public ObservableCollection<Patient> Patients { get; } = new();
 
@@ -41,10 +41,10 @@ public class PatientsViewModel : ViewModelBase
     }
 }
 
-    public PatientsViewModel(InMemoryPatientRepository store, INavigationService navigationService)
+    public PatientsViewModel(PatientService patientService, InMemoryPatientRepository store, NavigationService nav)
     {
         _store = store;
-        _navigationService = navigationService;
+        NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         Reload();
     }
 
@@ -64,10 +64,5 @@ public class PatientsViewModel : ViewModelBase
         Patients.Clear();
         foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
             Patients.Add(p);
-    }
-
-    public void GoBack()
-    {
-        _navigationService.NavigateToMain();
     }
 }

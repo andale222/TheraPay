@@ -11,7 +11,7 @@ public partial class PatientsView : UserControl
     private void AddPatient_Click(object? sender, RoutedEventArgs e)
     {
         (DataContext as PatientsViewModel)?.AddPatient();
-        (DataContext as PatientsViewModel)?.GoBack();
+        (DataContext as PatientsViewModel)?.NavigateHomeViewCommand.Execute(null);
     }
 
     private void CheckData_Click(object? sender, RoutedEventArgs e)
