@@ -21,4 +21,9 @@ public class InMemoryAppointmentRepository
     {
         return _appointments[index];
     }
+
+    public IReadOnlyList<Appointment> GetAll()
+    {
+        return _appointments;
+    }
 }

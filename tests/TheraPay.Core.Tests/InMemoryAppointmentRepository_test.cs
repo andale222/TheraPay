@@ -52,4 +52,21 @@ public class InMemoryAppointmentRepository_test
         Assert.Equal(appointment2, repository.GetAppointment(1));
     }
 
+    [Fact]
+    public void GivenInMemoryAppointmentRepository_GetAll_ReturnsAllAppointments()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        Appointment appointment1 = TestData.Appointment1();
+        Appointment appointment2 = TestData.Appointment2();
+
+        // WHEN
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+        var allAppointments = repository.GetAll();
+
+        // THEN
+        Assert.Equal(2, allAppointments.Count());
+    }
+
 }
