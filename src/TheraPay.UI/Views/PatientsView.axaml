@@ -3,8 +3,6 @@
              xmlns:vm="using:TheraPay.UI.ViewModels"
              xmlns:domain="using:TheraPay.Domain"
              xmlns:dataGrid="using:Avalonia.Controls"
-             Width="900"
-             Height="600"
              x:Class="TheraPay.UI.Views.PatientsView"
              x:DataType="vm:PatientsViewModel">
 
