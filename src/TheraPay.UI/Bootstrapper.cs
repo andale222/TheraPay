@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TheraPay.Core; // Services / Interfaces
 using TheraPay.UI.ViewModels;
+using TheraPay.UI.ViewModels.Panels;
 using TheraPay.UI.Views;
 using TheraPay.UI.Navigation;
 
@@ -26,6 +27,7 @@ public static class Bootstrapper
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
         services.AddTransient<PatientsViewModel>();
+        services.AddTransient<PatientPanelViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<MainWindowViewModel>();
 
