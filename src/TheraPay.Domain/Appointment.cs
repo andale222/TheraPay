@@ -28,4 +28,9 @@ public class Appointment
         }
         DurationInMinutes = durationInMinutes;
     }
+
+    public bool OverlapsWith(Appointment other)
+    {
+        return Date < other.End && End > other.Date;
+    }
 }
