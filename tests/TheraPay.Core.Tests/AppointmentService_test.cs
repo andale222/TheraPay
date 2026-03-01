@@ -16,7 +16,7 @@ public class AppointmentService_test
         AppointmentService service = new AppointmentService(repository);
 
         // THEN
-        Assert.Equal(repository.GetAll(), service.GetAll());
+        Assert.Equal(repository.GetAll(), service.ViewAppointments());
     }
 
 }

@@ -10,7 +10,7 @@ public class AppointmentService
         _repository = repository;
     }
 
-    public IReadOnlyList<Appointment> GetAll()
+    public IReadOnlyList<Appointment> ViewAppointments()
     {
         return _repository.GetAll();
     }
