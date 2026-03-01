@@ -16,7 +16,7 @@ public class PatientService_test
         PatientService service = new PatientService(repository);
 
         // THEN
-        Assert.Equal(repository.GetAll(), service.GetAll());
+        Assert.Equal(repository.GetAll(), service.ViewPatients());
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class PatientService_test
 
         // // WHEN
         var result = service.AddPatient("Friedrich", "Gauss", "FG7");
-        IReadOnlyList<Patient> patients = service.GetAll();
+        IReadOnlyList<Patient> patients = service.ViewPatients();
 
         // THEN
         Assert.True(result.Ok);

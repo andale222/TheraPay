@@ -18,7 +18,7 @@ public class PatientService
         return result;
     }
 
-    public IReadOnlyList<Patient> GetAll()
+    public IReadOnlyList<Patient> ViewPatients()
     {
         return _repository.GetAll();
     }
