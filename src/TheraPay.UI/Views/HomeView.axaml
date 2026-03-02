@@ -7,12 +7,12 @@
              x:Class="TheraPay.UI.Views.HomeView"
              x:DataType="vm:HomeViewModel">
     
-    <Grid ColumnDefinitions="1*,1*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,*" >
+    <Grid ColumnDefinitions="2*,1*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,*" >
         <!-- Left: Calendar + label -->
-    <StackPanel Grid.Row= "0" Grid.Column="0" Spacing="8">
-      <TextBlock Text="Termine:" FontSize="18" FontWeight="Bold"/>
-      <Calendar/>
-    </StackPanel>
+    
+    <!-- Calendar + label -->
+     <panels:CalendarPanelView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
+                          DataContext="{Binding CalendarPanel}" />
     
     <!-- Right: action groups -->
     <StackPanel Grid.Row= "0" Grid.Column="1" Spacing="12">
