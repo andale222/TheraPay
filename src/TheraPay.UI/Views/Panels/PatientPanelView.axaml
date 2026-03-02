@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels.Panels"
+             xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+             x:Class="TheraPay.UI.Views.Panels.PatientPanelView"
+             x:DataType="vm:PatientPanelViewModel">
+
+  <!-- Patientenlisten Box mit mini filter -->
+  <StackPanel Spacing="12">
+    <HeaderedContentControl>
+      <HeaderedContentControl.Header>
+        <TextBlock Text="Patienten:" FontSize="18" FontWeight="Bold"/>
+      </HeaderedContentControl.Header>
+
+      <Border Margin="0,8,0,0"
+              Padding="12"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+              BorderThickness="1"
+              CornerRadius="8">
+
+        <Grid ColumnDefinitions="Auto,1*,Auto"
+              RowDefinitions="*,Auto"
+              Margin="16"
+              ColumnSpacing="16">
+
+          <!-- Filter -->
+          <StackPanel Spacing="8" Margin="8" Grid.Column="0">
+            <RadioButton GroupName="PatientenFilter" Content="alle"
+                         IsChecked="{Binding FilterAll, Mode=TwoWay}" />
+            <RadioButton GroupName="PatientenFilter" Content="aktiv"
+                         IsChecked="{Binding FilterActive, Mode=TwoWay}" />
+            <RadioButton GroupName="PatientenFilter" Content="archiviert"
+                         IsChecked="{Binding FilterArchived, Mode=TwoWay}" />
+          </StackPanel>
+
+          <!-- Patientenliste -->
+          <dataGrid:DataGrid Grid.Column="1"
+                             ItemsSource="{Binding Patients}"
+                             SelectedItem="{Binding SelectedPatient, Mode=TwoWay}"
+                             AutoGenerateColumns="False"
+                             IsReadOnly="True"
+                             Height="250">
+            <dataGrid:DataGrid.Columns>
+              <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Vorname" Binding="{Binding Vorname}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Adresse" Binding="{Binding Adresse}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Tel." Binding="{Binding Telefon}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Versicherungsart" Binding="{Binding Versicherungsart}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Diagnose" Binding="{Binding Diagnose}" Width="Auto" />
+            </dataGrid:DataGrid.Columns>
+          </dataGrid:DataGrid>
+
+          <!-- Aktionen -->
+          <StackPanel Spacing="8" Margin="8" Grid.Column="2">
+            <Button Content="Bearbeiten" Command="{Binding EditCommand}" />
+            <Button Content="(In)aktivieren" Command="{Binding ToggleActiveCommand}" />
+            <Button Content="Löschen" Command="{Binding DeleteCommand}" />
+          </StackPanel>
+
+        </Grid>
+      </Border>
+    </HeaderedContentControl>
+  </StackPanel>
+</UserControl>
