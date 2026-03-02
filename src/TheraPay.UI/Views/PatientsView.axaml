@@ -80,8 +80,13 @@
       <RadioButton GroupName="PatientenStatus" Content="inaktiv" />
     </StackPanel>
     <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
-      <Button Content="Daten prüfen" Click="CheckData_Click" Background="#FAAC2D"/>
-      <Button Content="Hinzufügen" Click="AddPatient_Click" Background="#71CE82"/>
+      <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right"/>
+      <Button Content="Hinzufügen" Command="{Binding AddPatientCommand}" Background="#71CE82" HorizontalAlignment="Right"/>
+    </StackPanel>
+
+
+    <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="1" Spacing="8">
+      <Button Content="Zurück" Command="{Binding NavigateHomeViewCommand}" Background="#AA3A3A" HorizontalAlignment="Right"/>
     </StackPanel>
   
     </Grid>

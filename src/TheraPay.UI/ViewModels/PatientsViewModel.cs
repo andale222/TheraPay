@@ -11,6 +11,8 @@ public class PatientsViewModel : ViewModelBase
 {
     private readonly InMemoryPatientRepository _store;
     public RelayCommand NavigateHomeViewCommand  { get; }
+    public RelayCommand AddPatientCommand  { get; }
+    public RelayCommand CheckDataCommand  { get; }
 
     public ObservableCollection<Patient> Patients { get; } = new();
 
@@ -45,10 +47,12 @@ public class PatientsViewModel : ViewModelBase
     {
         _store = store;
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
+        AddPatientCommand = new RelayCommand(AddPatient);
+        CheckDataCommand = new RelayCommand(CheckData);
         Reload();
     }
 
-    public void AddPatient()
+    private void AddPatient()
     {
         var p = new Patient(FirstName.Trim(), LastName.Trim(),PatientID);
         _store.Add(p);
@@ -57,6 +61,13 @@ public class PatientsViewModel : ViewModelBase
         LastName = "";
         PatientID = "";
         Reload();
+
+        NavigateHomeViewCommand.Execute(null);
+    }
+
+    private void CheckData()
+    {
+        // TODO: Implement data checking logic here
     }
 
     private void Reload()
