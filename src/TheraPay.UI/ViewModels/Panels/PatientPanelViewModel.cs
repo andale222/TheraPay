@@ -120,7 +120,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
     {
         Patients.Clear();
 
-        var all = _patients.GetAll();
+        var all = _patients.ViewPatients();
 
         // MVP: Filterlogik optional. Wenn du später IsArchived/IsActive hast, hier filtern.
         // if (FilterActive) all = all.Where(p => p.IsActive).ToList();
