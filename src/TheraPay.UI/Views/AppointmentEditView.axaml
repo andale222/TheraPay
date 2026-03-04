@@ -48,6 +48,13 @@
                 <TextBox Text="{Binding }" Width="60"/>
             </StackPanel>
             <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Anzahl:"/>
+                <StackPanel Spacing="8" Orientation="Horizontal" >
+                    <TextBox Text="{Binding }" Width="60"/>
+                    <TextBlock Text="Stk."/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="8" Orientation="Vertical" >
                 <TextBlock Text="Betrag:"/>
                 <StackPanel Spacing="8" Orientation="Horizontal" >
                     <TextBox Text="{Binding }" Width="60"/>
@@ -86,6 +93,7 @@
                     <TextBlock Text="ID:" FontSize="16" />
                     <TextBlock Text="Name:" FontSize="16" />
                     <TextBlock Text="Geburtsdatum?:" FontSize="16" />
+                    <TextBlock Text="Versicherungsart: Selbstzahler/Privat/Kasse" FontSize="16" />
                 </StackPanel>
             </StackPanel>
         </Grid>
