@@ -1,8 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using TheraPay.Domain;
 using TheraPay.Core;
-using TheraPay.Domain;  
 using TheraPay.UI.Navigation;
 
 namespace TheraPay.UI.ViewModels;

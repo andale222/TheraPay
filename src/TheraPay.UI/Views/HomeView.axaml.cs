@@ -7,8 +7,5 @@ namespace TheraPay.UI.Views;
 
 public partial class HomeView : UserControl
 {
-    public HomeView()
-    {
-        InitializeComponent();
-    }
+    public HomeView() => InitializeComponent();
 }
