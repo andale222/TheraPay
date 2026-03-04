@@ -11,11 +11,4 @@ public partial class HomeView : UserControl
     {
         InitializeComponent();
     }
-
-    
-
-    private void AddPatient_Click(object? sender, RoutedEventArgs e)
-    {
-        (DataContext as HomeViewModel)?.NavigatePatientsCommand.Execute(null);
-    }
 }
