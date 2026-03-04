@@ -10,7 +10,7 @@
   <StackPanel Margin="16" Spacing="8">
     <TextBlock Text="Termin hinzufügen/bearbeiten" FontSize="18"/>
 
-    <Grid ColumnDefinitions="1*,1*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12" ColumnSpacing="12">
+    <Grid ColumnDefinitions="6*,5*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12" ColumnSpacing="12">
 
     <panels:CalendarPanelView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
                           DataContext="{Binding CalendarPanel}" />

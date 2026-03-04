@@ -11,6 +11,7 @@ namespace TheraPay.UI.ViewModels;
 public sealed class AppointmentEditViewModel : ViewModelBase
 {
     private readonly NavigationService _nav;
+    private readonly AppointmentService _appointmentService;
     public CalendarPanelViewModel CalendarPanel { get; }
     public PatientPanelViewModel PatientsPanel { get; }
 
@@ -22,7 +23,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     public DateTime? StartDate
     {
         get => _startDate;
-        set { _startDate = value; OnPropertyChanged(); }
+        set { _startDate = value; OnPropertyChanged(); NotifyCalculated(); }
     }
     private TimeSpan? _startTime = DateTime.Now.TimeOfDay;
     public TimeSpan? StartTime
@@ -52,6 +53,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 public AppointmentEditViewModel(AppointmentService appointmentService, CalendarPanelViewModel calendarPanel, PatientPanelViewModel patientsPanel, NavigationService nav)
     {
         _nav = nav;
+        _appointmentService = appointmentService;
         CalendarPanel = calendarPanel;
         PatientsPanel = patientsPanel;
 
@@ -66,7 +68,15 @@ public AppointmentEditViewModel(AppointmentService appointmentService, CalendarP
 
     private void SaveAppointment()
     {
-        
+        if (StartDate is null || StartTime is null || EndTime is null || DurationInMinutes is null)
+        {
+            // ToDo: Fehlermeldung anzeigen, z.B. über MessageBox oder Statusleiste
+            return;
+        }
+        DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
+        _appointmentService.AddAppointment( startDateTime, "wer", DurationInMinutes ?? 0 );
+
+        NavigateHomeViewCommand.Execute(null);
     }
     private void CheckData()
     {

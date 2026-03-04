@@ -6,8 +6,38 @@
              x:DataType="vm:CalendarPanelViewModel">
 
   <!-- Kalender mit anstehenden Terminen -->
-  <StackPanel Spacing="12">
+  <StackPanel Spacing="12" Orientation="Vertical" Margin="12,0,0,12">
     <TextBlock Text="Termine:" FontSize="18" FontWeight="Bold"/>
-    <Calendar/>
+
+    <Grid ColumnDefinitions="Auto,*"
+          ColumnSpacing="8">
+      <Calendar Grid.Column="0"/>
+
+      <StackPanel Grid.Column="1" Spacing="6">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <RadioButton GroupName="AppointmentFilter" Content="alle"
+                       IsChecked="{Binding , Mode=TwoWay}" />
+          <RadioButton GroupName="AppointmentFilter" Content="Woche"
+                       IsChecked="{Binding , Mode=TwoWay}" />
+          <Button Content="Bearbeiten" Command="{Binding }" />
+          <Button Content="Löschen" Command="{Binding }" />
+        </StackPanel>
+
+        <dataGrid:DataGrid ItemsSource="{Binding Appointments}"
+                           AutoGenerateColumns="False"
+                           IsReadOnly="True"
+                           Height="300"
+                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <dataGrid:DataGrid.Columns>
+            <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Dauer" Binding="{Binding Duration}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding PatientName}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Termin" Binding="{Binding AppointmentName}" Width="Auto" />
+          </dataGrid:DataGrid.Columns>
+        </dataGrid:DataGrid>
+      </StackPanel>
+    </Grid>
   </StackPanel>
+
 </UserControl>
