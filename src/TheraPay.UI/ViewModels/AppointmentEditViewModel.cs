@@ -15,7 +15,8 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     public PatientPanelViewModel PatientsPanel { get; }
 
     public RelayCommand NavigateHomeViewCommand  { get; }
-    private readonly InMemoryAppointmentRepository _store;
+    public RelayCommand SaveAppointmentCommand  { get; }
+    public RelayCommand CheckDataCommand  { get; }
 
     private DateTime? _startDate = DateTime.Now.Date; // heute
     public DateTime? StartDate
@@ -48,16 +49,32 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     }
 
 
-public AppointmentEditViewModel(AppointmentService appointmentService, InMemoryAppointmentRepository store, CalendarPanelViewModel calendarPanel, PatientPanelViewModel patientsPanel, NavigationService nav)
+public AppointmentEditViewModel(AppointmentService appointmentService, CalendarPanelViewModel calendarPanel, PatientPanelViewModel patientsPanel, NavigationService nav)
     {
         _nav = nav;
-        _store = store;
         CalendarPanel = calendarPanel;
         PatientsPanel = patientsPanel;
 
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
+        SaveAppointmentCommand = new RelayCommand(SaveAppointment);
+        CheckDataCommand = new RelayCommand(CheckData);
     }
 
     private void NotifyCalculated()
         => OnPropertyChanged(nameof(DurationInMinutes));
+
+
+    private void SaveAppointment()
+    {
+        
+    }
+    private void CheckData()
+    {
+        // Plausibilitätsprüfungen, z.B.:
+        // - Alle Felder ausgefüllt?
+        // - Endzeit nach Startzeit?
+        // - Überschneidungen mit anderen Terminen?
+        // - Patient ausgewählt?
+    }
 }
+
