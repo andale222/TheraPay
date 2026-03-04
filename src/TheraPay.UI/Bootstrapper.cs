@@ -26,6 +26,7 @@ public static class Bootstrapper
         // services.AddSingleton<AppointmentService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
+        services.AddTransient<AppointmentEditViewModel>();
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<MainWindowViewModel>();
