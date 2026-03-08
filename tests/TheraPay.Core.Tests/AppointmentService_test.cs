@@ -73,5 +73,52 @@ public class AppointmentService_test
         Assert.Equal("Overlapping appointment", result.Error);
     }
 
+    [Fact]
+    public void GivenRepositoryWithTwoAppointments_GetAppointmentsByDate_ReturnsOnlyAppointmentsFromThatDay()
+    {
+        // GIVEN
+        var service = TestData.getAppointmentServiceWithInMemoryAppointmentRepositoryWithTwoAppointments();
+        var targetDate = new DateTime(2026, 1, 1);
+
+        // WHEN
+        var result = service.GetAppointmentsByDate(targetDate);
+
+        // THEN
+        Assert.Single(result);
+        Assert.Equal(targetDate, result[0].Date.Date);
+    }
+
+    [Fact]
+    public void GivenRepositoryWithAppointmentsOnSameDayDifferentTimes_GetAppointmentsByDate_ReturnsBothAppointments()
+    {
+        // GIVEN
+        var repository = new InMemoryAppointmentRepository();
+        var service = new AppointmentService(repository);
+        var targetDate = new DateTime(2026, 1, 1);
+
+        service.AddAppointment(new DateTime(2026, 1, 1, 9, 0, 0), "P1", 30);
+        service.AddAppointment(new DateTime(2026, 1, 1, 15, 0, 0), "P2", 30);
+        service.AddAppointment(new DateTime(2026, 1, 2, 10, 0, 0), "P3", 30);
+
+        // WHEN
+        var result = service.GetAppointmentsByDate(targetDate);
+
+        // THEN
+        Assert.Equal(2, result.Count);
+        Assert.All(result, a => Assert.Equal(targetDate, a.Date.Date));
+    }
+
+    [Fact]
+    public void GivenRepositoryWithTwoAppointments_GetAppointmentsByDateForMissingDay_ReturnsEmptyList()
+    {
+        // GIVEN
+        var service = TestData.getAppointmentServiceWithInMemoryAppointmentRepositoryWithTwoAppointments();
+
+        // WHEN
+        var result = service.GetAppointmentsByDate(new DateTime(2026, 1, 2));
+
+        // THEN
+        Assert.Empty(result);
+    }
 
 }
