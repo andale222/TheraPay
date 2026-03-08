@@ -92,10 +92,11 @@
             <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Left">
                 <StackPanel Spacing="8" Orientation="Vertical" Margin="0,30,16,0">
                     <TextBlock Text="Patientendaten:" FontSize="20" />
-                    <TextBlock Text="ID:" FontSize="16" />
-                    <TextBlock Text="Name:" FontSize="16" />
-                    <TextBlock Text="Geburtsdatum?:" FontSize="16" />
-                    <TextBlock Text="Versicherungsart: Selbstzahler/Privat/Kasse" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Id, StringFormat='ID: {0}', TargetNullValue='ID: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Vorname, StringFormat='Vorname: {0}', TargetNullValue='Vorname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Name, StringFormat='Nachname: {0}', TargetNullValue='Nachname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Geburtsdatum, StringFormat='Geburtsdatum: {0}', TargetNullValue='Geburtsdatum: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Versicherungsart, StringFormat='Versicherungsart: {0}', TargetNullValue='Versicherungsart: -'}" FontSize="16" />
                 </StackPanel>
             </StackPanel>
         </Grid>

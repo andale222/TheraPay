@@ -73,8 +73,16 @@ public AppointmentEditViewModel(AppointmentService appointmentService, CalendarP
             // ToDo: Fehlermeldung anzeigen, z.B. über MessageBox oder Statusleiste
             return;
         }
+
+        var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
+        if (string.IsNullOrWhiteSpace(selectedPatientId))
+        {
+            // ToDo: Patient muss ausgewählt sein.
+            return;
+        }
+
         DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
-        _appointmentService.AddAppointment( startDateTime, "wer", DurationInMinutes ?? 0 );
+        _appointmentService.AddAppointment(startDateTime, selectedPatientId, DurationInMinutes ?? 0);
 
         NavigateHomeViewCommand.Execute(null);
     }
@@ -87,4 +95,3 @@ public AppointmentEditViewModel(AppointmentService appointmentService, CalendarP
         // - Patient ausgewählt?
     }
 }
-
