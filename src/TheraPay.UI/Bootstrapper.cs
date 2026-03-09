@@ -19,13 +19,14 @@ public static class Bootstrapper
 
         // Repositories (State) -> meist Singleton
         services.AddSingleton<InMemoryPatientRepository, InMemoryPatientRepository>();
-        // services.AddSingleton<IAppointmentRepository, InMemoryAppointmentRepository>();
+        services.AddSingleton<InMemoryAppointmentRepository, InMemoryAppointmentRepository>();
 
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
-        // services.AddSingleton<AppointmentService>();
+        services.AddSingleton<AppointmentService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
+        services.AddTransient<AppointmentEditViewModel>();
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<MainWindowViewModel>();
@@ -36,6 +37,7 @@ public static class Bootstrapper
         // Views/Windows -> DI kann sie bauen (Ctor Injection)
         services.AddTransient<HomeView>();
         services.AddTransient<MainWindow>();
+        // services.AddTransient<AppointmentEditView>();
 
         return services.BuildServiceProvider();
     }

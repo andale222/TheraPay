@@ -144,6 +144,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
         public string Id { get; init; } = "";
         public string Name { get; init; } = "";
         public string Vorname { get; init; } = "";
+        public string Geburtsdatum { get; init; } = "plchldr";
         public string Adresse { get; init; } = "plchldr";
         public string Email { get; init; } = "plchldr";
         public string Telefon { get; init; } = "plchldr";

@@ -13,6 +13,7 @@ public sealed class HomeViewModel : ViewModelBase
 
     public object? CurrentViewModel => _store.CurrentViewModel;
     public ICommand NavigatePatientsCommand  { get; }
+    public ICommand NavigateEditAppointmentCommand  { get; }
 
     public HomeViewModel(PatientPanelViewModel patientsPanel, CalendarPanelViewModel calendarPanel, NavigationStore store, NavigationService nav)
     {
@@ -22,5 +23,6 @@ public sealed class HomeViewModel : ViewModelBase
         _store.CurrentViewModelChanged += (_, __) => OnPropertyChanged(nameof(CurrentViewModel));
 
         NavigatePatientsCommand  = new RelayCommand(() => nav.NavigateTo<PatientsViewModel>());
+        NavigateEditAppointmentCommand  = new RelayCommand(() => nav.NavigateTo<AppointmentEditViewModel>());
     }
 }

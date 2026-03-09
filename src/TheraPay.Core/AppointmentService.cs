@@ -1,6 +1,6 @@
-namespace TheraPay.Core;
-
 using TheraPay.Domain;
+
+namespace TheraPay.Core;
 
 public class AppointmentService
 {
@@ -13,6 +13,14 @@ public class AppointmentService
     public IReadOnlyList<Appointment> ViewAppointments()
     {
         return _repository.GetAll();
+    }
+
+    public IReadOnlyList<Appointment> GetAppointmentsByDate(DateTime date)
+    {
+        return _repository
+            .GetAll()
+            .Where(appointment => appointment.Date.Date == date.Date)
+            .ToList();
     }
 
     public Result AddAppointment(DateTime date, string patientID, int durationInMinutes)

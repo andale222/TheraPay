@@ -33,7 +33,7 @@
         CornerRadius="8">
         <StackPanel Spacing="8" Margin="8">
           <Button Content="Patient:in hinzufügen" Command="{Binding NavigatePatientsCommand}"/>
-          <Button Content="Termin hinzufügen" />
+          <Button Content="Termin hinzufügen" Command="{Binding NavigateEditAppointmentCommand}" />
           <Button Content="Rechnungen erstellen" />
         </StackPanel>
     </Border>

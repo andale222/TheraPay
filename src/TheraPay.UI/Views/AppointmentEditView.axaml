@@ -1,0 +1,104 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             xmlns:domain="using:TheraPay.Domain"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             xmlns:panels="clr-namespace:TheraPay.UI.Views.Panels"
+             x:Class="TheraPay.UI.Views.AppointmentEditView"
+             x:DataType="vm:AppointmentEditViewModel">
+
+  <StackPanel Margin="16" Spacing="8">
+    <TextBlock Text="Termin hinzufügen/bearbeiten" FontSize="18"/>
+
+    <Grid ColumnDefinitions="6*,5*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12" ColumnSpacing="12">
+
+    <panels:CalendarPanelView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
+                          DataContext="{Binding CalendarPanel}" />
+    <panels:PatientPanelView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1"
+                          DataContext="{Binding PatientsPanel}" />
+
+    <StackPanel Spacing="8" Grid.Row="0" Grid.Column="1" Orientation="Vertical" >
+        <TextBlock Text="Termindetails" FontSize="16"/>
+
+        <StackPanel Spacing="8"  Orientation="Horizontal" >
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Datum und Uhrzeit:"/>
+                <StackPanel Spacing="8" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" >
+                <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="120" SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" Watermark="dd.MM.yyyy"/>
+                 <!-- <MaskedTextBox Width="50" Mask="00:00" Text="{Binding StartTime, StringFormat={}{0:HH:mm}}" /> -->
+                <TimePicker MinWidth="60" ClockIdentifier="24HourClock" MinuteIncrement="5" UseSeconds="False" SelectedTime="{Binding StartTime}"/>
+                <TextBlock Text=" bis "/>
+                <TimePicker MinWidth="60" ClockIdentifier="24HourClock" MinuteIncrement="5" UseSeconds="False" SelectedTime="{Binding EndTime}"/>
+                <!-- <MaskedTextBox Width="50" Mask="00:00" Text="{Binding StartTime, StringFormat={}{0:HH:mm}}" /> -->
+                <TextBlock Text="{Binding DurationInMinutes, StringFormat='Dauer: {0} min'}"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+
+
+        <StackPanel Spacing="8" Orientation="Horizontal" >
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Bezeichnung:"/>
+                <TextBox Text="{Binding }" AcceptsReturn="True" Height="50" TextWrapping="Wrap"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Spacing="8" Orientation="Horizontal" >
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="GOÄ Nr:"/>
+                <TextBox Text="{Binding }" Width="60"/>
+            </StackPanel>
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Anzahl:"/>
+                <StackPanel Spacing="8" Orientation="Horizontal" >
+                    <TextBox Text="{Binding }" Width="60"/>
+                    <TextBlock Text="Stk."/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Betrag:"/>
+                <StackPanel Spacing="8" Orientation="Horizontal" >
+                    <TextBox Text="{Binding }" Width="60"/>
+                    <TextBlock Text="€"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Faktor:"/>
+                <TextBox Text="{Binding }" Width="60"/>
+            </StackPanel>
+            <StackPanel Spacing="8" Orientation="Vertical" >
+                <TextBlock Text="Gesamtbetrag:"/>
+                <StackPanel Spacing="8" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox Text="{Binding }" Width="60"/>
+                    <TextBlock Text="€"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Notes -->
+        <TextBlock Text="Notizen:" VerticalAlignment="Top" Margin="0,8,0,0"/>
+        <TextBox Text="{Binding }" AcceptsReturn="True" Height="100" TextWrapping="Wrap"/>
+
+    </StackPanel>
+
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                <Button Content="Prüfen" Command="{Binding CheckDataCommand}" Background="#c77f21" MinWidth="100"/>
+                <Button Content="Speichern + Zurück" Command="{Binding SaveAppointmentCommand}" Background="#71CE82" MinWidth="150"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Margin="0,30,16,0" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right">
+                <Button Content="Zurück" Command="{Binding NavigateHomeViewCommand}" Background="#FF6B6B" MinWidth="100"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Left">
+                <StackPanel Spacing="8" Orientation="Vertical" Margin="0,30,16,0">
+                    <TextBlock Text="Patientendaten:" FontSize="20" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Id, StringFormat='ID: {0}', TargetNullValue='ID: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Vorname, StringFormat='Vorname: {0}', TargetNullValue='Vorname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Name, StringFormat='Nachname: {0}', TargetNullValue='Nachname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Geburtsdatum, StringFormat='Geburtsdatum: {0}', TargetNullValue='Geburtsdatum: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Versicherungsart, StringFormat='Versicherungsart: {0}', TargetNullValue='Versicherungsart: -'}" FontSize="16" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+  </StackPanel>
+</UserControl>
