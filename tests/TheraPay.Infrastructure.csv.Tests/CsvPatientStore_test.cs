@@ -12,13 +12,8 @@ public class CsvPatientStore_test
         return dataDir;
     }
 
-    /*
-SaveAll_writes_patients_to_csv
 
-LoadAll_reads_previously_saved_patients
 
-SaveAll_and_LoadAll_roundtrip_preserves_values
-    */
     [Fact]
     public void GivenNonExistingFile_LoadAll_ReturnsEmpty()
     {

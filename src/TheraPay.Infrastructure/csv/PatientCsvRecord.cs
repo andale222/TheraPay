@@ -1,6 +1,4 @@
-﻿using TheraPay.Domain;
-
-namespace TheraPay.Infrastructure.csv;
+﻿namespace TheraPay.Infrastructure.csv;
 
 public sealed class PatientCsvRecord
 {
