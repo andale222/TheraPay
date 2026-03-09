@@ -93,7 +93,7 @@ public sealed class CalendarPanelViewModel : ViewModelBase
                 Id = appt.Id.ToString(),
                 Date = appt.Date.ToString("dd.MM.yy HH:mm"),
                 Duration = $"{appt.DurationInMinutes} min",
-                PatientName = "TODO:",
+                PatientName = $"{appt.PatientID}",
                 AppointmentName = "TODO:"
             });
         }
