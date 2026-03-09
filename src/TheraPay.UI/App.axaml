@@ -12,6 +12,10 @@
     </Application.Styles>
 
      <Application.DataTemplates>
+    <DataTemplate DataType="{x:Type vm:LoadFilesViewModel}">
+      <views:LoadFilesView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:HomeViewModel}">
       <views:HomeView/>
     </DataTemplate>

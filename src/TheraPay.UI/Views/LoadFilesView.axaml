@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             x:Class="TheraPay.UI.Views.LoadFilesView"
+             x:DataType="vm:LoadFilesViewModel">
+  <Border Padding="24">
+    <StackPanel Spacing="14" MaxWidth="760">
+      <TextBlock Text="Projekt laden" FontSize="24" FontWeight="Bold" />
+      <TextBlock Text="Bitte gib die Dateipfade ein. Terminliste und Praxisdaten sind aktuell noch nicht funktional angebunden." TextWrapping="Wrap" />
+
+      <Button Content="Projektordner öffnen"
+              HorizontalAlignment="Left"
+              MinWidth="180"
+              Click="OpenProjectFolderClick" />
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Patientenliste (CSV):" />
+        <TextBox Text="{Binding PatientListPath}" Watermark="/pfad/zur/patients.csv" />
+      </StackPanel>
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Terminliste (noch nicht angebunden):" />
+        <TextBox Text="{Binding AppointmentListPath}" Watermark="/pfad/zur/appointments.csv" />
+      </StackPanel>
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Praxisdaten (noch nicht angebunden):" />
+        <TextBox Text="{Binding PracticeDataPath}" Watermark="/pfad/zur/practice.csv" />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
+        <Button Content="Laden" MinWidth="120" Command="{Binding LoadCommand}" />
+        <Button Content="Neue Praxis starten" MinWidth="180" Command="{Binding StartEmptyProjectCommand}" />
+      </StackPanel>
+
+      <TextBlock Text="{Binding StatusMessage}" Foreground="IndianRed" TextWrapping="Wrap" />
+    </StackPanel>
+  </Border>
+</UserControl>

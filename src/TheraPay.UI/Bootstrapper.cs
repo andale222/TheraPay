@@ -26,6 +26,7 @@ public static class Bootstrapper
         services.AddSingleton<AppointmentService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
+        services.AddTransient<LoadFilesViewModel>();
         services.AddTransient<AppointmentEditViewModel>();
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
@@ -35,6 +36,7 @@ public static class Bootstrapper
         services.AddTransient<CalendarPanelViewModel>();
 
         // Views/Windows -> DI kann sie bauen (Ctor Injection)
+        services.AddTransient<LoadFilesView>();
         services.AddTransient<HomeView>();
         services.AddTransient<MainWindow>();
         // services.AddTransient<AppointmentEditView>();
