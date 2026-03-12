@@ -16,10 +16,28 @@ public sealed class HomeViewModel : ViewModelBase
     public ICommand NavigateEditAppointmentCommand  { get; }
     public ICommand SaveDataCommand  { get; }
 
-    public HomeViewModel(PatientPanelViewModel patientsPanel, CalendarPanelViewModel calendarPanel, NavigationStore store, NavigationService nav)
+    private string _saveStatusMessage = "";
+    public string SaveStatusMessage
+    {
+        get => _saveStatusMessage;
+        private set
+        {
+            if (_saveStatusMessage == value) return;
+            _saveStatusMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public HomeViewModel(
+        PatientPanelViewModel patientsPanel,
+        CalendarPanelViewModel calendarPanel,
+        NavigationStore store,
+        NavigationService nav,
+        ProjectPersistenceService projectPersistence)
     {
         PatientsPanel = patientsPanel;
         CalendarPanel = calendarPanel;
+        _projectPersistence = projectPersistence;
         _store = store;
         _store.CurrentViewModelChanged += (_, __) => OnPropertyChanged(nameof(CurrentViewModel));
 
@@ -30,6 +48,10 @@ public sealed class HomeViewModel : ViewModelBase
 
     private void Save()
     {
+        var result = _projectPersistence.SaveProject();
+        SaveStatusMessage = result.Ok
+            ? $"Zuletzt gespeichert: {DateTime.Now:HH:mm:ss}"
+            : result.Error ?? "Speichern fehlgeschlagen.";
     }
 
 }
