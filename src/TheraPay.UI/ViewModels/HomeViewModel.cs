@@ -14,6 +14,7 @@ public sealed class HomeViewModel : ViewModelBase
     public object? CurrentViewModel => _store.CurrentViewModel;
     public ICommand NavigatePatientsCommand  { get; }
     public ICommand NavigateEditAppointmentCommand  { get; }
+    public ICommand SaveDataCommand  { get; }
 
     public HomeViewModel(PatientPanelViewModel patientsPanel, CalendarPanelViewModel calendarPanel, NavigationStore store, NavigationService nav)
     {
@@ -24,5 +25,11 @@ public sealed class HomeViewModel : ViewModelBase
 
         NavigatePatientsCommand  = new RelayCommand(() => nav.NavigateTo<PatientsViewModel>());
         NavigateEditAppointmentCommand  = new RelayCommand(() => nav.NavigateTo<AppointmentEditViewModel>());
+        SaveDataCommand  = new RelayCommand(Save);
     }
+
+    private void Save()
+    {
+    }
+
 }
