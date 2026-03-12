@@ -5,14 +5,8 @@ using System.Globalization;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvAppointmentStore : CsvStore<Appointment, AppointmentCsvRecord>
+public class CsvAppointmentStore(string filePath) : CsvStore<Appointment, AppointmentCsvRecord>(filePath)
 {
-
-    public CsvAppointmentStore(string filePath) : base(filePath)
-    {
-    }
-
-
     protected override AppointmentCsvRecord ToRecord(Appointment objectToConvert)
     {
         return new AppointmentCsvRecord
