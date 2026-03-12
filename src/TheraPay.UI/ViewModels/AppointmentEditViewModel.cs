@@ -5,19 +5,21 @@ using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
 using TheraPay.UI.ViewModels.Panels;
+using TheraPay.UI.State;
 
 namespace TheraPay.UI.ViewModels;
 
 public sealed class AppointmentEditViewModel : ViewModelBase
 {
     private readonly NavigationService _nav;
+    private readonly ProjectSession _session;
     private readonly AppointmentService _appointmentService;
     public CalendarPanelViewModel CalendarPanel { get; }
     public PatientPanelViewModel PatientsPanel { get; }
 
-    public RelayCommand NavigateHomeViewCommand  { get; }
-    public RelayCommand SaveAppointmentCommand  { get; }
-    public RelayCommand CheckDataCommand  { get; }
+    public RelayCommand NavigateHomeViewCommand { get; }
+    public RelayCommand SaveAppointmentCommand { get; }
+    public RelayCommand CheckDataCommand { get; }
 
     private DateTime? _startDate = DateTime.Now.Date; // heute
     public DateTime? StartDate
@@ -50,9 +52,10 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     }
 
 
-public AppointmentEditViewModel(AppointmentService appointmentService, CalendarPanelViewModel calendarPanel, PatientPanelViewModel patientsPanel, NavigationService nav)
+    public AppointmentEditViewModel(AppointmentService appointmentService, CalendarPanelViewModel calendarPanel, PatientPanelViewModel patientsPanel, NavigationService nav, ProjectSession session)
     {
         _nav = nav;
+        _session = session;
         _appointmentService = appointmentService;
         CalendarPanel = calendarPanel;
         PatientsPanel = patientsPanel;
@@ -81,8 +84,11 @@ public AppointmentEditViewModel(AppointmentService appointmentService, CalendarP
             return;
         }
 
+
         DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
         _appointmentService.AddAppointment(startDateTime, selectedPatientId, DurationInMinutes ?? 0);
+
+        _session.MarkUnsavedChanges();
 
         NavigateHomeViewCommand.Execute(null);
     }

@@ -70,7 +70,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void LoadProject()
     {
-        var result = _projectPersistence.LoadProject(PatientListPath);
+        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath);
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
@@ -87,7 +87,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void StartEmptyProject()
     {
-        _projectPersistence.StartEmptyProject(PatientListPath);
+        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath);
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
     }

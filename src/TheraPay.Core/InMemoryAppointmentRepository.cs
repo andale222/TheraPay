@@ -26,4 +26,8 @@ public class InMemoryAppointmentRepository : IAppointmentRepository
     {
         return _appointments;
     }
+    public void Clear()
+    {
+        _appointments.Clear();
+    }
 }

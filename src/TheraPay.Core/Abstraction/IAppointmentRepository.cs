@@ -8,4 +8,5 @@ public interface IAppointmentRepository
     int Count();
     Appointment GetAppointment(int index);
     IReadOnlyList<Appointment> GetAll();
+    void Clear();
 }
