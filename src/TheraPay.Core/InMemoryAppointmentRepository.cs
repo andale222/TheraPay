@@ -2,7 +2,7 @@ namespace TheraPay.Core;
 
 using TheraPay.Domain;
 
-public class InMemoryAppointmentRepository
+public class InMemoryAppointmentRepository : IAppointmentRepository
 {
 
     private readonly List<Appointment> _appointments = new List<Appointment>();
