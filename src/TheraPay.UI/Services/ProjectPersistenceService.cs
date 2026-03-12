@@ -29,6 +29,7 @@ public sealed class ProjectPersistenceService
             _session.SetPatientListPath(patientListPath);
             _patientRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository);
+            _session.MarkSaved();
             return new Result(true);
         }
         catch (Exception ex)
@@ -45,6 +46,8 @@ public sealed class ProjectPersistenceService
         {
             _session.SetPatientListPath(patientListPath);
         }
+
+        _session.MarkSaved();
     }
 
     public Result SaveProject()
@@ -57,6 +60,7 @@ public sealed class ProjectPersistenceService
         try
         {
             CreatePersistence().SaveFrom(_patientRepository);
+            _session.MarkSaved();
             return new Result(true);
         }
         catch (Exception ex)

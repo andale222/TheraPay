@@ -27,6 +27,7 @@ public static class Bootstrapper
         // Project state + persistence orchestration
         services.AddSingleton<ProjectSession>();
         services.AddSingleton<ProjectPersistenceService>();
+        services.AddSingleton<ExitConfirmationService>();
 
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
@@ -37,6 +38,7 @@ public static class Bootstrapper
         services.AddTransient<AppointmentEditViewModel>();
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
+        services.AddTransient<ExitConfirmViewModel>();
         services.AddTransient<MainWindowViewModel>();
         // Panels
         services.AddTransient<PatientPanelViewModel>();
@@ -45,6 +47,7 @@ public static class Bootstrapper
         // Views/Windows -> DI kann sie bauen (Ctor Injection)
         services.AddTransient<LoadFilesView>();
         services.AddTransient<HomeView>();
+        services.AddTransient<ExitConfirmView>();
         services.AddTransient<MainWindow>();
         // services.AddTransient<AppointmentEditView>();
 

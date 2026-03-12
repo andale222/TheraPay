@@ -27,5 +27,9 @@
     <DataTemplate DataType="{x:Type vm:AppointmentEditViewModel}">
       <views:AppointmentEditView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ExitConfirmViewModel}">
+      <views:ExitConfirmView/>
+    </DataTemplate>
   </Application.DataTemplates>
 </Application>

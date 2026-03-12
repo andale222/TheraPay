@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             x:Class="TheraPay.UI.Views.ExitConfirmView"
+             x:DataType="vm:ExitConfirmViewModel">
+  <Grid Margin="24" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+    <TextBlock Grid.Row="0"
+               Text="Daten wurden noch nicht gespeichert. Wirklich beenden?"
+               FontSize="20"
+               FontWeight="Bold"
+               TextWrapping="Wrap" />
+
+    <TextBlock Grid.Row="1"
+               Text="{Binding StatusMessage}"
+               Foreground="IndianRed"
+               TextWrapping="Wrap" />
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
+      <Button Content="Speichern + Beenden"
+              Command="{Binding SaveAndExitCommand}"
+              Background="#71CE82" />
+      <Button Content="Beenden ohne Speichern"
+              Command="{Binding ExitWithoutSavingCommand}" />
+      <Button Content="Abbrechen"
+              Command="{Binding CancelCommand}" />
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -3,12 +3,14 @@ using System.Linq;
 using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.State;
 
 namespace TheraPay.UI.ViewModels;
 
 public class PatientsViewModel : ViewModelBase
 {
     private readonly IPatientRepository _store;
+    private readonly ProjectSession _session;
     public RelayCommand NavigateHomeViewCommand  { get; }
     public RelayCommand AddPatientCommand  { get; }
     public RelayCommand CheckDataCommand  { get; }
@@ -42,9 +44,10 @@ public class PatientsViewModel : ViewModelBase
     }
 }
 
-    public PatientsViewModel(PatientService patientService, IPatientRepository store, NavigationService nav)
+    public PatientsViewModel(PatientService patientService, IPatientRepository store, ProjectSession session, NavigationService nav)
     {
         _store = store;
+        _session = session;
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         AddPatientCommand = new RelayCommand(AddPatient);
         CheckDataCommand = new RelayCommand(CheckData);
@@ -54,7 +57,11 @@ public class PatientsViewModel : ViewModelBase
     private void AddPatient()
     {
         var p = new Patient(FirstName.Trim(), LastName.Trim(),PatientID);
-        _store.Add(p);
+        var addResult = _store.Add(p);
+        if (addResult.Ok)
+        {
+            _session.MarkUnsavedChanges();
+        }
 
         FirstName = "";
         LastName = "";
