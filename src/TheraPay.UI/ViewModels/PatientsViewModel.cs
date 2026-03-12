@@ -1,4 +1,3 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TheraPay.Domain;
@@ -9,7 +8,7 @@ namespace TheraPay.UI.ViewModels;
 
 public class PatientsViewModel : ViewModelBase
 {
-    private readonly InMemoryPatientRepository _store;
+    private readonly IPatientRepository _store;
     public RelayCommand NavigateHomeViewCommand  { get; }
     public RelayCommand AddPatientCommand  { get; }
     public RelayCommand CheckDataCommand  { get; }
@@ -43,7 +42,7 @@ public class PatientsViewModel : ViewModelBase
     }
 }
 
-    public PatientsViewModel(PatientService patientService, InMemoryPatientRepository store, NavigationService nav)
+    public PatientsViewModel(PatientService patientService, IPatientRepository store, NavigationService nav)
     {
         _store = store;
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());

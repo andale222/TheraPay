@@ -30,6 +30,11 @@ public class InMemoryPatientRepository : IPatientRepository
     public IReadOnlyList<Patient> GetAll()
         => _patients.ToList();
 
+    public void Clear()
+    {
+        _patients.Clear();
+    }
+
     private bool PatientExists(string id)
     {
         return _patients.Any(p => p.ID == id);

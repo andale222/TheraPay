@@ -18,7 +18,8 @@ public static class Bootstrapper
         services.AddSingleton<NavigationService>();
 
         // Repositories (State) -> meist Singleton
-        services.AddSingleton<InMemoryPatientRepository, InMemoryPatientRepository>();
+        services.AddSingleton<InMemoryPatientRepository>();
+        services.AddSingleton<IPatientRepository>(sp => sp.GetRequiredService<InMemoryPatientRepository>());
         services.AddSingleton<InMemoryAppointmentRepository, InMemoryAppointmentRepository>();
 
         // Services (Use-Cases) -> Singleton ok im MVP

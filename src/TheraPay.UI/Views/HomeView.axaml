@@ -76,6 +76,7 @@
         CornerRadius="8">
         <StackPanel Spacing="6" Margin="8">
           <Button Content="Daten speichern" Command="{Binding SaveDataCommand}" Background="#71CE82" />
+          <TextBlock Text="{Binding SaveStatusMessage}" TextWrapping="Wrap"/>
         </StackPanel>
     </Border>
 </HeaderedContentControl>
