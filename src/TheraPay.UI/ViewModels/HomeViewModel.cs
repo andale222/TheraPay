@@ -1,13 +1,16 @@
+using System;
 using System.Windows.Input;
 using TheraPay.UI.Navigation;
 using CommunityToolkit.Mvvm.Input;
 using TheraPay.UI.ViewModels.Panels;
+using TheraPay.UI.Services;
 
 namespace TheraPay.UI.ViewModels;
 
 public sealed class HomeViewModel : ViewModelBase
 {
     private readonly NavigationStore _store;
+    private readonly ProjectPersistenceService _projectPersistence;
     public PatientPanelViewModel PatientsPanel { get; }
     public CalendarPanelViewModel CalendarPanel { get; }
 

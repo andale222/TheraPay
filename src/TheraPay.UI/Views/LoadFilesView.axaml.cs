@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -24,10 +25,19 @@ public partial class LoadFilesView : UserControl
             return;
         }
 
+
+
+        var initialPath = AppContext.BaseDirectory;
+        IStorageFolder? start = null;
+        if (!string.IsNullOrWhiteSpace(initialPath) && Directory.Exists(initialPath))
+        {
+            start = await topLevel.StorageProvider.TryGetFolderFromPathAsync(initialPath);
+        }
         var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Projektordner auswählen",
-            AllowMultiple = false
+            AllowMultiple = false,
+            SuggestedStartLocation = start
         });
 
         if (folders.Count == 0)
