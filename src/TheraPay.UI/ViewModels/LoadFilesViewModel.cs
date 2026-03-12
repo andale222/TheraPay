@@ -1,14 +1,12 @@
-using System;
-using TheraPay.Core;
-using TheraPay.Infrastructure.csv;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 
 namespace TheraPay.UI.ViewModels;
 
 public sealed class LoadFilesViewModel : ViewModelBase
 {
     private readonly NavigationService _nav;
-    private readonly InMemoryPatientRepository _patientRepository;
+    private readonly ProjectPersistenceService _projectPersistence;
 
     public RelayCommand LoadCommand { get; }
     public RelayCommand StartEmptyProjectCommand { get; }
@@ -61,10 +59,10 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
-    public LoadFilesViewModel(NavigationService nav, InMemoryPatientRepository patientRepository)
+    public LoadFilesViewModel(NavigationService nav, ProjectPersistenceService projectPersistence)
     {
         _nav = nav;
-        _patientRepository = patientRepository;
+        _projectPersistence = projectPersistence;
 
         LoadCommand = new RelayCommand(LoadProject);
         StartEmptyProjectCommand = new RelayCommand(StartEmptyProject);
@@ -72,32 +70,25 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void LoadProject()
     {
-        if (string.IsNullOrWhiteSpace(PatientListPath))
+        var result = _projectPersistence.LoadProject(PatientListPath);
+        if (!result.Ok)
         {
-            StatusMessage = "Bitte gib mindestens einen Pfad zur Patientenliste an.";
+            StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
             return;
         }
 
-        try
-        {
-            IDataPersistence persistence = new CsvDataPersistence(new CsvPatientStore(PatientListPath));
-            persistence.LoadInto(_patientRepository);
+        // Terminliste und Praxisdaten sind bewusst noch nicht angebunden.
+        _ = AppointmentListPath;
+        _ = PracticeDataPath;
 
-            // Terminliste und Praxisdaten sind bewusst noch nicht angebunden.
-            _ = AppointmentListPath;
-            _ = PracticeDataPath;
-
-            _nav.NavigateTo<HomeViewModel>();
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Laden fehlgeschlagen: {ex.Message}";
-        }
+        StatusMessage = "";
+        _nav.NavigateTo<HomeViewModel>();
     }
 
     private void StartEmptyProject()
     {
-        // MVP: Start mit leerem In-Memory-Stand.
+        _projectPersistence.StartEmptyProject(PatientListPath);
+        StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
     }
 }

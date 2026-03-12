@@ -4,6 +4,8 @@ using TheraPay.UI.ViewModels;
 using TheraPay.UI.ViewModels.Panels;
 using TheraPay.UI.Views;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
+using TheraPay.UI.State;
 
 namespace TheraPay.UI;
 
@@ -21,6 +23,10 @@ public static class Bootstrapper
         services.AddSingleton<InMemoryPatientRepository>();
         services.AddSingleton<IPatientRepository>(sp => sp.GetRequiredService<InMemoryPatientRepository>());
         services.AddSingleton<InMemoryAppointmentRepository, InMemoryAppointmentRepository>();
+
+        // Project state + persistence orchestration
+        services.AddSingleton<ProjectSession>();
+        services.AddSingleton<ProjectPersistenceService>();
 
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
