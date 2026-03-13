@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvPracticeDataStore
+public class CsvPracticeDataStore : IPracticeDataStore
 {
     private readonly string _filePath;
 
@@ -14,7 +14,7 @@ public class CsvPracticeDataStore
         _filePath = filePath;
     }
 
-    public void SaveAll(PracticeData data)
+    public void Save(PracticeData data)
     { 
         var record = ToRecord(data);
 
@@ -24,7 +24,7 @@ public class CsvPracticeDataStore
         csv.WriteRecords(new[] { record });
     }
 
-    public PracticeData LoadAll()
+    public PracticeData Load()
     {
         if (!File.Exists(_filePath))
             return new PracticeData();

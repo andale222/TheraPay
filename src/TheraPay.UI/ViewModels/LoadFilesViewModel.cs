@@ -70,16 +70,12 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void LoadProject()
     {
-        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath);
+        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath, PracticeDataPath);
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
             return;
         }
-
-        // Terminliste und Praxisdaten sind bewusst noch nicht angebunden.
-        _ = AppointmentListPath;
-        _ = PracticeDataPath;
 
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
@@ -87,7 +83,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void StartEmptyProject()
     {
-        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath);
+        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath, PracticeDataPath);
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
     }

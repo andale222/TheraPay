@@ -11,7 +11,7 @@ public class CsvPracticeDataStore_test
         var csvPracticeDataStore = new CsvPracticeDataStore(TestPaths.DataFile("nonExistingPracticeData.csv"));
 
         // When
-        var practiceData = csvPracticeDataStore.LoadAll();
+        var practiceData = csvPracticeDataStore.Load();
 
         // Then
         Assert.NotNull(practiceData);
@@ -24,7 +24,7 @@ public class CsvPracticeDataStore_test
         var csvPracticeDataStore = new CsvPracticeDataStore(TestPaths.DataFile("testLoadPracticeData.csv"));
 
         // When
-        var practiceData = csvPracticeDataStore.LoadAll();
+        var practiceData = csvPracticeDataStore.Load();
 
         // Then
         Assert.Equal("Privatpraxis test", practiceData.Name);
@@ -47,7 +47,7 @@ public class CsvPracticeDataStore_test
         var practiceData = new PracticeData();
 
         // When
-        csvPracticeDataStore.SaveAll(practiceData);
+        csvPracticeDataStore.Save(practiceData);
 
         // Then
         Assert.True(File.Exists(filePath));
@@ -75,8 +75,8 @@ public class CsvPracticeDataStore_test
         };
 
         // When
-        csvPracticeDataStore.SaveAll(practiceData);
-        var loadedPracticeData = csvPracticeDataStore.LoadAll();
+        csvPracticeDataStore.Save(practiceData);
+        var loadedPracticeData = csvPracticeDataStore.Load();
 
         // Then
         Assert.Equal(practiceData.Name, loadedPracticeData.Name);

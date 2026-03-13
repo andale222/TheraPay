@@ -19,7 +19,7 @@ public sealed class ProjectPersistenceService
         _session = session;
     }
 
-    public Result LoadProject(string patientListPath, string appointmentListPath)
+    public Result LoadProject(string patientListPath, string appointmentListPath, string practiceDataPath)
     {
         if (string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -31,10 +31,16 @@ public sealed class ProjectPersistenceService
             return new Result(false, "Bitte gib mindestens einen Pfad zur Terminliste an.");
         }
 
+        if (string.IsNullOrWhiteSpace(practiceDataPath))
+        {
+            return new Result(false, "Bitte gib mindestens einen Pfad zu den Praxisdaten an.");
+        }
+
         try
         {
             _session.SetPatientListPath(patientListPath);
             _session.SetAppointmentListPath(appointmentListPath);
+            _session.SetPracticeDataPath(practiceDataPath);
             _patientRepository.Clear();
             _appointmentRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository, _appointmentRepository);
@@ -47,7 +53,7 @@ public sealed class ProjectPersistenceService
         }
     }
 
-    public void StartEmptyProject(string patientListPath, string appointmentListPath)
+    public void StartEmptyProject(string patientListPath, string appointmentListPath, string practiceDataPath)
     {
         _patientRepository.Clear();
         _appointmentRepository.Clear();
@@ -60,6 +66,11 @@ public sealed class ProjectPersistenceService
         if (!string.IsNullOrWhiteSpace(appointmentListPath))
         {
             _session.SetAppointmentListPath(appointmentListPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(practiceDataPath))
+        {
+            _session.SetPracticeDataPath(practiceDataPath);
         }
 
         _session.MarkSaved();
@@ -75,6 +86,7 @@ public sealed class ProjectPersistenceService
         try
         {
             CreatePersistence().SaveFrom(_patientRepository, _appointmentRepository);
+            CreatePracticeDataStore().Save(_session.PracticeData);
             _session.MarkSaved();
             return new Result(true);
         }
@@ -88,5 +100,9 @@ public sealed class ProjectPersistenceService
     {
         return new CsvDataPersistence(new CsvPatientStore(_session.PatientListPath), 
         new CsvAppointmentStore(_session.AppointmentListPath));
+    }
+    private IPracticeDataStore CreatePracticeDataStore()
+    {
+        return new CsvPracticeDataStore(_session.PracticeDataPath);
     }
 }
