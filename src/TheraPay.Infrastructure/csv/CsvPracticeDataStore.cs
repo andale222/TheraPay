@@ -34,7 +34,8 @@ public class CsvPracticeDataStore : IPracticeDataStore
 
         var records = csv.GetRecords<CsvPracticeDataRecord>();
 
-        return ToDomain(records.FirstOrDefault());
+
+        return ToDomain(records.FirstOrDefault() ?? new CsvPracticeDataRecord());
     }
 
     private static CsvPracticeDataRecord ToRecord(PracticeData data)

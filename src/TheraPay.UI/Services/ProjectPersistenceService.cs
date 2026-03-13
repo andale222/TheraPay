@@ -44,6 +44,7 @@ public sealed class ProjectPersistenceService
             _patientRepository.Clear();
             _appointmentRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository, _appointmentRepository);
+            CreatePracticeDataStore().Load();
             _session.MarkSaved();
             return new Result(true);
         }
@@ -78,7 +79,7 @@ public sealed class ProjectPersistenceService
 
     public Result SaveProject()
     {
-        if (!_session.HasPatientListPath || !_session.HasAppointmentListPath)
+        if (!_session.HasPatientListPath || !_session.HasAppointmentListPath || !_session.HasPracticeDataPath)
         {
             return new Result(false, "Kein Speicherpfad gesetzt. Bitte zuerst ein Projekt laden oder im Startscreen einen Projektpfad angeben.");
         }
