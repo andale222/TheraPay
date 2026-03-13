@@ -41,10 +41,10 @@ public class CsvAppointmentStore_test
 
         // Then
         Assert.Equal(2, appointments.Count);
-        Assert.Equal(new DateTime(2026,1,1,12,5,0).AddHours(1), appointments[0].Date);
+        Assert.Equal(new DateTime(2026,1,1,12,5,0), appointments[0].Date.ToUniversalTime());
         Assert.Equal(25, appointments[0].DurationInMinutes);
         Assert.Equal("Pat1", appointments[0].PatientID);
-        Assert.Equal(new DateTime(2026,2,28,9,0,0).AddHours(0), appointments[1].Date);
+        Assert.Equal(new DateTime(2026,2,28,9,0,0), appointments[1].Date.ToUniversalTime());
         Assert.Equal(50, appointments[1].DurationInMinutes);
         Assert.Equal("Pat2", appointments[1].PatientID);
     }
