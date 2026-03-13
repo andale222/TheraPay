@@ -40,8 +40,8 @@ TestResults/
 *.sqlite3
 
 # CSV runtime data (keep templates if you want)
-data/
 *.csv
+!tests/TheraPay.Infrastructure.csv.Tests/testData/*.csv
 
 # Publish output
 publish/

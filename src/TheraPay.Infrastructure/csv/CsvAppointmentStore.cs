@@ -20,7 +20,7 @@ public class CsvAppointmentStore(string filePath) : CsvStore<Appointment, Appoin
 
     protected override Appointment ToDomain(AppointmentCsvRecord record)
     {
-        var appointment = new Appointment(DateTime.Parse(record.StartDateTime), record.PatientId);
+        var appointment = new Appointment(DateTime.Parse(record.StartDateTime, CultureInfo.InvariantCulture), record.PatientId);
         appointment.SetDuration(int.Parse(record.Duration));
 
         return appointment;

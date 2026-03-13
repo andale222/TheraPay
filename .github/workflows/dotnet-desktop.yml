@@ -1,0 +1,78 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+    env:
+      Solution_Name: TheraPay.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore
+      run: dotnet restore $env:Solution_Name
+
+    - name: Build
+      run: dotnet build $env:Solution_Name --configuration ${{ matrix.configuration }} --no-restore
+
+    - name: Test
+      run: dotnet test $env:Solution_Name --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+
+  publish-windows:
+    needs: build-and-test
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      UI_Project_Path: src/TheraPay.UI/TheraPay.UI.csproj
+      Publish_Directory: publish/win-x64
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Publish Windows build
+      run: dotnet publish $env:UI_Project_Path -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=false -o $env:Publish_Directory
+
+    - name: Create ZIP package
+      run: Compress-Archive -Path "$env:Publish_Directory\*" -DestinationPath "publish\TheraPay-win-x64-${{ github.ref_name }}.zip" -Force
+
+    - name: Upload publish artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TheraPay-win-x64-${{ github.ref_name }}
+        path: publish/TheraPay-win-x64-${{ github.ref_name }}.zip
+
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: publish/TheraPay-win-x64-${{ github.ref_name }}.zip
+        generate_release_notes: true
