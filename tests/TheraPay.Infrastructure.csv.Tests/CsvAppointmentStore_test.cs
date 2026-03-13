@@ -1,24 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using TheraPay.Domain;
+﻿using TheraPay.Domain;
 
 namespace TheraPay.Infrastructure.csv.Tests;
 
 public class CsvAppointmentStore_test
 {
-
-    private string getBaseDirectory()
-    {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "data");
-        return dataDir;
-    }
-
-
-
     [Fact]
     public void GivenNonExistingFile_LoadAll_ReturnsEmpty()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "nonExistingAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("nonExistingAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
@@ -31,7 +21,7 @@ public class CsvAppointmentStore_test
     public void GivenExistingFile_LoadAll_ReturnsAppointments()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "testLoadAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("testLoadAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
@@ -44,17 +34,17 @@ public class CsvAppointmentStore_test
     public void GivenExistingFile_LoadAll_ReturnsCorrectAppointments()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "testLoadAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("testLoadAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
 
         // Then
         Assert.Equal(2, appointments.Count);
-        Assert.Equal(new DateTime(2026,1,1,12,5,0).AddHours(1), appointments[0].Date);
+        Assert.Equal(new DateTime(2026,1,1,12,5,0), appointments[0].Date.ToUniversalTime());
         Assert.Equal(25, appointments[0].DurationInMinutes);
         Assert.Equal("Pat1", appointments[0].PatientID);
-        Assert.Equal(new DateTime(2026,2,28,9,0,0).AddHours(0), appointments[1].Date);
+        Assert.Equal(new DateTime(2026,2,28,9,0,0), appointments[1].Date.ToUniversalTime());
         Assert.Equal(50, appointments[1].DurationInMinutes);
         Assert.Equal("Pat2", appointments[1].PatientID);
     }
@@ -63,7 +53,7 @@ public class CsvAppointmentStore_test
     public void GivenEmptyList_SaveAll_FileExists()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testEmptySaveAppointments.csv");
+        var filePath = TestPaths.DataFile("testEmptySaveAppointments.csv");
         var csvAppointmentStore = new CsvAppointmentStore(filePath);
         var appointments = new List<Appointment>();
 
@@ -80,7 +70,7 @@ public class CsvAppointmentStore_test
     public void GivenAppointmentList_SaveAllLoadAll_SavesAndLoadsAppointments()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testRoundtripAppointments.csv");
+        var filePath = TestPaths.DataFile("testRoundtripAppointments.csv");
         var csvAppointmentStore = new CsvAppointmentStore(filePath);
         var appointments = new List<Appointment>
         {
@@ -104,5 +94,8 @@ public class CsvAppointmentStore_test
         Assert.Equal(appointments[2].Date, loadedAppointments[2].Date);
         Assert.Equal(appointments[2].DurationInMinutes, loadedAppointments[2].DurationInMinutes);
         Assert.Equal(appointments[2].PatientID, loadedAppointments[2].PatientID);
+
+        File.Delete(filePath);
+        Assert.False(File.Exists(filePath));
     }
 }

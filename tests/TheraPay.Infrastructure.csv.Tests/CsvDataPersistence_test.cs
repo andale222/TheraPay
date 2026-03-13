@@ -5,21 +5,12 @@ namespace TheraPay.Infrastructure.csv.Tests;
 
 public class CsvDataPersistence_test
 {
-
-    private string getBaseDirectory()
-    {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "data");
-        return dataDir;
-    }
-
-
-
     [Fact]
     public void GivenCsvPatientStoreAndPatientRepository_LoadInto_FillsPatientRepository()
     {
         // Given
-        var dataDirPatients = Path.Combine(getBaseDirectory(), "testLoadPatients.csv");
-        var dataDirAppointments = Path.Combine(getBaseDirectory(), "testLoadAppointments.csv");
+        var dataDirPatients = TestPaths.DataFile("testLoadPatients.csv");
+        var dataDirAppointments = TestPaths.DataFile("testLoadAppointments.csv");
         var patientStore = new CsvPatientStore(dataDirPatients);
         var appointmentStore = new CsvAppointmentStore(dataDirAppointments);
         var dataPersistence = new CsvDataPersistence(patientStore, appointmentStore);
@@ -54,8 +45,8 @@ public class CsvDataPersistence_test
     public void GivenCsvPatientStoreAndPatientRepository_SaveFrom_SavesPatientsToCsv()
     {
         // Given
-        var dataDirPatients = Path.Combine(getBaseDirectory(), "testSavePatients_DataPersistence.csv");
-        var dataDirAppointments = Path.Combine(getBaseDirectory(), "testSaveAppointments_DataPersistence.csv");
+        var dataDirPatients = TestPaths.DataFile("testSavePatients_DataPersistence.csv");
+        var dataDirAppointments = TestPaths.DataFile("testSaveAppointments_DataPersistence.csv");
         var patientStore = new CsvPatientStore(dataDirPatients);
         var appointmentStore = new CsvAppointmentStore(dataDirAppointments);
         var dataPersistence = new CsvDataPersistence(patientStore, appointmentStore);
