@@ -4,9 +4,9 @@ using TheraPay.Domain;
 
 public class PatientService
 {
-    private readonly InMemoryPatientRepository _repository;
+    private readonly IPatientRepository _repository;
 
-    public PatientService(InMemoryPatientRepository repository)
+    public PatientService(IPatientRepository repository)
     {
         _repository = repository;
     }

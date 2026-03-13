@@ -4,6 +4,8 @@ using TheraPay.UI.ViewModels;
 using TheraPay.UI.ViewModels.Panels;
 using TheraPay.UI.Views;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
+using TheraPay.UI.State;
 
 namespace TheraPay.UI;
 
@@ -18,24 +20,35 @@ public static class Bootstrapper
         services.AddSingleton<NavigationService>();
 
         // Repositories (State) -> meist Singleton
-        services.AddSingleton<InMemoryPatientRepository, InMemoryPatientRepository>();
-        services.AddSingleton<InMemoryAppointmentRepository, InMemoryAppointmentRepository>();
+        services.AddSingleton<InMemoryPatientRepository>();
+        services.AddSingleton<InMemoryAppointmentRepository>();
+        services.AddSingleton<IPatientRepository>(sp => sp.GetRequiredService<InMemoryPatientRepository>());
+        services.AddSingleton<IAppointmentRepository>(sp => sp.GetRequiredService<InMemoryAppointmentRepository>());
+
+        // Project state + persistence orchestration
+        services.AddSingleton<ProjectSession>();
+        services.AddSingleton<ProjectPersistenceService>();
+        services.AddSingleton<ExitConfirmationService>();
 
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
         services.AddSingleton<AppointmentService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
+        services.AddTransient<LoadFilesViewModel>();
         services.AddTransient<AppointmentEditViewModel>();
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
+        services.AddTransient<ExitConfirmViewModel>();
         services.AddTransient<MainWindowViewModel>();
         // Panels
         services.AddTransient<PatientPanelViewModel>();
         services.AddTransient<CalendarPanelViewModel>();
 
         // Views/Windows -> DI kann sie bauen (Ctor Injection)
+        services.AddTransient<LoadFilesView>();
         services.AddTransient<HomeView>();
+        services.AddTransient<ExitConfirmView>();
         services.AddTransient<MainWindow>();
         // services.AddTransient<AppointmentEditView>();
 

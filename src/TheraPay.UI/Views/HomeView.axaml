@@ -60,6 +60,27 @@
     </Border>
 </HeaderedContentControl>
 
+
+      <HeaderedContentControl>
+        <HeaderedContentControl.Header>
+        <TextBlock
+            Text="Speichern:"
+            FontSize="18"
+            FontWeight="Bold" />
+    </HeaderedContentControl.Header>
+    <Border
+        Margin="0,8,0,0"
+        Padding="12"
+        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <StackPanel Spacing="6" Margin="8">
+          <Button Content="Daten speichern" Command="{Binding SaveDataCommand}" Background="#71CE82" />
+          <TextBlock Text="{Binding SaveStatusMessage}" TextWrapping="Wrap"/>
+        </StackPanel>
+    </Border>
+</HeaderedContentControl>
+
     </StackPanel>
 
 

@@ -5,26 +5,26 @@ using System.Globalization;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvPracticeInfoStore
+public class CsvPracticeDataStore : IPracticeDataStore
 {
     private readonly string _filePath;
 
-    public CsvPracticeInfoStore(string filePath)
+    public CsvPracticeDataStore(string filePath)
     {
         _filePath = filePath;
     }
 
-    public void SaveAll(PracticeData data)
+    public void Save(PracticeData data)
     { 
         var record = ToRecord(data);
 
         using var writer = new StreamWriter(_filePath);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         
-        csv.WriteRecord(record);
+        csv.WriteRecords(new[] { record });
     }
 
-    public PracticeData LoadAll()
+    public PracticeData Load()
     {
         if (!File.Exists(_filePath))
             return new PracticeData();
@@ -32,9 +32,10 @@ public class CsvPracticeInfoStore
         using var reader = new StreamReader(_filePath);
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
-        var record = csv.GetRecord<CsvPracticeDataRecord>();
+        var records = csv.GetRecords<CsvPracticeDataRecord>();
 
-        return ToDomain(record);
+
+        return ToDomain(records.FirstOrDefault() ?? new CsvPracticeDataRecord());
     }
 
     private static CsvPracticeDataRecord ToRecord(PracticeData data)

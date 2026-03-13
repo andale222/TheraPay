@@ -14,6 +14,6 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CurrentViewModel));
 
         // Startscreen
-        nav.NavigateTo<HomeViewModel>();
+        nav.NavigateTo<LoadFilesViewModel>();
     }
 }
