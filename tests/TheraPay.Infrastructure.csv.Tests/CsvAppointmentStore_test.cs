@@ -94,5 +94,8 @@ public class CsvAppointmentStore_test
         Assert.Equal(appointments[2].Date, loadedAppointments[2].Date);
         Assert.Equal(appointments[2].DurationInMinutes, loadedAppointments[2].DurationInMinutes);
         Assert.Equal(appointments[2].PatientID, loadedAppointments[2].PatientID);
+
+        File.Delete(filePath);
+        Assert.False(File.Exists(filePath));
     }
 }

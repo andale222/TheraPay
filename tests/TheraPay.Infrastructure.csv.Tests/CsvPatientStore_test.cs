@@ -97,5 +97,8 @@ public class CsvPatientStore_test
         Assert.Equal(patients[2].ID, loadedPatients[2].ID);
         Assert.Equal(patients[2].FirstName, loadedPatients[2].FirstName);
         Assert.Equal(patients[2].LastName, loadedPatients[2].LastName);
+
+        File.Delete(filePath);
+        Assert.False(File.Exists(filePath));
     }
 }
