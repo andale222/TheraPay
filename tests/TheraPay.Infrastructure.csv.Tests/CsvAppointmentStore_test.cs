@@ -1,24 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using TheraPay.Domain;
+﻿using TheraPay.Domain;
 
 namespace TheraPay.Infrastructure.csv.Tests;
 
 public class CsvAppointmentStore_test
 {
-
-    private string getBaseDirectory()
-    {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "data");
-        return dataDir;
-    }
-
-
-
     [Fact]
     public void GivenNonExistingFile_LoadAll_ReturnsEmpty()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "nonExistingAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("nonExistingAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
@@ -31,7 +21,7 @@ public class CsvAppointmentStore_test
     public void GivenExistingFile_LoadAll_ReturnsAppointments()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "testLoadAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("testLoadAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
@@ -44,7 +34,7 @@ public class CsvAppointmentStore_test
     public void GivenExistingFile_LoadAll_ReturnsCorrectAppointments()
     {
         // Given
-        var csvAppointmentStore = new CsvAppointmentStore(Path.Combine(getBaseDirectory(), "testLoadAppointments.csv"));
+        var csvAppointmentStore = new CsvAppointmentStore(TestPaths.DataFile("testLoadAppointments.csv"));
 
         // When
         var appointments = csvAppointmentStore.LoadAll();
@@ -63,7 +53,7 @@ public class CsvAppointmentStore_test
     public void GivenEmptyList_SaveAll_FileExists()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testEmptySaveAppointments.csv");
+        var filePath = TestPaths.DataFile("testEmptySaveAppointments.csv");
         var csvAppointmentStore = new CsvAppointmentStore(filePath);
         var appointments = new List<Appointment>();
 
@@ -80,7 +70,7 @@ public class CsvAppointmentStore_test
     public void GivenAppointmentList_SaveAllLoadAll_SavesAndLoadsAppointments()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testRoundtripAppointments.csv");
+        var filePath = TestPaths.DataFile("testRoundtripAppointments.csv");
         var csvAppointmentStore = new CsvAppointmentStore(filePath);
         var appointments = new List<Appointment>
         {

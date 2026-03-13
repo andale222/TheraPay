@@ -1,24 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using TheraPay.Domain;
+﻿using TheraPay.Domain;
 
 namespace TheraPay.Infrastructure.csv.Tests;
 
 public class CsvPatientStore_test
 {
-
-    private string getBaseDirectory()
-    {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "data");
-        return dataDir;
-    }
-
-
-
     [Fact]
     public void GivenNonExistingFile_LoadAll_ReturnsEmpty()
     {
         // Given
-        var csvPatientStore = new CsvPatientStore(Path.Combine(getBaseDirectory(), "nonExistingPatients.csv"));
+        var csvPatientStore = new CsvPatientStore(TestPaths.DataFile("nonExistingPatients.csv"));
 
         // When
         var patients = csvPatientStore.LoadAll();
@@ -31,7 +21,7 @@ public class CsvPatientStore_test
     public void GivenExistingFile_LoadAll_ReturnsPatients()
     {
         // Given
-        var csvPatientStore = new CsvPatientStore(Path.Combine(getBaseDirectory(), "testLoadPatients.csv"));
+        var csvPatientStore = new CsvPatientStore(TestPaths.DataFile("testLoadPatients.csv"));
 
         // When
         var patients = csvPatientStore.LoadAll();
@@ -44,7 +34,7 @@ public class CsvPatientStore_test
     public void GivenExistingFile_LoadAll_ReturnsCorrectPatients()
     {
         // Given
-        var csvPatientStore = new CsvPatientStore(Path.Combine(getBaseDirectory(), "testLoadPatients.csv"));
+        var csvPatientStore = new CsvPatientStore(TestPaths.DataFile("testLoadPatients.csv"));
 
         // When
         var patients = csvPatientStore.LoadAll();
@@ -66,7 +56,7 @@ public class CsvPatientStore_test
     public void GivenEmptyList_SaveAll_FileExists()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testEmptySavePatients.csv");
+        var filePath = TestPaths.DataFile("testEmptySavePatients.csv");
         var csvPatientStore = new CsvPatientStore(filePath);
         var patients = new List<Patient>();
 
@@ -83,7 +73,7 @@ public class CsvPatientStore_test
     public void GivenPatientList_SaveAllLoadAll_SavesAndLoadsPatients()
     {
         // Given
-        var filePath = Path.Combine(getBaseDirectory(), "testRoundtripPatients.csv");
+        var filePath = TestPaths.DataFile("testRoundtripPatients.csv");
         var csvPatientStore = new CsvPatientStore(filePath);
         var patients = new List<Patient>
         {
