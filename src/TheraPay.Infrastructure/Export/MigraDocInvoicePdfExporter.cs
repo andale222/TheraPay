@@ -136,7 +136,7 @@ public sealed class MigraDocInvoicePdfExporter
         textFrame.Left = Unit.FromCentimeter(2.2);
         textFrame.Top = ShapePosition.Top;
         textFrame.RelativeVertical = RelativeVertical.Page;
-        textFrame.Top = Unit.FromCentimeter(4.1);
+        textFrame.Top = Unit.FromCentimeter(4.4);
 
         var practiceDetails = textFrame.AddParagraph();
         practiceDetails.Format.Font.Size = 7;
@@ -170,8 +170,8 @@ public sealed class MigraDocInvoicePdfExporter
         textFrame.Left = ShapePosition.Right;
         textFrame.RelativeHorizontal = RelativeHorizontal.Margin;
         textFrame.Top = ShapePosition.Top;
-        textFrame.RelativeVertical = RelativeVertical.Margin;
-        textFrame.Top = Unit.FromCentimeter(2.7);
+        textFrame.RelativeVertical = RelativeVertical.Page;
+        textFrame.Top = Unit.FromCentimeter(4.4);
         // Add some text.
         textFrame.AddParagraph($"Rechnungsdatum: {model.IssueDate:dd.MM.yyyy}");
         textFrame.AddParagraph($"Rechnungsnummer: {model.InvoiceNumber}");
@@ -185,7 +185,7 @@ public sealed class MigraDocInvoicePdfExporter
     {
         var par = section.AddParagraph($"Rechnung vom {model.IssueDate:dd.MM.yyyy}");
         par.Format.Font.Bold = true;
-        par.Format.SpaceBefore = Unit.FromCentimeter(4);
+        par.Format.SpaceBefore = Unit.FromCentimeter(4.9);
         par.Format.SpaceAfter = Unit.FromCentimeter(0.5);
 
         var letter = section.AddParagraph($"Sehr geehrtix {model.PatientName},");
@@ -238,25 +238,29 @@ public sealed class MigraDocInvoicePdfExporter
 
     private static void BuildTotal(Section section, InvoicePdfModel model)
     {
-        var total = section.AddParagraph();
+        var paymentDetails = section.AddParagraph();
+        paymentDetails.Format.KeepTogether = true;
         // total.Format.Alignment = ParagraphAlignment.Right;
-        total.AddFormattedText("Bitte überweisen Sie den Gesamtbetrag innerhalb von 14 Tagen auf folgendes Konto: ", TextFormat.Bold);
-        total.AddLineBreak();
-        total.AddText($"IBAN: {model.Iban}");
-        total.AddLineBreak();
-        total.AddText($"BIC: {model.Bic}");
-        total.AddLineBreak();
-        total.AddText($"Bank: {model.BankName}");
-        total.AddLineBreak();
-        total.AddText($"Betreff: {model.InvoiceNumber}");
-        total.AddLineBreak();
-        total.AddLineBreak();
-        total.AddText("Mit freundlichen Grüßen");
-        total.AddLineBreak();
-        total.AddLineBreak();
-        total.AddLineBreak();
-        total.AddFormattedText("\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0", TextFormat.Underline);
-        total.AddLineBreak();
-        total.AddText($"{model.PractitionerTitle} {model.PractitionerName}");
+        paymentDetails.AddFormattedText("Bitte überweisen Sie den Gesamtbetrag innerhalb von 14 Tagen auf folgendes Konto: ", TextFormat.Bold);
+        paymentDetails.AddLineBreak();
+        paymentDetails.AddText($"IBAN: {model.Iban}");
+        paymentDetails.AddLineBreak();
+        paymentDetails.AddText($"BIC: {model.Bic}");
+        paymentDetails.AddLineBreak();
+        paymentDetails.AddText($"Bank: {model.BankName}");
+        paymentDetails.AddLineBreak();
+        paymentDetails.AddText($"Betreff: {model.InvoiceNumber}");
+        paymentDetails.AddLineBreak();
+        paymentDetails.AddLineBreak();
+
+        var signature = section.AddParagraph();
+        signature.Format.KeepTogether = true;
+        signature.AddText("Mit freundlichen Grüßen");
+        signature.AddLineBreak();
+        signature.AddLineBreak();
+        // signature.AddLineBreak();
+        signature.AddFormattedText("\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0", TextFormat.Underline);
+        signature.AddLineBreak();
+        signature.AddText($"{model.PractitionerTitle} {model.PractitionerName}");
     }
 }
