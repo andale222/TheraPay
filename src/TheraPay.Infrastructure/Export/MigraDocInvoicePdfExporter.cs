@@ -24,7 +24,7 @@ public sealed class MigraDocInvoicePdfExporter
 
         var section = document.AddSection();
         section.PageSetup.PageFormat = PageFormat.A4;
-        section.PageSetup.TopMargin = Unit.FromCentimeter(2.0);
+        section.PageSetup.TopMargin = Unit.FromCentimeter(1.3);
         section.PageSetup.BottomMargin = Unit.FromCentimeter(2.0);
         section.PageSetup.LeftMargin = Unit.FromCentimeter(2.2);
         section.PageSetup.RightMargin = Unit.FromCentimeter(2.2);
@@ -35,7 +35,7 @@ public sealed class MigraDocInvoicePdfExporter
         BuildLinesTable(section, model);
         BuildTotal(section, model);
         BuildFooter(section, model);
-        section.AddPageBreak();
+        // section.AddPageBreak();
 
         var renderer = new PdfDocumentRenderer();
         renderer.Document = document;
@@ -55,7 +55,7 @@ public sealed class MigraDocInvoicePdfExporter
 
         var heading = document.Styles["Heading1"];
         heading.Font.Name = "TheraSans";
-        heading.Font.Size = 16;
+        heading.Font.Size = 13;
         heading.Font.Bold = true;
         heading.ParagraphFormat.SpaceAfter = Unit.FromCentimeter(0.5);
 
@@ -70,20 +70,39 @@ public sealed class MigraDocInvoicePdfExporter
 
     private static void BuildHeader(Section section, InvoicePdfModel model)
     {
-        var title = section.AddParagraph("Rechnung", "Heading1");
+        var title = section.AddParagraph($"{model.PracticeName}", "Heading1");
         title.Format.Alignment = ParagraphAlignment.Center;
-        title.Format.SpaceAfter = Unit.FromCentimeter(0.2);
+        title.Format.SpaceAfter = Unit.FromCentimeter(0.1);
 
-        // var meta = section.AddParagraph();
-        // meta.AddText($"Rechnungsnummer: {model.InvoiceNumber}");
-        // meta.AddLineBreak();
-        // meta.AddText($"Rechnungsdatum: {model.IssueDate:dd.MM.yyyy}");
-        // meta.AddLineBreak();
-        // meta.AddText(model.PracticeName);
-        // meta.AddLineBreak();
-        // meta.AddText(model.PracticeAddress);
+        var secondPar = section.AddParagraph($"{model.PracticeDescription}");
+        secondPar.Format.Alignment = ParagraphAlignment.Center;
+        secondPar.Format.Font.Bold = true;
+        secondPar.Format.Font.Size = 10;
 
-        // section.AddParagraph().Format.SpaceAfter = Unit.FromCentimeter(0.4);
+        var thirdPar = section.AddParagraph($"Tel.: {model.PracticeTelephone} - E-Mail: {model.PracticeEmail}");
+        thirdPar.Format.Alignment = ParagraphAlignment.Center;
+        thirdPar.Format.Font.Size = 10;
+
+
+        HeaderFooter header = section.Headers.Primary;
+        double[] foldPositionsMm = { 105, 210 };
+
+        foreach (double posMm in foldPositionsMm)
+        {
+            TextFrame tf = header.AddTextFrame();
+
+            tf.Width = Unit.FromMillimeter(5);
+            tf.Height = Unit.FromPoint(1);
+
+            tf.RelativeHorizontal = RelativeHorizontal.Page;
+            tf.RelativeVertical = RelativeVertical.Page;
+
+            tf.Left = Unit.FromMillimeter(0);   // linker Seitenrand
+            tf.Top = Unit.FromMillimeter(posMm);
+
+            tf.LineFormat.Width = 0;
+            tf.FillFormat.Color = Colors.Black;
+        }
     }
 
     private static void BuildFooter(Section section, InvoicePdfModel model)
@@ -96,7 +115,7 @@ public sealed class MigraDocInvoicePdfExporter
 
         var paragraph2 = footer.AddParagraph($"Name: {model.PatientName}");
         paragraph2.AddTab();
-        paragraph2.AddText( "");
+        paragraph2.AddText("");
         paragraph2.AddTab();
         paragraph2.AddText("Seite ");
         paragraph2.AddPageField();
@@ -127,6 +146,8 @@ public sealed class MigraDocInvoicePdfExporter
         practiceDetails.AddText(model.PracticeStreetNr);
         practiceDetails.AddText("-");
         practiceDetails.AddText(model.PracticeCityCode);
+        practiceDetails.AddLineBreak();
+        practiceDetails.AddLineBreak();
 
         var paragraph = textFrame.AddParagraph();
         paragraph.AddText(model.PatientName);
@@ -150,7 +171,7 @@ public sealed class MigraDocInvoicePdfExporter
         textFrame.RelativeHorizontal = RelativeHorizontal.Margin;
         textFrame.Top = ShapePosition.Top;
         textFrame.RelativeVertical = RelativeVertical.Margin;
-        textFrame.Top = Unit.FromCentimeter(2);
+        textFrame.Top = Unit.FromCentimeter(2.7);
         // Add some text.
         textFrame.AddParagraph($"Rechnungsdatum: {model.IssueDate:dd.MM.yyyy}");
         textFrame.AddParagraph($"Rechnungsnummer: {model.InvoiceNumber}");
@@ -163,16 +184,17 @@ public sealed class MigraDocInvoicePdfExporter
     private static void BuildLinesTable(Section section, InvoicePdfModel model)
     {
         var par = section.AddParagraph($"Rechnung vom {model.IssueDate:dd.MM.yyyy}");
+        par.Format.Font.Bold = true;
         par.Format.SpaceBefore = Unit.FromCentimeter(4);
         par.Format.SpaceAfter = Unit.FromCentimeter(0.5);
 
         var letter = section.AddParagraph($"Sehr geehrtix {model.PatientName},");
         letter.AddLineBreak();
-        letter.AddText("für meine Bemühungen erlaube ich mir entsprechend der Gebührenordnung für Psychotherapeute*innen (GOP/GOÄ)");
+        letter.AddText("für meine Bemühungen erlaube ich mir entsprechend der Gebührenordnung für Psychotherapeut*innen (GOP/GOÄ)");
         letter.AddFormattedText($" {model.TotalAmountEuro.ToString("N2", De)} € ", TextFormat.Bold);
         letter.AddText("zu berechnen. Eine Aufstellung aller berücksichtigten Einzelpositionen finden Sie nachfolgend.");
         letter.Format.SpaceAfter = Unit.FromCentimeter(0.1);
-        
+
         var table = section.AddTable();
         table.Borders.Width = 0.5;
 
@@ -220,11 +242,11 @@ public sealed class MigraDocInvoicePdfExporter
         // total.Format.Alignment = ParagraphAlignment.Right;
         total.AddFormattedText("Bitte überweisen Sie den Gesamtbetrag innerhalb von 14 Tagen auf folgendes Konto: ", TextFormat.Bold);
         total.AddLineBreak();
-        total.AddText("IBAN: ");
+        total.AddText($"IBAN: {model.Iban}");
         total.AddLineBreak();
-        total.AddText("BIC: ");
+        total.AddText($"BIC: {model.Bic}");
         total.AddLineBreak();
-        total.AddText("Bank: ");
+        total.AddText($"Bank: {model.BankName}");
         total.AddLineBreak();
         total.AddText($"Betreff: {model.InvoiceNumber}");
         total.AddLineBreak();
