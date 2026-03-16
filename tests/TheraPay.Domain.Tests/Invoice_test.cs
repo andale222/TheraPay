@@ -2,18 +2,45 @@ namespace TheraPay.Domain.Tests;
 
 public class Invoice_test
 {
-    // public static Appointment CreateAppointment() => new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
-    [Fact]
-    public void GivenInvoicesPatientData_CreateInvoice_InvoiceHasCorrectValues()
+    public static InvoicePatientData CreatePatientData()
     {
-        // GIVEN
         Patient patient = new Patient("A", "J", "L5R");
         var patientData = new InvoicePatientData()
         {
             Name = patient.FirstName + " " + patient.LastName,
             Id = patient.ID
         };
-        var appointmentData = new List<InvoiceAppointmentData>();
+        return patientData;
+    }
+    public static List<InvoiceAppointmentData> CreateAppointmenttDataListWithTwoEntries()
+    {
+        Appointment appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "L5R");
+        Appointment appointment2 = new Appointment(new DateTime(2026, 2, 1, 14, 0, 0), "L5R");
+        var appointmentData = new List<InvoiceAppointmentData>()
+        {
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment1.Id.ToString("D"),
+                Date = appointment1.Date,
+                PatientId = appointment1.PatientID
+            },
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment2.Id.ToString("D"),
+                Date = appointment2.Date,
+                PatientId = appointment1.PatientID
+            },
+        };
+
+        return appointmentData;
+    }
+
+    [Fact]
+    public void GivenInvoicesPatientData_CreateInvoice_InvoiceHasCorrectValues()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
 
         //     // WHEN
         var invoice = new Invoice(patientData, appointmentData);
@@ -21,38 +48,29 @@ public class Invoice_test
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(patientData.Name, invoice.PatientData.Name);
-        Assert.Equal(patient.ID, invoice.PatientData.Id);
+        Assert.Equal(patientData.Id, invoice.PatientData.Id);
     }
     [Fact]
     public void GivenInvoicesAppointmentData_CreateInvoice_InvoiceHasCorrectAppointmentData()
     {
         // GIVEN
-        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
-        Appointment appointment = new Appointment(date, "OR5");
-        var patientData = new InvoicePatientData();
-        var appointmentData = new List<InvoiceAppointmentData>()
-        {
-            new InvoiceAppointmentData()
-            {
-                AppointmentId = appointment.Id.ToString("D"),
-                Date = appointment.Date
-            }
-        };
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
 
         //     // WHEN
         var invoice = new Invoice(patientData, appointmentData);
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
-        Assert.Equal(appointment.Id.ToString("D"), invoice.AppointmentDataList[0].AppointmentId);
-        Assert.Equal(date, invoice.AppointmentDataList[0].Date);
+        Assert.Equal(appointmentData[0].AppointmentId, invoice.AppointmentDataList[0].AppointmentId);
+        Assert.Equal(appointmentData[0].Date, invoice.AppointmentDataList[0].Date);
     }
     [Fact]
-    public void GivenEmptyData_CreateInvoice_InvoiceIsDraft()
+    public void GivenInvoiceData_CreateInvoice_InvoiceIsDraft()
     {
         // GIVEN
-        var patientData = new InvoicePatientData();
-        var appointmentData = new List<InvoiceAppointmentData>();
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData);
@@ -64,8 +82,8 @@ public class Invoice_test
     public void GivenEmptyInvoice_IssueInvoice_StatusIsIssued()
     {
         // GIVEN
-        var patientData = new InvoicePatientData();
-        var appointmentData = new List<InvoiceAppointmentData>();
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
         var invoice = new Invoice(patientData, appointmentData);
 
         // WHEN
@@ -73,5 +91,73 @@ public class Invoice_test
 
         // THEN
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
+    }
+
+    [Fact]
+    public void GivenInvoiceWithPatientAndAppointmentData_CreateInvoice_InvoiceHasBothCorrectValues()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
+
+        //     // WHEN
+        var invoice = new Invoice(patientData, appointmentData);
+
+        //     // THEN
+        Assert.NotEqual(Guid.Empty, invoice.Id);
+        Assert.Equal(patientData.Name, invoice.PatientData.Name);
+        Assert.Equal(patientData.Id, invoice.PatientData.Id);
+        Assert.Equal(appointmentData[0].AppointmentId, invoice.AppointmentDataList[0].AppointmentId);
+        Assert.Equal(appointmentData[0].Date, invoice.AppointmentDataList[0].Date);
+    }
+
+
+
+    [Fact]
+    public void GivenInvoiceWithDifferingFirstPatientId_CreateInvoice_InvoiceRaisesException()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
+        Appointment appointment = new Appointment(date, "OR5");
+        var appointmentData = new List<InvoiceAppointmentData>()
+        {
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment.Id.ToString("D"),
+                Date = appointment.Date,
+                PatientId = appointment.PatientID
+            }
+        };
+
+        // WHEN THEN
+        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
+    }
+    [Fact]
+    public void GivenInvoiceWithDifferingSecondPatientId_CreateInvoice_InvoiceRaisesException()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
+        Appointment appointment = new Appointment(date, "L5R");
+        Appointment appointment2 = new Appointment(date, "OR5");
+        var appointmentData = new List<InvoiceAppointmentData>()
+        {
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment.Id.ToString("D"),
+                Date = appointment.Date,
+                PatientId = appointment.PatientID
+            },
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment2.Id.ToString("D"),
+                Date = appointment2.Date,
+                PatientId = appointment2.PatientID
+            }
+        };
+
+        // WHEN THEN
+        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
     }
 }
