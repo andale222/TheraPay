@@ -3,15 +3,16 @@ namespace TheraPay.Domain;
 public class Invoice
 {
     public InvoicePatientData PatientData { get; private set; }
-    public InvoiceAppointmentData AppointmentData { get; private set; }
+    private List<InvoiceAppointmentData> _appointmentDataList = new List<InvoiceAppointmentData>();
+    public IReadOnlyList<InvoiceAppointmentData> AppointmentDataList => _appointmentDataList;
     public Guid Id { get; }
     public InvoiceStatus Status { get; private set; }
 
-    public Invoice(InvoicePatientData patientData, InvoiceAppointmentData appointmentData)
+    public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)
     {
         Id = Guid.NewGuid();
         PatientData = patientData;
-        AppointmentData = appointmentData;
+        _appointmentDataList = appointmentDataList;
         Status = InvoiceStatus.Draft;
     }
 
@@ -36,5 +37,5 @@ public sealed record InvoicePatientData
 public sealed record InvoiceAppointmentData
 {
     public DateTime Date { get; set;}
-    public string PatientId { get; set; } = "";
+    public string AppointmentId { get; set; } = "";
 }

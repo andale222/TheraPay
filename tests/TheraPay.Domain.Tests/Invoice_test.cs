@@ -10,14 +10,14 @@ public class Invoice_test
         Patient patient = new Patient("A", "J", "L5R");
         var patientData = new InvoicePatientData()
         {
-            PatientName = patient.FirstName+" "+patient.LastName
+            PatientName = patient.FirstName + " " + patient.LastName
         };
-        var appointmentData = new InvoiceAppointmentData();
+        var appointmentData = new List<InvoiceAppointmentData>();
 
-    //     // WHEN
+        //     // WHEN
         var invoice = new Invoice(patientData, appointmentData);
 
-    //     // THEN
+        //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(patientData.PatientName, invoice.PatientData.PatientName);
     }
@@ -26,30 +26,32 @@ public class Invoice_test
     {
         // GIVEN
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
-        string patientID = "OR5";
-        Appointment appointment = new Appointment( date, patientID);
+        Appointment appointment = new Appointment(date, "OR5");
         var patientData = new InvoicePatientData();
-        var appointmentData = new InvoiceAppointmentData()
+        var appointmentData = new List<InvoiceAppointmentData>()
         {
-            PatientId = appointment.PatientID,
-            Date = appointment.Date
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment.Id.ToString("D"),
+                Date = appointment.Date
+            }
         };
 
-    //     // WHEN
+        //     // WHEN
         var invoice = new Invoice(patientData, appointmentData);
 
-    //     // THEN
+        //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(patientData.PatientName, invoice.PatientData.PatientName);
-        Assert.Equal(patientID, invoice.AppointmentData.PatientId);
-        Assert.Equal(date, invoice.AppointmentData.Date);
+        Assert.Equal(appointment.Id.ToString("D"), invoice.AppointmentDataList[0].AppointmentId);
+        Assert.Equal(date, invoice.AppointmentDataList[0].Date);
     }
     [Fact]
     public void GivenEmptyData_CreateInvoice_InvoiceIsDraft()
     {
         // GIVEN
         var patientData = new InvoicePatientData();
-        var appointmentData = new InvoiceAppointmentData();
+        var appointmentData = new List<InvoiceAppointmentData>();
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData);
@@ -62,7 +64,7 @@ public class Invoice_test
     {
         // GIVEN
         var patientData = new InvoicePatientData();
-        var appointmentData = new InvoiceAppointmentData();
+        var appointmentData = new List<InvoiceAppointmentData>();
         var invoice = new Invoice(patientData, appointmentData);
 
         // WHEN
