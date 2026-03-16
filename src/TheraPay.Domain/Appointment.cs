@@ -10,10 +10,26 @@ public class Appointment
     public DateTime End => Date.AddMinutes(DurationInMinutes);
 
     public Appointment(DateTime date, string patientID)
+        : this(Guid.NewGuid(), date, patientID, 0)
     {
+    }
+
+    private Appointment(Guid id, DateTime date, string patientID, int durationInMinutes)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Id cannot be empty.", nameof(id));
+        }
+
         Date = date;
         PatientID = patientID;
-        Id = Guid.NewGuid();
+        Id = id;
+        SetDuration(durationInMinutes);
+    }
+
+    public static Appointment Rehydrate(Guid id, DateTime date, string patientID, int durationInMinutes)
+    {
+        return new Appointment(id, date, patientID, durationInMinutes);
     }
 
     public void SetDuration(int durationInMinutes)
