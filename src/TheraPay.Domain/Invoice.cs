@@ -32,7 +32,8 @@ public enum InvoiceStatus { Draft, Issued, Cancelled };
 
 public sealed record InvoicePatientData
 {
-    public string PatientName { get; set; } = "";
+    public string Name { get; set; } = "";
+public string Id { get; set; } = "";
 }
 public sealed record InvoiceAppointmentData
 {

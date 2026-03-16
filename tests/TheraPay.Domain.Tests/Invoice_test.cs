@@ -10,7 +10,8 @@ public class Invoice_test
         Patient patient = new Patient("A", "J", "L5R");
         var patientData = new InvoicePatientData()
         {
-            PatientName = patient.FirstName + " " + patient.LastName
+            Name = patient.FirstName + " " + patient.LastName,
+            Id = patient.ID
         };
         var appointmentData = new List<InvoiceAppointmentData>();
 
@@ -19,7 +20,8 @@ public class Invoice_test
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
-        Assert.Equal(patientData.PatientName, invoice.PatientData.PatientName);
+        Assert.Equal(patientData.Name, invoice.PatientData.Name);
+        Assert.Equal(patient.ID, invoice.PatientData.Id);
     }
     [Fact]
     public void GivenInvoicesAppointmentData_CreateInvoice_InvoiceHasCorrectAppointmentData()
@@ -42,7 +44,6 @@ public class Invoice_test
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
-        Assert.Equal(patientData.PatientName, invoice.PatientData.PatientName);
         Assert.Equal(appointment.Id.ToString("D"), invoice.AppointmentDataList[0].AppointmentId);
         Assert.Equal(date, invoice.AppointmentDataList[0].Date);
     }
