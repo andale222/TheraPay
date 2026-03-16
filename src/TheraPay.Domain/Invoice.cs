@@ -11,12 +11,16 @@ public class Invoice
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)
     {
         Id = Guid.NewGuid();
+        if (patientData == null)
+            throw new ArgumentNullException(nameof(patientData));
+        if (appointmentDataList == null)
+            throw new ArgumentNullException(nameof(appointmentDataList));
         if (!CheckDataValidity(patientData, appointmentDataList))
         {
-            throw new Exception("Irgendwas ist schiefgelaufen.");
+            throw new ArgumentException("Data inconsistency detected: multiple patient Ids or matching appointment Ids detected.");
         }
         PatientData = patientData;
-        _appointmentDataList = appointmentDataList;
+        _appointmentDataList = appointmentDataList.ToList();
         Status = InvoiceStatus.Draft;
     }
 
@@ -49,12 +53,12 @@ public enum InvoiceStatus { Draft, Issued, Cancelled };
 
 public sealed record InvoicePatientData
 {
-    public string Name { get; set; } = "";
-    public string Id { get; set; } = "";
+    public string Name { get; init; } = "";
+    public string Id { get; init; } = "";
 }
 public sealed record InvoiceAppointmentData
 {
-    public DateTime Date { get; set; }
-    public string AppointmentId { get; set; } = "";
-    public string PatientId { get; set; } = "";
+    public DateTime Date { get; init; }
+    public string AppointmentId { get; init; } = "";
+    public string PatientId { get; init; } = "";
 }

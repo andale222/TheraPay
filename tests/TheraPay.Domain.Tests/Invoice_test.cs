@@ -112,7 +112,6 @@ public class Invoice_test
     }
 
 
-
     [Fact]
     public void GivenInvoiceWithDifferingFirstPatientId_CreateInvoice_InvoiceRaisesException()
     {
@@ -131,7 +130,7 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData));
     }
     [Fact]
     public void GivenInvoiceWithDifferingSecondPatientId_CreateInvoice_InvoiceRaisesException()
@@ -158,7 +157,7 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData));
     }
     [Fact]
     public void GivenInvoiceData_CreateInvoiceWithTheSameAppointmentTwice_InvoiceRaisesException()
@@ -184,6 +183,6 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData));
     }
 }
