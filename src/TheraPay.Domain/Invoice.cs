@@ -26,6 +26,10 @@ public class Invoice
             if (patientData.Id != appointment.PatientId)
                 return false;
 
+        var ids = appointmentDataList.Select(x => x.AppointmentId).ToList();
+        if (ids.Count != ids.Distinct().Count())
+            return false;
+
         return true;
     }
 

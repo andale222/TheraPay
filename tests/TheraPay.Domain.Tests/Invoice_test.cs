@@ -160,4 +160,30 @@ public class Invoice_test
         // WHEN THEN
         Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
     }
+    [Fact]
+    public void GivenInvoiceData_CreateInvoiceWithTheSameAppointmentTwice_InvoiceRaisesException()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
+        Appointment appointment = new Appointment(date, "L5R");
+        var appointmentData = new List<InvoiceAppointmentData>()
+        {
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment.Id.ToString("D"),
+                Date = appointment.Date,
+                PatientId = appointment.PatientID
+            },
+            new InvoiceAppointmentData()
+            {
+                AppointmentId = appointment.Id.ToString("D"),
+                Date = appointment.Date,
+                PatientId = appointment.PatientID
+            }
+        };
+
+        // WHEN THEN
+        Assert.Throws<Exception>(() => new Invoice(patientData, appointmentData));
+    }
 }
