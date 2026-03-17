@@ -79,7 +79,7 @@ public class Invoice_test
         Assert.Equal(InvoiceStatus.Draft, invoice.Status);
     }
     [Fact]
-    public void GivenEmptyInvoice_IssueInvoice_StatusIsIssued()
+    public void GivenEmptyInvoice_IssueInvoice_StatusIsIssuedAndDatesAreSet()
     {
         // GIVEN
         var patientData = CreatePatientData();
@@ -91,6 +91,8 @@ public class Invoice_test
 
         // THEN
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
+        Assert.Equal(DateTime.Today, invoice.IssueDate);
+        Assert.Equal(DateTime.Today.AddDays(14), invoice.DueDate); // TODO: add function to set Due date properly
     }
 
     [Fact]

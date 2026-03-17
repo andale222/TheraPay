@@ -7,6 +7,9 @@ public class Invoice
     public IReadOnlyList<InvoiceAppointmentData> AppointmentDataList => _appointmentDataList;
     public Guid Id { get; }
     public InvoiceStatus Status { get; private set; }
+    public decimal TotalAmount {get; private set; }
+    public DateTime IssueDate {get;private set;}
+    public DateTime DueDate {get;private set;}
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)
     {
@@ -37,6 +40,11 @@ public class Invoice
         return true;
     }
 
+    private void UpdateTotalAmount()
+    {
+        // TODO: update the total amount computation as soon as it is implemented in the appointments...
+    }
+
     private bool IsEditable() => Status == InvoiceStatus.Draft;
 
     public void Issue()
@@ -44,12 +52,14 @@ public class Invoice
         if (!IsEditable())
             return;
 
+        IssueDate = DateTime.Today;
+        DueDate = IssueDate.AddDays(14); // TODO: setting with default values erstellen 
         Status = InvoiceStatus.Issued;
     }
 }
 
 
-public enum InvoiceStatus { Draft, Issued, Cancelled };
+public enum InvoiceStatus { Draft, Issued, Overdue, Cancelled };
 
 public sealed record InvoicePatientData
 {
