@@ -51,6 +51,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
             PhoneNumber = data.PhoneNumber,
             IBAN = data.IBAN,
             TaxIdentificationNumber = data.TaxIdentificationNumber,
+            DefaultPaymentTermDays = data.DefaultPaymentTermDays,
         };
     }
     private static PracticeData ToDomain(CsvPracticeDataRecord record)
@@ -66,6 +67,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
             PhoneNumber = record.PhoneNumber,
             IBAN = record.IBAN,
             TaxIdentificationNumber = record.TaxIdentificationNumber,
+            DefaultPaymentTermDays = record.DefaultPaymentTermDays,
         };
     }
 }

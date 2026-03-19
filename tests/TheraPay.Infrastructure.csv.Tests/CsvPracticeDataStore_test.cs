@@ -36,6 +36,7 @@ public class CsvPracticeDataStore_test
         Assert.Equal("+49 12345678901", practiceData.PhoneNumber);
         Assert.Equal("DE12 3456 7890 1234 5678 9012", practiceData.IBAN);
         Assert.Equal("123456789", practiceData.TaxIdentificationNumber);
+        Assert.Equal(21, practiceData.DefaultPaymentTermDays);
     }
 
     [Fact]
@@ -71,7 +72,8 @@ public class CsvPracticeDataStore_test
             Country = "Test Country",
             PhoneNumber = "+1 234 567 8901",
             IBAN = "DE12 3456 7890 1234 5678 9012",
-            TaxIdentificationNumber = "123456789"
+            TaxIdentificationNumber = "123456789",
+            DefaultPaymentTermDays = 30
         };
 
         // When
@@ -88,6 +90,7 @@ public class CsvPracticeDataStore_test
         Assert.Equal(practiceData.PhoneNumber, loadedPracticeData.PhoneNumber);
         Assert.Equal(practiceData.IBAN, loadedPracticeData.IBAN);
         Assert.Equal(practiceData.TaxIdentificationNumber, loadedPracticeData.TaxIdentificationNumber);
+        Assert.Equal(practiceData.DefaultPaymentTermDays, loadedPracticeData.DefaultPaymentTermDays);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));

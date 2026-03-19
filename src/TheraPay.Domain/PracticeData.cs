@@ -11,4 +11,5 @@ public class PracticeData
     public string PhoneNumber { get; set; } = "phone number placeholder";
     public string IBAN { get; set; } = "IBAN placeholder";
     public string TaxIdentificationNumber { get; set; } = "tax identification number placeholder";
+    public int DefaultPaymentTermDays { get; set; } = 14;
 }
