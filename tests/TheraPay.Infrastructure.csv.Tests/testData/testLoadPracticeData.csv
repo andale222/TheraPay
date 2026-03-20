@@ -1,2 +1,2 @@
-Name,FirstNamePractitioner,LastNamePractitioner,StreetAndNumber,CityAndPostalCode,Country,PhoneNumber,IBAN,TaxIdentificationNumber,DefaultPaymentTermDays
-Privatpraxis test,Mara,Mustermann,Teststraße 81,12345 Teststadt,Deutschland,+49 12345678901,DE12 3456 7890 1234 5678 9012,123456789,21
+Name,FirstNamePractitioner,LastNamePractitioner,Street,HouseNumber,PostalCode,City,Country,AddressAdditional,PhoneNumber,IBAN,BLZ,BankName,Subject,TaxIdentificationNumber,DefaultPaymentTermDays
+Privatpraxis test,Mara,Mustermann,Teststraße,81,12345,Teststadt,Deutschland,2. OG,+49 12345678901,DE12 3456 7890 1234 5678 9012,11112222,Testbank,Therapie Januar,123456789,21
