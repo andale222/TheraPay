@@ -50,7 +50,8 @@ public class Invoice_test
             BLZ = "77665544",
             BankName = "Musterbank",
             Subject = "Rechnung Therapie",
-            DefaultPaymentTermDays = 30
+            DefaultPaymentTermDays = 30,
+            InvoiceNumberState = InvoiceNumberState.Rehydrate(DateTime.Today.Year, 1200, 1)
         };
     }
 
@@ -116,6 +117,8 @@ public class Invoice_test
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
         Assert.Equal(DateTime.Today, invoice.IssueDate);
         Assert.Equal(DateTime.Today.AddDays(practiceData.DefaultPaymentTermDays), invoice.DueDate);
+        Assert.Equal($"{DateTime.Today:yyyyMM}-1201", invoice.InvoiceNumber);
+        Assert.Equal(2, practiceData.InvoiceNumberState.NextIssueNumber);
     }
 
     [Fact]
@@ -240,5 +243,47 @@ public class Invoice_test
         Assert.Equal(practiceData.BankName, invoice.PracticeDataRecord.PaymentDetails.BankName);
         Assert.Equal(practiceData.Subject, invoice.PracticeDataRecord.PaymentDetails.Subject);
         Assert.Equal(practiceData.DefaultPaymentTermDays, invoice.PracticeDataRecord.DefaultPaymentTermDays);
+    }
+
+    [Fact]
+    public void GivenTwoInvoicesFromSamePracticeData_IssueBoth_InvoiceNumbersAreUniqueAndSequential()
+    {
+        // GIVEN
+        var practiceData = CreatePracticeData();
+        var invoice1 = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
+        var invoice2 = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
+
+        // WHEN
+        invoice1.Issue();
+        invoice2.Issue();
+
+        // THEN
+        Assert.Equal($"{DateTime.Today:yyyyMM}-1201", invoice1.InvoiceNumber);
+        Assert.Equal($"{DateTime.Today:yyyyMM}-1202", invoice2.InvoiceNumber);
+        Assert.Equal(3, practiceData.InvoiceNumberState.NextIssueNumber);
+    }
+
+    [Fact]
+    public void GivenInvoiceNumberStateFromDifferentYear_IssueInvoice_StateResetsToCurrentYear()
+    {
+        // GIVEN
+        var practiceData = CreatePracticeData();
+        practiceData.InvoiceNumberState = InvoiceNumberState.Rehydrate(
+            DateTime.Today.Year - 1,
+            1500,
+            999);
+
+        var invoice = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
+
+        // WHEN
+        invoice.Issue();
+
+        // THEN
+        Assert.StartsWith($"{DateTime.Today:yyyyMM}-", invoice.InvoiceNumber);
+        Assert.Equal(DateTime.Today.Year, practiceData.InvoiceNumberState.Year);
+        Assert.Equal(2, practiceData.InvoiceNumberState.NextIssueNumber);
+
+        var serial = int.Parse(invoice.InvoiceNumber.Split('-')[1]);
+        Assert.InRange(serial, 1001, 9000);
     }
 }

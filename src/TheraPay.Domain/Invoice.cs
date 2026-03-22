@@ -5,12 +5,15 @@ public class Invoice
     public InvoicePatientData PatientData { get; private set; }
     public PracticeDataRecord PracticeDataRecord { get; private set; }
     private List<InvoiceAppointmentData> _appointmentDataList = new List<InvoiceAppointmentData>();
+    private readonly PracticeData _practiceData;
     public IReadOnlyList<InvoiceAppointmentData> AppointmentDataList => _appointmentDataList;
     public Guid Id { get; }
     public InvoiceStatus Status { get; private set; }
     public decimal TotalAmount {get; private set; }
     public DateTime IssueDate {get;private set;}
     public DateTime DueDate {get;private set;}
+    public string InvoiceNumber { get; private set; } = "";
+    public string AdditionalTest {get;private set;} = "";
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeData practiceData)
     {
@@ -25,6 +28,7 @@ public class Invoice
         {
             throw new ArgumentException("Data inconsistency detected: multiple patient Ids or matching appointment Ids detected.");
         }
+        _practiceData = practiceData;
         PatientData = patientData;
         PracticeDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
         _appointmentDataList = appointmentDataList.ToList();
@@ -57,8 +61,19 @@ public class Invoice
             return;
 
         IssueDate = DateTime.Today;
+        InvoiceNumber = GenerateInvoiceNumber(IssueDate);
         DueDate = IssueDate.AddDays(PracticeDataRecord.DefaultPaymentTermDays);
         Status = InvoiceStatus.Issued;
+    }
+
+    private string GenerateInvoiceNumber(DateTime issueDate)
+    {
+        // Locking the state object ensures unique numbers in one process.
+        lock (_practiceData.InvoiceNumberState)
+        {
+            var serial = _practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
+            return $"{issueDate:yyyyMM}-{serial:0000}";
+        }
     }
 }
 
