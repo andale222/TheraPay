@@ -1,3 +1,5 @@
+
+
 namespace TheraPay.Domain;
 
 public class Invoice
@@ -5,32 +7,30 @@ public class Invoice
     public InvoicePatientData PatientData { get; private set; }
     public PracticeDataRecord PracticeDataRecord { get; private set; }
     private List<InvoiceAppointmentData> _appointmentDataList = new List<InvoiceAppointmentData>();
-    private readonly PracticeData _practiceData;
     public IReadOnlyList<InvoiceAppointmentData> AppointmentDataList => _appointmentDataList;
     public Guid Id { get; }
     public InvoiceStatus Status { get; private set; }
-    public decimal TotalAmount {get; private set; }
-    public DateTime IssueDate {get;private set;}
-    public DateTime DueDate {get;private set;}
+    public decimal TotalAmount { get; private set; }
+    public DateTime IssueDate { get; private set; }
+    public DateTime DueDate { get; private set; }
     public string InvoiceNumber { get; private set; } = "";
-    public string AdditionalTest {get;private set;} = "";
+    public string AdditionalTest { get; private set; } = "";
 
-    public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeData practiceData)
+    public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
     {
         Id = Guid.NewGuid();
         if (patientData == null)
             throw new ArgumentNullException(nameof(patientData));
         if (appointmentDataList == null)
             throw new ArgumentNullException(nameof(appointmentDataList));
-        if (practiceData == null)
-            throw new ArgumentNullException(nameof(practiceData));
+        if (practiceDataRecord == null)
+            throw new ArgumentNullException(nameof(practiceDataRecord));
         if (!CheckDataValidity(patientData, appointmentDataList))
         {
             throw new ArgumentException("Data inconsistency detected: multiple patient Ids or matching appointment Ids detected.");
         }
-        _practiceData = practiceData;
         PatientData = patientData;
-        PracticeDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
+        PracticeDataRecord = practiceDataRecord;
         _appointmentDataList = appointmentDataList.ToList();
         Status = InvoiceStatus.Draft;
     }
@@ -55,26 +55,57 @@ public class Invoice
 
     private bool IsEditable() => Status == InvoiceStatus.Draft;
 
-    public void Issue()
+    private static bool InvoiceNumberFormatIsOk(string invoiceNumber, DateTime issueDate)
+    {
+        if (string.IsNullOrWhiteSpace(invoiceNumber) || invoiceNumber.Length != 11)
+            return false;
+
+        if (invoiceNumber[6] != '-')
+            return false;
+
+        if ($"{issueDate:yyyyMM}" != invoiceNumber.Substring(0,6))
+            return false;
+
+        
+        for (var i = 7; i < invoiceNumber.Length; i++)
+        {
+            if (!char.IsDigit(invoiceNumber[i]))
+                return false;
+        }
+
+        return true;
+    }
+    public bool Issue(PracticeDataRecord practiceData, string invoiceNumber)
     {
         if (!IsEditable())
-            return;
+            return false;
 
-        IssueDate = DateTime.Today;
-        InvoiceNumber = GenerateInvoiceNumber(IssueDate);
+        var draftIssueDate = DateTime.Today;
+        if (!InvoiceNumberFormatIsOk(invoiceNumber, draftIssueDate))
+            return false;
+        
+        if (practiceData==null)
+            return false;
+
+        IssueDate = draftIssueDate;
+        PracticeDataRecord = practiceData;
+        UpdateTotalAmount();
+        InvoiceNumber = invoiceNumber;
         DueDate = IssueDate.AddDays(PracticeDataRecord.DefaultPaymentTermDays);
         Status = InvoiceStatus.Issued;
+
+        return true;
     }
 
-    private string GenerateInvoiceNumber(DateTime issueDate)
-    {
-        // Locking the state object ensures unique numbers in one process.
-        lock (_practiceData.InvoiceNumberState)
-        {
-            var serial = _practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
-            return $"{issueDate:yyyyMM}-{serial:0000}";
-        }
-    }
+    // private string GenerateInvoiceNumber(DateTime issueDate)
+    // {
+    //     // Locking the state object ensures unique numbers in one process.
+    //     lock (_practiceData.InvoiceNumberState)
+    //     {
+    //         var serial = _practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
+    //         return $"{issueDate:yyyyMM}-{serial:0000}";
+    //     }
+    // }
 }
 
 
@@ -90,38 +121,4 @@ public sealed record InvoiceAppointmentData
     public DateTime Date { get; init; }
     public string AppointmentId { get; init; } = "";
     public string PatientId { get; init; } = "";
-}
-
-public sealed record PracticeDataRecord
-{
-    public string Name { get; init; } = "";
-    public Address Address { get; init; } = new Address("street", "1", "00000", "city");
-    public string TaxNumber { get; init; } = "";
-    public PaymentDetails PaymentDetails { get; init; } = new PaymentDetails("DE00");
-    public int DefaultPaymentTermDays { get; init; }
-
-    public static PracticeDataRecord FromPracticeData(PracticeData practiceData)
-    {
-        if (practiceData == null)
-            throw new ArgumentNullException(nameof(practiceData));
-
-        return new PracticeDataRecord
-        {
-            Name = practiceData.Name,
-            Address = new Address(
-                practiceData.Street,
-                practiceData.HouseNumber,
-                practiceData.PostalCode,
-                practiceData.City,
-                practiceData.Country,
-                practiceData.AddressAdditional),
-            TaxNumber = practiceData.TaxIdentificationNumber,
-            PaymentDetails = new PaymentDetails(
-                practiceData.IBAN,
-                practiceData.BLZ,
-                practiceData.BankName,
-                practiceData.Subject),
-            DefaultPaymentTermDays = practiceData.DefaultPaymentTermDays
-        };
-    }
 }

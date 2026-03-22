@@ -61,10 +61,10 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
         //     // WHEN
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
@@ -77,10 +77,10 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
         //     // WHEN
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
@@ -93,10 +93,10 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
         // WHEN
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         // THEN
         Assert.Equal(InvoiceStatus.Draft, invoice.Status);
@@ -108,17 +108,35 @@ public class Invoice_test
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
         var practiceData = CreatePracticeData();
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
-
+        var invoice = new Invoice(patientData, appointmentData, PracticeDataRecord.FromPracticeData(practiceData));
+        var invoiceNr = $"{DateTime.Today:yyyyMM}-1201";
         // WHEN
-        invoice.Issue();
+        var result = invoice.Issue(PracticeDataRecord.FromPracticeData(practiceData), invoiceNr);
 
         // THEN
+        Assert.True(result);
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
         Assert.Equal(DateTime.Today, invoice.IssueDate);
         Assert.Equal(DateTime.Today.AddDays(practiceData.DefaultPaymentTermDays), invoice.DueDate);
-        Assert.Equal($"{DateTime.Today:yyyyMM}-1201", invoice.InvoiceNumber);
-        Assert.Equal(2, practiceData.InvoiceNumberState.NextIssueNumber);
+        Assert.Equal(invoiceNr, invoice.InvoiceNumber);
+    }
+
+    [Fact]
+    public void GivenInvalidInvoiceNumberFormat_IssueInvoice_ReturnsFalseAndKeepsDraft()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
+
+        // WHEN
+        var result = invoice.Issue(practiceDataRecord, "202613-1201");
+
+        // THEN
+        Assert.False(result);
+        Assert.Equal(InvoiceStatus.Draft, invoice.Status);
+        Assert.Equal(string.Empty, invoice.InvoiceNumber);
     }
 
     [Fact]
@@ -127,10 +145,10 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
         //     // WHEN
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         //     // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
@@ -146,7 +164,7 @@ public class Invoice_test
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "OR5");
         var appointmentData = new List<InvoiceAppointmentData>()
@@ -160,14 +178,14 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceDataRecord));
     }
     [Fact]
     public void GivenInvoiceWithDifferingSecondPatientId_CreateInvoice_InvoiceRaisesException()
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "L5R");
         Appointment appointment2 = new Appointment(date, "OR5");
@@ -188,14 +206,14 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceDataRecord));
     }
     [Fact]
     public void GivenInvoiceData_CreateInvoiceWithTheSameAppointmentTwice_InvoiceRaisesException()
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "L5R");
         var appointmentData = new List<InvoiceAppointmentData>()
@@ -215,7 +233,7 @@ public class Invoice_test
         };
 
         // WHEN THEN
-        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceData));
+        Assert.Throws<ArgumentException>(() => new Invoice(patientData, appointmentData, practiceDataRecord));
     }
 
     [Fact]
@@ -224,66 +242,12 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
         // WHEN
-        var invoice = new Invoice(patientData, appointmentData, practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         // THEN
-        Assert.Equal(practiceData.Name, invoice.PracticeDataRecord.Name);
-        Assert.Equal(practiceData.Street, invoice.PracticeDataRecord.Address.Street);
-        Assert.Equal(practiceData.HouseNumber, invoice.PracticeDataRecord.Address.HouseNumber);
-        Assert.Equal(practiceData.PostalCode, invoice.PracticeDataRecord.Address.PostalCode);
-        Assert.Equal(practiceData.City, invoice.PracticeDataRecord.Address.City);
-        Assert.Equal(practiceData.Country, invoice.PracticeDataRecord.Address.Country);
-        Assert.Equal(practiceData.AddressAdditional, invoice.PracticeDataRecord.Address.Additional);
-        Assert.Equal(practiceData.TaxIdentificationNumber, invoice.PracticeDataRecord.TaxNumber);
-        Assert.Equal(practiceData.IBAN, invoice.PracticeDataRecord.PaymentDetails.IBAN);
-        Assert.Equal(practiceData.BLZ, invoice.PracticeDataRecord.PaymentDetails.BLZ);
-        Assert.Equal(practiceData.BankName, invoice.PracticeDataRecord.PaymentDetails.BankName);
-        Assert.Equal(practiceData.Subject, invoice.PracticeDataRecord.PaymentDetails.Subject);
-        Assert.Equal(practiceData.DefaultPaymentTermDays, invoice.PracticeDataRecord.DefaultPaymentTermDays);
-    }
-
-    [Fact]
-    public void GivenTwoInvoicesFromSamePracticeData_IssueBoth_InvoiceNumbersAreUniqueAndSequential()
-    {
-        // GIVEN
-        var practiceData = CreatePracticeData();
-        var invoice1 = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
-        var invoice2 = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
-
-        // WHEN
-        invoice1.Issue();
-        invoice2.Issue();
-
-        // THEN
-        Assert.Equal($"{DateTime.Today:yyyyMM}-1201", invoice1.InvoiceNumber);
-        Assert.Equal($"{DateTime.Today:yyyyMM}-1202", invoice2.InvoiceNumber);
-        Assert.Equal(3, practiceData.InvoiceNumberState.NextIssueNumber);
-    }
-
-    [Fact]
-    public void GivenInvoiceNumberStateFromDifferentYear_IssueInvoice_StateResetsToCurrentYear()
-    {
-        // GIVEN
-        var practiceData = CreatePracticeData();
-        practiceData.InvoiceNumberState = InvoiceNumberState.Rehydrate(
-            DateTime.Today.Year - 1,
-            1500,
-            999);
-
-        var invoice = new Invoice(CreatePatientData(), CreateAppointmenttDataListWithTwoEntries(), practiceData);
-
-        // WHEN
-        invoice.Issue();
-
-        // THEN
-        Assert.StartsWith($"{DateTime.Today:yyyyMM}-", invoice.InvoiceNumber);
-        Assert.Equal(DateTime.Today.Year, practiceData.InvoiceNumberState.Year);
-        Assert.Equal(2, practiceData.InvoiceNumberState.NextIssueNumber);
-
-        var serial = int.Parse(invoice.InvoiceNumber.Split('-')[1]);
-        Assert.InRange(serial, 1001, 9000);
+        Assert.Equal(practiceDataRecord, invoice.PracticeDataRecord);
     }
 }
