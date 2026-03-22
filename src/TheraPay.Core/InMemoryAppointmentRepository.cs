@@ -2,32 +2,14 @@ namespace TheraPay.Core;
 
 using TheraPay.Domain;
 
-public class InMemoryAppointmentRepository : IAppointmentRepository
+public class InMemoryAppointmentRepository : InMemoryRepositoryBase<Appointment>, IAppointmentRepository
 {
-
-    private readonly List<Appointment> _appointments = new List<Appointment>();
-
-    public void Add(Appointment appointment)
+    protected override Result EntityExists(Appointment entity)
     {
-        _appointments.Add(appointment);
-    }
+        bool exists = Items.Any(p => p.Id == entity.Id);
+        if (exists)
+            return new Result(exists, $"Appointment with ID {entity.Id} already exists.");
 
-    public int Count()
-    {
-        return _appointments.Count;
-    }
-
-    public Appointment GetAppointment(int index)
-    {
-        return _appointments[index];
-    }
-
-    public IReadOnlyList<Appointment> GetAll()
-    {
-        return _appointments;
-    }
-    public void Clear()
-    {
-        _appointments.Clear();
+        return new Result(false, $"Appointment with ID {entity.Id} not found.");
     }
 }

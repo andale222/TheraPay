@@ -31,7 +31,7 @@ public class InMemoryAppointmentRepository_test
 
         // THEN
         Assert.Equal(1, repository.Count());
-        Assert.Equal(appointment, repository.GetAppointment(0));
+        Assert.Equal(appointment, repository.GetByIndex(0));
     }
 
     [Fact]
@@ -48,8 +48,8 @@ public class InMemoryAppointmentRepository_test
 
         // THEN
         Assert.Equal(2, repository.Count());
-        Assert.Equal(appointment1, repository.GetAppointment(0));
-        Assert.Equal(appointment2, repository.GetAppointment(1));
+        Assert.Equal(appointment1, repository.GetByIndex(0));
+        Assert.Equal(appointment2, repository.GetByIndex(1));
     }
 
     [Fact]

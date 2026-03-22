@@ -2,11 +2,6 @@ using TheraPay.Domain;
 
 namespace TheraPay.Core;
 
-public interface IAppointmentRepository
+public interface IAppointmentRepository : IRepository<Appointment>
 {
-    void Add(Appointment appointment);
-    int Count();
-    Appointment GetAppointment(int index);
-    IReadOnlyList<Appointment> GetAll();
-    void Clear();
 }
