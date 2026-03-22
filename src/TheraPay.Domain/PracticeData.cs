@@ -18,4 +18,5 @@ public class PracticeData
     public string? Subject { get; set; }
     public string TaxIdentificationNumber { get; set; } = "tax identification number placeholder";
     public int DefaultPaymentTermDays { get; set; } = 14;
+    public InvoiceNumberState InvoiceNumberState { get; set; } = new InvoiceNumberState();
 }

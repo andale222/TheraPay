@@ -58,6 +58,9 @@ public class CsvPracticeDataStore : IPracticeDataStore
             Subject = data.Subject,
             TaxIdentificationNumber = data.TaxIdentificationNumber,
             DefaultPaymentTermDays = data.DefaultPaymentTermDays,
+            InvoiceStateYear = data.InvoiceNumberState.Year,
+            InvoiceStateRandomStart = data.InvoiceNumberState.RandomStart,
+            InvoiceStateNextIssueNumber = data.InvoiceNumberState.NextIssueNumber,
         };
     }
     private static PracticeData ToDomain(CsvPracticeDataRecord record)
@@ -80,6 +83,10 @@ public class CsvPracticeDataStore : IPracticeDataStore
             Subject = record.Subject,
             TaxIdentificationNumber = record.TaxIdentificationNumber,
             DefaultPaymentTermDays = record.DefaultPaymentTermDays,
+            InvoiceNumberState = InvoiceNumberState.Rehydrate(
+                record.InvoiceStateYear,
+                record.InvoiceStateRandomStart,
+                record.InvoiceStateNextIssueNumber),
         };
     }
 }

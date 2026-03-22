@@ -17,4 +17,7 @@ public sealed class CsvPracticeDataRecord
     public string? Subject { get; set; }
     public string TaxIdentificationNumber { get; set; } = string.Empty;
     public int DefaultPaymentTermDays { get; set; }
+    public int InvoiceStateYear { get; set; }
+    public int InvoiceStateRandomStart { get; set; }
+    public int InvoiceStateNextIssueNumber { get; set; }
 }

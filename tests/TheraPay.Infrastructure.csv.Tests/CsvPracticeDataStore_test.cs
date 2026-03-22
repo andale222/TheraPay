@@ -43,6 +43,9 @@ public class CsvPracticeDataStore_test
         Assert.Equal("Therapie Januar", practiceData.Subject);
         Assert.Equal("123456789", practiceData.TaxIdentificationNumber);
         Assert.Equal(21, practiceData.DefaultPaymentTermDays);
+        Assert.Equal(2026, practiceData.InvoiceNumberState.Year);
+        Assert.Equal(1321, practiceData.InvoiceNumberState.RandomStart);
+        Assert.Equal(12, practiceData.InvoiceNumberState.NextIssueNumber);
     }
 
     [Fact]
@@ -85,7 +88,8 @@ public class CsvPracticeDataStore_test
             BankName = "Example Bank",
             Subject = "Invoice Payment",
             TaxIdentificationNumber = "123456789",
-            DefaultPaymentTermDays = 30
+            DefaultPaymentTermDays = 30,
+            InvoiceNumberState = InvoiceNumberState.Rehydrate(2027, 1500, 23)
         };
 
         // When
@@ -109,6 +113,9 @@ public class CsvPracticeDataStore_test
         Assert.Equal(practiceData.Subject, loadedPracticeData.Subject);
         Assert.Equal(practiceData.TaxIdentificationNumber, loadedPracticeData.TaxIdentificationNumber);
         Assert.Equal(practiceData.DefaultPaymentTermDays, loadedPracticeData.DefaultPaymentTermDays);
+        Assert.Equal(practiceData.InvoiceNumberState.Year, loadedPracticeData.InvoiceNumberState.Year);
+        Assert.Equal(practiceData.InvoiceNumberState.RandomStart, loadedPracticeData.InvoiceNumberState.RandomStart);
+        Assert.Equal(practiceData.InvoiceNumberState.NextIssueNumber, loadedPracticeData.InvoiceNumberState.NextIssueNumber);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));
