@@ -14,7 +14,7 @@ public class Invoice
     public DateTime IssueDate { get; private set; }
     public DateTime DueDate { get; private set; }
     public string InvoiceNumber { get; private set; } = "";
-    public string AdditionalTest { get; private set; } = "";
+    public string AdditionalText { get; private set; } = "";
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
     {
