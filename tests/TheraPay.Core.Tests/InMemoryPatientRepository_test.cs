@@ -46,7 +46,7 @@ public class PatientOperations_test
         patients.Add(newPatient);
 
         // THEN
-        Assert.Equal(patients.GetPatient(0), newPatient);
+        Assert.Equal(patients.GetByIndex(0), newPatient);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class PatientOperations_test
         patients.Add(newPatient);
 
         // THEN
-        Assert.Equal(patients.GetPatient(1), newPatient);
+        Assert.Equal(patients.GetByIndex(1), newPatient);
     }
 
     [Fact]
