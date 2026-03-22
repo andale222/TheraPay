@@ -22,13 +22,15 @@ public class Invoice_test
             {
                 AppointmentId = appointment1.Id.ToString("D"),
                 Date = appointment1.Date,
-                PatientId = appointment1.PatientID
+                PatientId = appointment1.PatientID,
+                TotalAmount = appointment1.TotalAmount
             },
             new InvoiceAppointmentData()
             {
                 AppointmentId = appointment2.Id.ToString("D"),
                 Date = appointment2.Date,
-                PatientId = appointment1.PatientID
+                PatientId = appointment2.PatientID,
+                TotalAmount = appointment2.TotalAmount
             },
         };
 
@@ -63,10 +65,10 @@ public class Invoice_test
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
         var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
-        //     // WHEN
+        // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
-        //     // THEN
+        // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(patientData.Name, invoice.PatientData.Name);
         Assert.Equal(patientData.Id, invoice.PatientData.Id);
@@ -79,13 +81,27 @@ public class Invoice_test
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
         var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
 
-        //     // WHEN
+        // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
-        //     // THEN
+        // THEN
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(appointmentData[0].AppointmentId, invoice.AppointmentDataList[0].AppointmentId);
         Assert.Equal(appointmentData[0].Date, invoice.AppointmentDataList[0].Date);
+    }
+    [Fact]
+    public void GivenInvoicesAppointmentData_CreateInvoice_InvoiceHasCorrectTotalAmount()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+
+        // WHEN
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
+
+        // THEN
+        Assert.Equal(2.468m, invoice.TotalAmount); // TODO: add actual correct amount!
     }
     [Fact]
     public void GivenInvoiceData_CreateInvoice_InvoiceIsDraft()

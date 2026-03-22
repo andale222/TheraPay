@@ -33,6 +33,7 @@ public class Invoice
         PracticeDataRecord = practiceDataRecord;
         _appointmentDataList = appointmentDataList.ToList();
         Status = InvoiceStatus.Draft;
+        UpdateTotalAmount();
     }
 
     private bool CheckDataValidity(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)
@@ -50,7 +51,11 @@ public class Invoice
 
     private void UpdateTotalAmount()
     {
-        // TODO: update the total amount computation as soon as it is implemented in the appointments...
+        TotalAmount = 0m;
+        foreach (var appointment in AppointmentDataList)
+        {
+            TotalAmount += appointment.TotalAmount;
+        }
     }
 
     private bool IsEditable() => Status == InvoiceStatus.Draft;
@@ -121,4 +126,5 @@ public sealed record InvoiceAppointmentData
     public DateTime Date { get; init; }
     public string AppointmentId { get; init; } = "";
     public string PatientId { get; init; } = "";
+    public decimal TotalAmount {get; init;} = 0m;
 }

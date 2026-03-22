@@ -7,6 +7,7 @@ public class Appointment
     public DateTime Date { get; private set; }
     public string PatientID { get; private set; }
     public int DurationInMinutes { get; private set; }
+    public decimal TotalAmount {get; private set; }
     public DateTime End => Date.AddMinutes(DurationInMinutes);
 
     public Appointment(DateTime date, string patientID)
@@ -25,6 +26,7 @@ public class Appointment
         PatientID = patientID;
         Id = id;
         SetDuration(durationInMinutes);
+        TotalAmount = 1.234m;
     }
 
     public static Appointment Rehydrate(Guid id, DateTime date, string patientID, int durationInMinutes)
