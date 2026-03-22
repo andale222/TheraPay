@@ -80,17 +80,17 @@ public class Invoice
 
         return true;
     }
-    public bool Issue(PracticeDataRecord practiceData, string invoiceNumber)
+    public Result Issue(PracticeDataRecord practiceData, string invoiceNumber)
     {
         if (!IsEditable())
-            return false;
+            return new Result(false,"Issue is not editable anymore.");
 
         var draftIssueDate = DateTime.Today;
         if (!InvoiceNumberFormatIsOk(invoiceNumber, draftIssueDate))
-            return false;
+            return new Result(false,"Error in invoice number or invoice number format.");
         
         if (practiceData==null)
-            return false;
+            return new Result(false,"Given practice Data Record is empty.");
 
         IssueDate = draftIssueDate;
         PracticeDataRecord = practiceData;
@@ -99,7 +99,7 @@ public class Invoice
         DueDate = IssueDate.AddDays(PracticeDataRecord.DefaultPaymentTermDays);
         Status = InvoiceStatus.Issued;
 
-        return true;
+        return new Result(true);
     }
 
     // private string GenerateInvoiceNumber(DateTime issueDate)

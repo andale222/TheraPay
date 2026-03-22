@@ -130,7 +130,7 @@ public class Invoice_test
         var result = invoice.Issue(PracticeDataRecord.FromPracticeData(practiceData), invoiceNr);
 
         // THEN
-        Assert.True(result);
+        Assert.True(result.Ok);
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
         Assert.Equal(DateTime.Today, invoice.IssueDate);
         Assert.Equal(DateTime.Today.AddDays(practiceData.DefaultPaymentTermDays), invoice.DueDate);
@@ -150,7 +150,8 @@ public class Invoice_test
         var result = invoice.Issue(practiceDataRecord, "202613-1201");
 
         // THEN
-        Assert.False(result);
+        Assert.False(result.Ok);
+        Assert.Equal("Error in invoice number or invoice number format.",result.Error);
         Assert.Equal(InvoiceStatus.Draft, invoice.Status);
         Assert.Equal(string.Empty, invoice.InvoiceNumber);
     }
