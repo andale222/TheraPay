@@ -19,6 +19,7 @@ public class Appointment_test
         Assert.Equal(date, appointment.Date);
         Assert.Equal(patient.ID, appointment.PatientID);
         Assert.NotEqual(Guid.Empty, appointment.Id);
+        Assert.Equal(AppointmentStatus.Open, appointment.Status);
     }
 
     [Fact]
@@ -31,13 +32,14 @@ public class Appointment_test
         const int duration = 60;
 
         // WHEN
-        var appointment = Appointment.Rehydrate(id, date, patientId, duration);
+        var appointment = Appointment.Rehydrate(id, date, patientId, duration, AppointmentStatus.Billed);
 
         // THEN
         Assert.Equal(id, appointment.Id);
         Assert.Equal(date, appointment.Date);
         Assert.Equal(patientId, appointment.PatientID);
         Assert.Equal(duration, appointment.DurationInMinutes);
+        Assert.Equal(AppointmentStatus.Billed, appointment.Status);
     }
 
     [Fact]
@@ -45,7 +47,7 @@ public class Appointment_test
     {
         // WHEN THEN
         Assert.Throws<ArgumentException>(() =>
-            Appointment.Rehydrate(Guid.Empty, new DateTime(2026, 1, 1, 14, 0, 0), "patientID", 60));
+            Appointment.Rehydrate(Guid.Empty, new DateTime(2026, 1, 1, 14, 0, 0), "patientID", 60, AppointmentStatus.Open));
     }
     [Fact]
     public void GivenAppointment_AddDuration_DurationHasCorrectValue()
@@ -184,5 +186,16 @@ public class Appointment_test
         // THEN
         Assert.False(overlaps);
     }
+[Fact]
+    public void GivenAppointment_SetBilled_AppointmentStatusIsBilled()
+    {
+        // GIVEN
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "patientID");
 
+        // WHEN
+        appointment.SetStatusToBilled( );
+
+        // THEN
+        Assert.Equal(AppointmentStatus.Billed, appointment.Status);
+    }
 }

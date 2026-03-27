@@ -1,4 +1,6 @@
-﻿namespace TheraPay.Infrastructure.csv;
+﻿using TheraPay.Domain;
+
+namespace TheraPay.Infrastructure.csv;
 
 public sealed class AppointmentCsvRecord
 {
@@ -7,4 +9,5 @@ public sealed class AppointmentCsvRecord
     public string Duration { get; set; } = "";
     public string PatientId { get; set; } = "";
     public bool IsDeleted { get; set; }
+    public AppointmentStatus Status {get; set; }
 }
