@@ -69,4 +69,23 @@ public class InMemoryAppointmentRepository_test
         Assert.Equal(2, allAppointments.Count());
     }
 
+    [Fact]
+    public void GivenInMemoryAppointmentRepository_GetByIdAndIndex_ReturnsMatchingAppointment()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        Appointment appointment1 = TestData.Appointment1();
+        Appointment appointment2 = TestData.Appointment2();
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+
+        // WHEN
+        var byId = repository.GetById(appointment2.Id);
+        var index = repository.GetIndexById(appointment2.Id);
+
+        // THEN
+        Assert.Equal(appointment2, byId);
+        Assert.Equal(1, index);
+    }
+
 }

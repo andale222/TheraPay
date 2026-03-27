@@ -4,8 +4,8 @@ namespace TheraPay.Core;
 
 public class AppointmentService
 {
-    private readonly InMemoryAppointmentRepository _repository;
-    public AppointmentService(InMemoryAppointmentRepository repository)
+    private readonly IAppointmentRepository _repository;
+    public AppointmentService(IAppointmentRepository repository)
     {
         _repository = repository;
     }

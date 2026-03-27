@@ -4,6 +4,8 @@ using TheraPay.Domain;
 
 public class InMemoryPatientRepository : InMemoryRepositoryBase<Patient>, IPatientRepository
 {
+    protected override object GetEntityId(Patient entity) => entity.ID;
+
     protected override Result EntityExists(Patient entity)
     {
         bool exists = Items.Any(p => p.ID == entity.ID);

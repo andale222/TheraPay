@@ -4,7 +4,7 @@ public class Invoice_test
 {
     public static InvoicePatientData CreatePatientData()
     {
-        return InvoicePatientData.FromPatientData(TestData.Patient1());;
+        return InvoicePatientData.FromPatientData(TestData.Patient1());
     }
     public static List<InvoiceAppointmentData> CreateAppointmenttDataListWithTwoEntries()
     {

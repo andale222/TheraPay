@@ -69,6 +69,25 @@ public class InMemoryInvoiceRepository_test
         Assert.Equal(2, allAppointments.Count());
     }
 
+    [Fact]
+    public void GivenInMemoryInvoiceRepository_GetByIdAndIndex_ReturnsMatchingInvoice()
+    {
+        // GIVEN
+        InMemoryInvoiceRepository repository = new InMemoryInvoiceRepository();
+        Invoice invoice1 = TestData.CreateInvoice();
+        Invoice invoice2 = TestData.CreateInvoice();
+        repository.Add(invoice1);
+        repository.Add(invoice2);
+
+        // WHEN
+        var byId = repository.GetById(invoice2.Id);
+        var index = repository.GetIndexById(invoice2.Id);
+
+        // THEN
+        Assert.Equal(invoice2, byId);
+        Assert.Equal(1, index);
+    }
+
     
     [Fact]
     public void GivenEmptyInMemoryInvoiceRepository_AddInvoiceTwice_CountIsOneReturnsBadResult()

@@ -98,4 +98,37 @@ public class PatientOperations_test
         Assert.Equal(TestData.Patient2( ).ID, allPatients[1].ID);
     }
 
+    [Fact]
+    public void GivenPatientRepositoryWithTwoPatients_GetByIdAndIndex_ReturnsCorrectPatient()
+    {
+        // GIVEN
+        InMemoryPatientRepository patients = new InMemoryPatientRepository();
+        var patient1 = TestData.Patient1();
+        var patient2 = TestData.Patient2();
+        patients.Add(patient1);
+        patients.Add(patient2);
+
+        // WHEN
+        var byId = patients.GetById(patient2.ID);
+        var index = patients.GetIndexById(patient2.ID);
+
+        // THEN
+        Assert.Equal(patient2, byId);
+        Assert.Equal(1, index);
+    }
+
+    [Fact]
+    public void EmptyPatientRepository_GetByIdUnknown_ReturnsMinusOneAndThrows()
+    {
+        // GIVEN
+        InMemoryPatientRepository patients = new InMemoryPatientRepository();
+
+        // WHEN
+        var index = patients.GetIndexById("unknown");
+
+        // THEN
+        Assert.Equal(-1, index);
+        Assert.Throws<KeyNotFoundException>(() => patients.GetById("unknown"));
+    }
+
 }

@@ -22,8 +22,10 @@ public static class Bootstrapper
         // Repositories (State) -> meist Singleton
         services.AddSingleton<InMemoryPatientRepository>();
         services.AddSingleton<InMemoryAppointmentRepository>();
+        services.AddSingleton<InMemoryInvoiceRepository>();
         services.AddSingleton<IPatientRepository>(sp => sp.GetRequiredService<InMemoryPatientRepository>());
         services.AddSingleton<IAppointmentRepository>(sp => sp.GetRequiredService<InMemoryAppointmentRepository>());
+        services.AddSingleton<IInvoiceRepository>(sp => sp.GetRequiredService<InMemoryInvoiceRepository>());
 
         // Project state + persistence orchestration
         services.AddSingleton<ProjectSession>();
