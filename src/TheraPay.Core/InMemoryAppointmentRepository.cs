@@ -14,4 +14,24 @@ public class InMemoryAppointmentRepository : InMemoryRepositoryBase<Appointment>
 
         return new Result(false, $"Appointment with ID {entity.Id} not found.");
     }
+    private static List<Appointment> MyGetAppointmentsOfPatient(string patientId, List<Appointment> list)
+    {
+        var appointmentsOfPatient = list.FindAll(x => x.PatientID == patientId);
+
+        return appointmentsOfPatient;
+    }
+    private static List<Appointment> MyGetNonBilledAppointments(List<Appointment> list)
+    {
+        return list.FindAll(x => x.Status == AppointmentStatus.Open);
+    }
+    public IReadOnlyList<Appointment> GetAppointmentsOfPatient(string patientId)
+    {
+        return MyGetAppointmentsOfPatient(patientId, Items);
+    }
+    public IReadOnlyList<Appointment> GetNonBilledAppointmentsOfPatient(string patientId)
+    {
+        var appointmentsOfPatient = MyGetAppointmentsOfPatient(patientId, Items);
+        return MyGetNonBilledAppointments(appointmentsOfPatient);
+    }
+
 }

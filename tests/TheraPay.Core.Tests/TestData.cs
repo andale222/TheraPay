@@ -57,6 +57,19 @@ public static class TestData
         repository.Add(Patient2());
         return repository;
     }
+    public static InMemoryAppointmentRepository getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments()
+    {
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        Appointment appointment1 = Appointment1();
+        appointment1.SetDuration(60);
+        Appointment appointment2 = Appointment2();
+        appointment2.SetStatusToBilled( );
+        appointment2.SetDuration(30);
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+
+        return repository;
+    }
     public static PatientService getPatientServiceWithInMemoryPatientRepositoryWithTwoPatients()
     {
 
@@ -69,13 +82,7 @@ public static class TestData
 
     public static AppointmentService getAppointmentServiceWithInMemoryAppointmentRepositoryWithTwoAppointments()
     {
-        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
-        Appointment appointment1 = Appointment1();
-        appointment1.SetDuration(60);
-        Appointment appointment2 = Appointment2();
-        appointment2.SetDuration(30);
-        repository.Add(appointment1);
-        repository.Add(appointment2);
+        InMemoryAppointmentRepository repository = getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
         return new AppointmentService(repository);
     }
 

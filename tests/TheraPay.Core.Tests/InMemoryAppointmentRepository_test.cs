@@ -88,4 +88,36 @@ public class InMemoryAppointmentRepository_test
         Assert.Equal(1, index);
     }
 
+
+    [Fact]
+    public void GivenInMemoryAppointmentRepository_GetAppointmentsOfPatient_ReturnsMatchingAppointments()
+    {
+        // GIVEN
+        var repository = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        repository.Add(TestData.Appointment1_2());
+
+        // WHEN
+        var appointmentsOfNonExistingPatient = repository.GetAppointmentsOfPatient("abs");
+        var appointmentsOfPatient1 = repository.GetAppointmentsOfPatient(repository.GetAll()[0].PatientID);
+        var appointmentsOfPatient2 = repository.GetAppointmentsOfPatient(repository.GetAll()[1].PatientID);
+
+        // THEN
+        Assert.Empty(appointmentsOfNonExistingPatient);
+        Assert.Equal(2, appointmentsOfPatient1.Count);
+        Assert.Single(appointmentsOfPatient2);
+    }
+    [Fact]
+    public void GivenInMemoryAppointmentRepositoryWithBilledAppointment_GetNonBilledAppointmentsOfPatient_ReturnsMatchingAppointments()
+    {
+        // GIVEN
+        var repository = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        repository.Add(TestData.Appointment1_2());
+        repository.GetAll()[0].SetStatusToBilled();
+
+        // WHEN
+        var appointmentsOfPatient1 = repository.GetNonBilledAppointmentsOfPatient(repository.GetAll()[0].PatientID);
+
+        // THEN
+        Assert.Single(appointmentsOfPatient1);
+    }
 }
