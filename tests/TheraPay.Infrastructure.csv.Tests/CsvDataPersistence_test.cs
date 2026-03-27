@@ -37,7 +37,10 @@ public class CsvDataPersistence_test
         Assert.Equal(loadedAppointments.Count(), appointments.Count);
         foreach (var loadedAppointment in loadedAppointments)
         {
-            Assert.Contains(appointments, a => a.Date == loadedAppointment.Date && a.PatientID == loadedAppointment.PatientID);
+            Assert.Contains(appointments, a =>
+                a.Id == loadedAppointment.Id &&
+                a.Date == loadedAppointment.Date &&
+                a.PatientID == loadedAppointment.PatientID);
         }
     }
 
@@ -76,8 +79,8 @@ public class CsvDataPersistence_test
         var loadedAppointments = appointmentStore.LoadAll();
         Assert.NotEmpty(loadedAppointments);
         Assert.Equal(2, loadedAppointments.Count());
-        Assert.Contains(loadedAppointments, a => a.Date == appointment1.Date && a.PatientID == appointment1.PatientID);
-        Assert.Contains(loadedAppointments, a => a.Date == appointment2.Date && a.PatientID == appointment2.PatientID);
+        Assert.Contains(loadedAppointments, a => a.Id == appointment1.Id && a.Date == appointment1.Date && a.PatientID == appointment1.PatientID);
+        Assert.Contains(loadedAppointments, a => a.Id == appointment2.Id && a.Date == appointment2.Date && a.PatientID == appointment2.PatientID);
         File.Delete(dataDirAppointments);
         Assert.False(File.Exists(dataDirAppointments));
     }   

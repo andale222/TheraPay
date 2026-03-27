@@ -44,9 +44,11 @@ public class CsvAppointmentStore_test
         Assert.Equal(new DateTime(2026,1,1,12,5,0), appointments[0].Date.ToUniversalTime());
         Assert.Equal(25, appointments[0].DurationInMinutes);
         Assert.Equal("Pat1", appointments[0].PatientID);
+        Assert.Equal(Guid.Parse("11111111-1111-1111-1111-111111111111"), appointments[0].Id);
         Assert.Equal(new DateTime(2026,2,28,9,0,0), appointments[1].Date.ToUniversalTime());
         Assert.Equal(50, appointments[1].DurationInMinutes);
         Assert.Equal("Pat2", appointments[1].PatientID);
+        Assert.Equal(Guid.Parse("22222222-2222-2222-2222-222222222222"), appointments[1].Id);
     }
 
     [Fact]
@@ -88,12 +90,15 @@ public class CsvAppointmentStore_test
         Assert.Equal(appointments[0].Date, loadedAppointments[0].Date);
         Assert.Equal(appointments[0].DurationInMinutes, loadedAppointments[0].DurationInMinutes);
         Assert.Equal(appointments[0].PatientID, loadedAppointments[0].PatientID);
+        Assert.Equal(appointments[0].Id, loadedAppointments[0].Id);
         Assert.Equal(appointments[1].Date, loadedAppointments[1].Date);
         Assert.Equal(appointments[1].DurationInMinutes, loadedAppointments[1].DurationInMinutes);
         Assert.Equal(appointments[1].PatientID, loadedAppointments[1].PatientID);
+        Assert.Equal(appointments[1].Id, loadedAppointments[1].Id);
         Assert.Equal(appointments[2].Date, loadedAppointments[2].Date);
         Assert.Equal(appointments[2].DurationInMinutes, loadedAppointments[2].DurationInMinutes);
         Assert.Equal(appointments[2].PatientID, loadedAppointments[2].PatientID);
+        Assert.Equal(appointments[2].Id, loadedAppointments[2].Id);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));
