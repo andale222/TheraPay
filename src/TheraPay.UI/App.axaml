@@ -24,6 +24,10 @@
       <views:PatientsView/>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:InvoiceCreationViewModel}">
+       <views:InvoiceCreationView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:AppointmentEditViewModel}">
       <views:AppointmentEditView/>
     </DataTemplate>

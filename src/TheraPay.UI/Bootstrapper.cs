@@ -42,6 +42,7 @@ public static class Bootstrapper
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<ExitConfirmViewModel>();
+        services.AddTransient<InvoiceCreationViewModel>();
         services.AddTransient<MainWindowViewModel>();
         // Panels
         services.AddTransient<PatientPanelViewModel>();

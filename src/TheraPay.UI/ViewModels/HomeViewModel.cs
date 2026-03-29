@@ -17,6 +17,7 @@ public sealed class HomeViewModel : ViewModelBase
     public object? CurrentViewModel => _store.CurrentViewModel;
     public ICommand NavigatePatientsCommand  { get; }
     public ICommand NavigateEditAppointmentCommand  { get; }
+    public ICommand NavigateInvoiceCreationCommand  { get; }
     public ICommand SaveDataCommand  { get; }
 
     private string _saveStatusMessage = "";
@@ -46,6 +47,7 @@ public sealed class HomeViewModel : ViewModelBase
 
         NavigatePatientsCommand  = new RelayCommand(() => nav.NavigateTo<PatientsViewModel>());
         NavigateEditAppointmentCommand  = new RelayCommand(() => nav.NavigateTo<AppointmentEditViewModel>());
+        NavigateInvoiceCreationCommand  = new RelayCommand(() => nav.NavigateTo<InvoiceCreationViewModel>());
         SaveDataCommand  = new RelayCommand(Save);
     }
 
