@@ -119,36 +119,31 @@ public class BillingService_test
 
         // THEN
         Assert.True(result.Ok);
-        Assert.Single(service.ViewInvoices());
+        Assert.Single(service.ViewInvoices()[0].AppointmentDataList);
         // check that the error is caught in the service!
         Assert.Equal("1 billed appointments were removed. ",result.Error);
     }
 
-    // [Fact]
-    // public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndAppointmentsWithMismatchingPatientId_InvoiceIsNotAddedToInvoiceRepository()
-    // {
-    //     // GIVEN
-    //     IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
-    //     IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
-    //     IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+    [Fact]
+    public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndTwoAppointmentsOfSameId_InvoiceIsAddedToInvoiceRepositoryAndTheDoubleEntryIgnored()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
 
-    //     var appointment1_2 = TestData.Appointment1_2();
-    //     appointmentRepo.Add(appointment1_2);
+        BillingService service = new(invoiceRepo, appointmentRepo, patientRepo);
+        // Patient1 has two appointments, one is already billed. Patient2 has one appointment.
 
-    //     BillingService service = new(invoiceRepo, appointmentRepo, patientRepo);
-    //     // Patient1 has two appointments, one is already billed. Patient2 has one appointment.
+        // WHEN
+        var patientId = TestData.Patient1().ID;
+        var aptmtId = appointmentRepo.GetByIndex(0).Id;
+        List<Guid> appointmentIds = [aptmtId,aptmtId];
+        var result = service.AddInvoiceForPatientAndAppointments(patientId, appointmentIds, TestData.PracticeData1());
 
-    //     // WHEN
-    //     var patientId = TestData.Patient2().ID;
-    //     var aptmtId = appointmentRepo.GetByIndex(0).Id;
-    //     List<Guid> appointmentIds = [aptmtId];
-    //     var result = service.AddInvoiceForPatientAndAppointments(patientId, appointmentIds, TestData.PracticeData1());
-
-    //     Console.WriteLine("-------------------");
-    //     Console.WriteLine(result.Error);
-    //     Console.WriteLine("-------------------");
-    //     // THEN
-    //     Assert.False(result.Ok);
-    //     Assert.Equal("", result.Error);
-    // }
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal("1 double appointment entry was removed.", result.Error);
+        Assert.Single(service.ViewInvoices()[0].AppointmentDataList);
+    }
 }

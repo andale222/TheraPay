@@ -68,9 +68,13 @@ public class BillingService
 
             var patientData = InvoicePatientData.FromPatientData(_patientRepository.GetById(patientId));
 
-            var appointmentList = GetExistingAppointmentsFromAppointmentIds(appointmentIds);
-            if (appointmentList.Count < appointmentIds.Count)
-                info += "" + (appointmentIds.Count - appointmentList.Count) + " appointment ids were not found. ";
+            var distinctAppointmentIds = appointmentIds.Distinct().ToList();
+            if (appointmentIds.Count != distinctAppointmentIds.Count)
+                info += ""+ (appointmentIds.Count-distinctAppointmentIds.Count)+" double appointment entry was removed.";
+
+            var appointmentList = GetExistingAppointmentsFromAppointmentIds(distinctAppointmentIds);
+            if (appointmentList.Count < distinctAppointmentIds.Count)
+                info += "" + (distinctAppointmentIds.Count - appointmentList.Count) + " appointment ids were not found. ";
 
             var filterResult = FilterOutBilledAppointments(appointmentList);
             info += filterResult.Error;
