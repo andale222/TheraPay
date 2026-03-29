@@ -4,8 +4,8 @@ namespace TheraPay.Core;
 
 public class AppointmentService
 {
-    private readonly InMemoryAppointmentRepository _repository;
-    public AppointmentService(InMemoryAppointmentRepository repository)
+    private readonly IAppointmentRepository _repository;
+    public AppointmentService(IAppointmentRepository repository)
     {
         _repository = repository;
     }
@@ -21,6 +21,12 @@ public class AppointmentService
             .GetAll()
             .Where(appointment => appointment.Date.Date == date.Date)
             .ToList();
+    }
+    public IReadOnlyList<Appointment> GetNotBilledAppointmentsForPatient(string patientId)
+    {
+        var appointments = _repository.GetNonBilledAppointmentsOfPatient(patientId);
+
+        return appointments;
     }
 
     public Result AddAppointment(DateTime date, string patientID, int durationInMinutes)
