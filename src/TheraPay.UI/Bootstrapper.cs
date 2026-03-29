@@ -44,6 +44,7 @@ public static class Bootstrapper
         services.AddTransient<HomeViewModel>();
         services.AddTransient<ExitConfirmViewModel>();
         services.AddTransient<InvoiceCreationViewModel>();
+        services.AddTransient<InvoiceDraftViewModel>();
         services.AddTransient<MainWindowViewModel>();
         // Panels
         services.AddTransient<PatientPanelViewModel>();
@@ -53,6 +54,7 @@ public static class Bootstrapper
         services.AddTransient<LoadFilesView>();
         services.AddTransient<HomeView>();
         services.AddTransient<ExitConfirmView>();
+        services.AddTransient<InvoiceDraftView>();
         services.AddTransient<MainWindow>();
         // services.AddTransient<AppointmentEditView>();
 

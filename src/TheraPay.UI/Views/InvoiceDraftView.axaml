@@ -1,0 +1,168 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             x:Class="TheraPay.UI.Views.InvoiceDraftView"
+             x:DataType="vm:InvoiceDraftViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="16" Spacing="12">
+      <StackPanel Margin="0" Spacing="20" Orientation="Horizontal" VerticalAlignment="Center">
+        <TextBlock Text="Invoice-Draft Vorschau" FontSize="20" FontWeight="Bold" />
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding DraftId, StringFormat='Draft-ID: {0}'}" VerticalAlignment="Center" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="1*,1*,1*" ColumnSpacing="16">
+        <Border Grid.Column="0"
+                Padding="12"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Praxis: " FontSize="16" FontWeight="Bold" />
+            <TextBlock Text="Praxisname" />
+            <TextBox Text="{Binding PracticeName}" />
+            <TextBlock Text="Adresszusatz" />
+            <TextBox Text="{Binding PracticeAddressAdditional}" />
+            <TextBlock Text="Straße Hausnummer" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Text="{Binding PracticeStreet}" Width="260" />
+              <TextBox Text="{Binding PracticeHouseNumber}" Width="100" />
+            </StackPanel>
+            <TextBlock Text="PLZ Stadt" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Text="{Binding PracticePostalCode}" Width="120" />
+              <TextBox Text="{Binding PracticeCity}" Width="240" />
+            </StackPanel>
+            <TextBlock Text="Land" />
+            <TextBox Text="{Binding PracticeCountry}" />
+          </StackPanel>
+        </Border>
+
+
+        <Border Grid.Column="1"
+                Padding="12"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Praxis: Abrechnungsdaten" FontSize="16" FontWeight="Bold" />
+            <TextBlock Text="Steuernummer" />
+            <TextBox Text="{Binding PracticeTaxNumber}" />
+            <TextBlock Text="IBAN" />
+            <TextBox Text="{Binding PracticeIban}" />
+            <TextBlock Text="BLZ" />
+            <TextBox Text="{Binding PracticeBlz}" />
+            <TextBlock Text="Bankname" />
+            <TextBox Text="{Binding PracticeBankName}" />
+            <TextBlock Text="Betreff der Rechnung" />
+            <TextBox Text="{Binding InvoiceSubject}" />
+          </StackPanel>
+        </Border>
+
+        <Border Grid.Column="2"
+                Padding="12"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+          <StackPanel Spacing="8">
+            <TextBlock Text="{Binding PatientId, StringFormat='Patient: {0}'}" FontSize="16" FontWeight="Bold" />
+            <TextBlock Text="Vorname Nachname" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Text="{Binding PatientFirstName}" Width="170" />
+              <TextBox Text="{Binding PatientLastName}" Width="190" />
+            </StackPanel>
+            <TextBlock Text="Adresszusatz" />
+            <TextBox Text="{Binding PatientAddressAdditional}" />
+            <TextBlock Text="Straße Hausnummer" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Text="{Binding PatientStreet}" Width="260" />
+              <TextBox Text="{Binding PatientHouseNumber}" Width="100" />
+            </StackPanel>
+            <TextBlock Text="PLZ Stadt" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Text="{Binding PatientPostalCode}" Width="120" />
+              <TextBox Text="{Binding PatientCity}" Width="240" />
+            </StackPanel>
+            <TextBlock Text="Land" />
+            <TextBox Text="{Binding PatientCountry}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="1*,1*" ColumnSpacing="16">
+        <Border Padding="12"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+              BorderThickness="1"
+              CornerRadius="8">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Im Draft enthaltene Termine" FontSize="16" FontWeight="Bold" />
+          <dataGrid:DataGrid ItemsSource="{Binding Appointments}"
+                             AutoGenerateColumns="False"
+                             IsReadOnly="True"
+                             Height="220"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <dataGrid:DataGrid.Columns>
+              <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Termin-ID" Binding="{Binding AppointmentId}" Width="*" />
+              <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Patient-ID" Binding="{Binding PatientId}" Width="Auto" />
+            </dataGrid:DataGrid.Columns>
+          </dataGrid:DataGrid>
+        </StackPanel>
+      </Border>
+
+        <Border Grid.Column="1"
+                Padding="12"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
+            <StackPanel Spacing="8" Orientation= "Horizontal">
+              <StackPanel Spacing="8" Orientation= "Vertical">
+                <TextBlock Text="Rechnungsdatum" />
+                <CalendarDatePicker SelectedDate="{Binding InvoiceDate}"
+                                    SelectedDateFormat="Custom"
+                                    CustomDateFormatString="dd.MM.yyyy"
+                                    Watermark="dd.MM.yyyy" />
+              </StackPanel>
+              <StackPanel Spacing="8" Orientation= "Vertical">
+                <TextBlock Text="Zahlungsfrist (Tage)" />
+                <TextBox Text="{Binding PaymentTermInDays}" Width="80" />
+              </StackPanel>
+            </StackPanel>
+            <TextBlock Text="{Binding DueDatePreview, StringFormat='Faelligkeitsdatum: {0}'}" />
+            <CheckBox Content="Unterschriftbereich einfuegen"
+                      IsChecked="{Binding IncludeSignatureSection}" />
+            <CheckBox Content="QR-Code fuer Rechnungsdetails erzeugen"
+                      IsChecked="{Binding IncludeQrCode}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <TextBlock Text="{Binding IssueWarningText}" Foreground="#C94A1A" VerticalAlignment="Center" />
+        <Button Content="Zurück zur Auswahl"
+                Command="{Binding NavigateBackCommand}"
+                Background="#FF6B6B"
+                MinWidth="150" />
+        <Button Content="Speichern"
+                Command="{Binding SaveAndNavigateHomeCommand}"
+                Background="#71CE82"
+                MinWidth="170" />
+        <Button Content="Speichern und zu Home"
+                Command="{Binding SaveAndNavigateHomeCommand}"
+                Background="#71CE82"
+                MinWidth="170" />
+        <Button Content="{Binding IssueActionText}"
+                Command="{Binding IssueInvoiceCommand}"
+                Background="#F2B134"
+                MinWidth="170" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

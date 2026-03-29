@@ -28,6 +28,10 @@
        <views:InvoiceCreationView/>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:InvoiceDraftViewModel}">
+      <views:InvoiceDraftView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:AppointmentEditViewModel}">
       <views:AppointmentEditView/>
     </DataTemplate>

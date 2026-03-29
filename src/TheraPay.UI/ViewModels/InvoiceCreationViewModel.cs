@@ -13,6 +13,7 @@ namespace TheraPay.UI.ViewModels;
 
 public class InvoiceCreationViewModel : ViewModelBase
 {
+    private readonly NavigationService _nav;
     private readonly IPatientRepository _store;
     private readonly ProjectSession _session;
     private readonly AppointmentService _appointmentService;
@@ -54,6 +55,7 @@ public class InvoiceCreationViewModel : ViewModelBase
 
     public InvoiceCreationViewModel(PatientService patientService, AppointmentService appointmentService, BillingService billingService, PatientPanelViewModel patientsPanel, IPatientRepository store, ProjectSession session, NavigationService nav)
     {
+        _nav = nav;
         _store = store;
         _session = session;
         _appointmentService = appointmentService;
@@ -62,7 +64,7 @@ public class InvoiceCreationViewModel : ViewModelBase
         PatientsPanel.PropertyChanged += OnPatientsPanelPropertyChanged;
 
         _paymentTermInDays = _session.PracticeData.DefaultPaymentTermDays;
-        NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
+        NavigateHomeViewCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         NavigateInvoiceDraftCommand = new RelayCommand(ContinueToDraft);
 
         ReloadAppointments();
@@ -120,7 +122,7 @@ public class InvoiceCreationViewModel : ViewModelBase
         if (result.Ok)
         {
             _session.MarkUnsavedChanges();
-            ReloadAppointments();
+            _nav.NavigateTo<InvoiceDraftViewModel>();
         }
     }
 
