@@ -15,7 +15,8 @@ public class CsvAppointmentStore(string filePath) : CsvStore<Appointment, Appoin
             StartDateTime = objectToConvert.Date.ToString("o", CultureInfo.InvariantCulture),
             Duration = objectToConvert.DurationInMinutes.ToString(),
             PatientId = objectToConvert.PatientID,
-            IsDeleted = false
+            IsDeleted = false,
+            Status = objectToConvert.Status
         };
     }
 
@@ -24,6 +25,6 @@ public class CsvAppointmentStore(string filePath) : CsvStore<Appointment, Appoin
         var date = DateTime.Parse(record.StartDateTime, CultureInfo.InvariantCulture);
         var duration = int.Parse(record.Duration);
         var id = Guid.Parse(record.Id);
-        return Appointment.Rehydrate(id, date, record.PatientId, duration);
+        return Appointment.Rehydrate(id, date, record.PatientId, duration, record.Status);
     }
 }

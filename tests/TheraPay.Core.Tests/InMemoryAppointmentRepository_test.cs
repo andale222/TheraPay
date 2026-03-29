@@ -31,7 +31,7 @@ public class InMemoryAppointmentRepository_test
 
         // THEN
         Assert.Equal(1, repository.Count());
-        Assert.Equal(appointment, repository.GetAppointment(0));
+        Assert.Equal(appointment, repository.GetByIndex(0));
     }
 
     [Fact]
@@ -48,8 +48,8 @@ public class InMemoryAppointmentRepository_test
 
         // THEN
         Assert.Equal(2, repository.Count());
-        Assert.Equal(appointment1, repository.GetAppointment(0));
-        Assert.Equal(appointment2, repository.GetAppointment(1));
+        Assert.Equal(appointment1, repository.GetByIndex(0));
+        Assert.Equal(appointment2, repository.GetByIndex(1));
     }
 
     [Fact]
@@ -69,4 +69,55 @@ public class InMemoryAppointmentRepository_test
         Assert.Equal(2, allAppointments.Count());
     }
 
+    [Fact]
+    public void GivenInMemoryAppointmentRepository_GetByIdAndIndex_ReturnsMatchingAppointment()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        Appointment appointment1 = TestData.Appointment1();
+        Appointment appointment2 = TestData.Appointment2();
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+
+        // WHEN
+        var byId = repository.GetById(appointment2.Id);
+        var index = repository.GetIndexById(appointment2.Id);
+
+        // THEN
+        Assert.Equal(appointment2, byId);
+        Assert.Equal(1, index);
+    }
+
+
+    [Fact]
+    public void GivenInMemoryAppointmentRepository_GetAppointmentsOfPatient_ReturnsMatchingAppointments()
+    {
+        // GIVEN
+        var repository = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        repository.Add(TestData.Appointment1_2());
+
+        // WHEN
+        var appointmentsOfNonExistingPatient = repository.GetAppointmentsOfPatient("abs");
+        var appointmentsOfPatient1 = repository.GetAppointmentsOfPatient(repository.GetAll()[0].PatientID);
+        var appointmentsOfPatient2 = repository.GetAppointmentsOfPatient(repository.GetAll()[1].PatientID);
+
+        // THEN
+        Assert.Empty(appointmentsOfNonExistingPatient);
+        Assert.Equal(2, appointmentsOfPatient1.Count);
+        Assert.Single(appointmentsOfPatient2);
+    }
+    [Fact]
+    public void GivenInMemoryAppointmentRepositoryWithBilledAppointment_GetNonBilledAppointmentsOfPatient_ReturnsMatchingAppointments()
+    {
+        // GIVEN
+        var repository = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        repository.Add(TestData.Appointment1_2());
+        repository.GetAll()[0].SetStatusToBilled();
+
+        // WHEN
+        var appointmentsOfPatient1 = repository.GetNonBilledAppointmentsOfPatient(repository.GetAll()[0].PatientID);
+
+        // THEN
+        Assert.Single(appointmentsOfPatient1);
+    }
 }

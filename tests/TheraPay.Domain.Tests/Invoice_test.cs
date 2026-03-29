@@ -4,57 +4,19 @@ public class Invoice_test
 {
     public static InvoicePatientData CreatePatientData()
     {
-        Patient patient = new Patient("A", "J", "L5R");
-        var patientData = new InvoicePatientData()
-        {
-            Name = patient.FirstName + " " + patient.LastName,
-            Id = patient.ID
-        };
-        return patientData;
+        return InvoicePatientData.FromPatientData(TestData.Patient1());
     }
     public static List<InvoiceAppointmentData> CreateAppointmenttDataListWithTwoEntries()
     {
-        Appointment appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "L5R");
-        Appointment appointment2 = new Appointment(new DateTime(2026, 2, 1, 14, 0, 0), "L5R");
+        Appointment appointment1 = TestData.Appointment1();
+        Appointment appointment2 = TestData.Appointment1_2();
         var appointmentData = new List<InvoiceAppointmentData>()
         {
-            new InvoiceAppointmentData()
-            {
-                AppointmentId = appointment1.Id.ToString("D"),
-                Date = appointment1.Date,
-                PatientId = appointment1.PatientID,
-                TotalAmount = appointment1.TotalAmount
-            },
-            new InvoiceAppointmentData()
-            {
-                AppointmentId = appointment2.Id.ToString("D"),
-                Date = appointment2.Date,
-                PatientId = appointment2.PatientID,
-                TotalAmount = appointment2.TotalAmount
-            },
+            InvoiceAppointmentData.FromAppointmentData(appointment1),
+            InvoiceAppointmentData.FromAppointmentData(appointment2),
         };
 
         return appointmentData;
-    }
-    public static PracticeData CreatePracticeData()
-    {
-        return new PracticeData()
-        {
-            Name = "Physio Praxis 7",
-            Street = "Beispielweg",
-            HouseNumber = "12",
-            PostalCode = "12345",
-            City = "Musterstadt",
-            Country = "Deutschland",
-            AddressAdditional = "Hinterhaus",
-            TaxIdentificationNumber = "987654321",
-            IBAN = "DE77 1234 5678 9012 3456 78",
-            BLZ = "77665544",
-            BankName = "Musterbank",
-            Subject = "Rechnung Therapie",
-            DefaultPaymentTermDays = 30,
-            InvoiceNumberState = InvoiceNumberState.Rehydrate(DateTime.Today.Year, 1200, 1)
-        };
     }
 
     [Fact]
@@ -63,7 +25,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
@@ -79,7 +41,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
@@ -95,7 +57,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
@@ -109,7 +71,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
@@ -123,7 +85,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceData = CreatePracticeData();
+        var practiceData = TestData.PracticeData1();
         var invoice = new Invoice(patientData, appointmentData, PracticeDataRecord.FromPracticeData(practiceData));
         var invoiceNr = $"{DateTime.Today:yyyyMM}-1201";
         // WHEN
@@ -143,7 +105,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         // WHEN
@@ -162,7 +124,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         //     // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
@@ -181,7 +143,7 @@ public class Invoice_test
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "OR5");
         var appointmentData = new List<InvoiceAppointmentData>()
@@ -202,7 +164,7 @@ public class Invoice_test
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "L5R");
         Appointment appointment2 = new Appointment(date, "OR5");
@@ -230,7 +192,7 @@ public class Invoice_test
     {
         // GIVEN
         var patientData = CreatePatientData();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
         DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
         Appointment appointment = new Appointment(date, "L5R");
         var appointmentData = new List<InvoiceAppointmentData>()
@@ -259,7 +221,7 @@ public class Invoice_test
         // GIVEN
         var patientData = CreatePatientData();
         var appointmentData = CreateAppointmenttDataListWithTwoEntries();
-        var practiceDataRecord = PracticeDataRecord.FromPracticeData(CreatePracticeData());
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
 
         // WHEN
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);

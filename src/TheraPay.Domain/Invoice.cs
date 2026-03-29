@@ -68,10 +68,10 @@ public class Invoice
         if (invoiceNumber[6] != '-')
             return false;
 
-        if ($"{issueDate:yyyyMM}" != invoiceNumber.Substring(0,6))
+        if ($"{issueDate:yyyyMM}" != invoiceNumber.Substring(0, 6))
             return false;
 
-        
+
         for (var i = 7; i < invoiceNumber.Length; i++)
         {
             if (!char.IsDigit(invoiceNumber[i]))
@@ -83,14 +83,14 @@ public class Invoice
     public Result Issue(PracticeDataRecord practiceData, string invoiceNumber)
     {
         if (!IsEditable())
-            return new Result(false,"Issue is not editable anymore.");
+            return new Result(false, "Issue is not editable anymore.");
 
         var draftIssueDate = DateTime.Today;
         if (!InvoiceNumberFormatIsOk(invoiceNumber, draftIssueDate))
-            return new Result(false,"Error in invoice number or invoice number format.");
-        
-        if (practiceData==null)
-            return new Result(false,"Given practice Data Record is empty.");
+            return new Result(false, "Error in invoice number or invoice number format.");
+
+        if (practiceData == null)
+            return new Result(false, "Given practice Data Record is empty.");
 
         IssueDate = draftIssueDate;
         PracticeDataRecord = practiceData;
@@ -120,11 +120,35 @@ public sealed record InvoicePatientData
 {
     public string Name { get; init; } = "";
     public string Id { get; init; } = "";
+    public static InvoicePatientData FromPatientData(Patient data)
+    {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+
+        return new InvoicePatientData
+        {
+            Name = data.FirstName + " " + data.LastName,
+            Id = data.ID
+        };
+    }
 }
 public sealed record InvoiceAppointmentData
 {
     public DateTime Date { get; init; }
     public string AppointmentId { get; init; } = "";
     public string PatientId { get; init; } = "";
-    public decimal TotalAmount {get; init;} = 0m;
+    public decimal TotalAmount { get; init; } = 0m;
+    public static InvoiceAppointmentData FromAppointmentData(Appointment data)
+    {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+
+        return new InvoiceAppointmentData
+        {
+            AppointmentId = data.Id.ToString("D"),
+            Date = data.Date,
+            PatientId = data.PatientID,
+            TotalAmount = data.TotalAmount
+        };
+    }
 }

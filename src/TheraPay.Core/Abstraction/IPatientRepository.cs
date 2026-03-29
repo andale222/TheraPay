@@ -2,11 +2,6 @@ using TheraPay.Domain;
 
 namespace TheraPay.Core;
 
-public interface IPatientRepository
+public interface IPatientRepository : IRepository<Patient>
 {
-    Result Add(Patient patient);
-    int Count();
-    Patient GetPatient(int index);
-    void Clear();
-    IReadOnlyList<Patient> GetAll();
 }
