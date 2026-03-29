@@ -12,27 +12,34 @@
 
     <Grid ColumnDefinitions="6*,5*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="12" ColumnSpacing="12">
 
-    <!-- <panels:CalendarPanelView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
-                          DataContext="{Binding CalendarPanel}" /> -->
     <StackPanel Grid.Row= "0"  Grid.Column="0" Spacing="6">
         <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Bearbeiten" Command="{Binding }" />
-          <Button Content="Löschen" Command="{Binding }" />
+          <TextBlock Text="Bitte markieren Sie alle Termine, die abgerechnet werden sollen mit einem Haken." FontSize="14"/>
         </StackPanel>
 
         <dataGrid:DataGrid ItemsSource="{Binding Appointments}"
                            AutoGenerateColumns="False"
-                           IsReadOnly="True"
+                           IsReadOnly="False"
                            Height="300"
                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
                            ScrollViewer.VerticalScrollBarVisibility="Auto">
           <dataGrid:DataGrid.Columns>
-            <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
-            <dataGrid:DataGridTextColumn Header="Dauer" Binding="{Binding Duration}" Width="Auto" />
-            <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding PatientName}" Width="Auto" />
-            <dataGrid:DataGridTextColumn Header="Termin" Binding="{Binding AppointmentName}" Width="Auto" />
+            <dataGrid:DataGridTemplateColumn Header="Abrech." Width="Auto">
+              <dataGrid:DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+                </DataTemplate>
+              </dataGrid:DataGridTemplateColumn.CellTemplate>
+            </dataGrid:DataGridTemplateColumn>
+            <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" IsReadOnly="True" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Dauer" Binding="{Binding Duration}" IsReadOnly="True" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding PatientName}" IsReadOnly="True" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Termin" Binding="{Binding AppointmentName}" IsReadOnly="True" Width="Auto" />
           </dataGrid:DataGrid.Columns>
         </dataGrid:DataGrid>
+        <TextBlock Text="{Binding DraftStatusMessage}" TextWrapping="Wrap" />
       </StackPanel>
     
     <panels:PatientPanelView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1"

@@ -35,6 +35,7 @@ public static class Bootstrapper
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
         services.AddSingleton<AppointmentService>();
+        services.AddSingleton<BillingService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
         services.AddTransient<LoadFilesViewModel>();
