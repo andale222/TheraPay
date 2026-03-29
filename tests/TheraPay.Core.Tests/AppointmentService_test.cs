@@ -33,7 +33,7 @@ public class AppointmentService_test
 
         // THEN
         var result = service.ViewAppointments();
-        Assert.Equal(1, result.Count);
+        Assert.Single(result);
         Assert.Equal(appointment.Date, result[0].Date);
         Assert.Equal(appointment.PatientID, result[0].PatientID);
         Assert.Equal(appointment.End, result[0].End);

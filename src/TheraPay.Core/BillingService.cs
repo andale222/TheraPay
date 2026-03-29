@@ -1,6 +1,5 @@
 namespace TheraPay.Core;
 
-using System.Reflection.Metadata;
 using TheraPay.Domain;
 
 public class BillingService
@@ -16,32 +15,88 @@ public class BillingService
         _patientRepository = patientRepository;
     }
 
-    private List<InvoiceAppointmentData> GetAppointmentDataListFromAppointmentIdList(List<Guid> appointmentIds)
+    private List<Appointment> GetExistingAppointmentsFromAppointmentIds(List<Guid> appointmentIds)
     {
-        var appointmentDataList = new List<InvoiceAppointmentData>();
+        var appointmentList = new List<Appointment>();
         foreach (var aptmt in appointmentIds)
         {
             bool exists = _appointmentRepository.GetAll().Any(p => p.Id == aptmt);
             if (exists)
             {
-                appointmentDataList.Add(InvoiceAppointmentData.FromAppointmentData(
-                    _appointmentRepository.GetById(aptmt)));
+                appointmentList.Add(_appointmentRepository.GetById(aptmt));
             }
+        }
+        return appointmentList;
+    }
+    private Result FilterOutBilledAppointments(List<Appointment> appointmentList)
+    {
+        int nBilledAppointmentsRemoved = 0;
+        for (int i = appointmentList.Count - 1; i >= 0; i--)
+        {
+            bool isBilled = appointmentList[i].Status == AppointmentStatus.Billed;
+            if (isBilled)
+            {
+                appointmentList.RemoveAt(i);
+                nBilledAppointmentsRemoved++;
+            }
+        }
+
+        if (nBilledAppointmentsRemoved == 0)
+            return new Result(true, "");
+
+        return new Result(true, "" + nBilledAppointmentsRemoved + " billed appointments were removed. ");
+    }
+    private List<InvoiceAppointmentData> GetAppointmentDataListFromAppointments(List<Appointment> appointments)
+    {
+        var appointmentDataList = new List<InvoiceAppointmentData>();
+        foreach (var aptmt in appointments)
+        {
+            appointmentDataList.Add(InvoiceAppointmentData.FromAppointmentData(aptmt));
         }
         return appointmentDataList;
     }
     public Result AddInvoiceForPatientAndAppointments(string patientId, List<Guid> appointmentIds, PracticeData practiceData)
     {
-        // TODO: Die eingegebenen Daten sollten geprüft werden und bei fehlerhaften oder nichtexistenten Daten eine Fehlermeldung zurückgegeben werden, da hier user-input verarbeitet wird
         try
         {
+            // store warnings and info here, which the user should be informed about but does not impact the functioning
+            string info = "";
+
+            // Check PatientId exists
+            if (_patientRepository.GetAll().Any(p => p.ID == patientId) == false)
+                return new Result(false, $"Patient with ID {patientId} not found.");
+
             var patientData = InvoicePatientData.FromPatientData(_patientRepository.GetById(patientId));
-            var appointmentDataList = GetAppointmentDataListFromAppointmentIdList(appointmentIds);
+
+            var appointmentList = GetExistingAppointmentsFromAppointmentIds(appointmentIds);
+            if (appointmentList.Count < appointmentIds.Count)
+                info += "" + (appointmentIds.Count - appointmentList.Count) + " appointment ids were not found. ";
+
+            var filterResult = FilterOutBilledAppointments(appointmentList);
+            info += filterResult.Error;
+
+            var appointmentDataList = GetAppointmentDataListFromAppointments(appointmentList);
+            // Check appointmentIds is not empty
+            if (appointmentDataList.Count == 0)
+                return new Result(false, "No valid appointments found for the provided appointment IDs.");
+
+            // Check appointments use patientId 
+            bool allAppointmentsMatchPatientId = appointmentDataList.All(x => x.PatientId == patientData.Id);
+            if (!allAppointmentsMatchPatientId)
+                return new Result(false, "Mismatch between patient Id and appointments patient Id.");
+
+
             var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
             var invoice = new Invoice(patientData, appointmentDataList, practiceDataRecord);
-            _invoiceRepository.Add(invoice);
 
-            return new Result(true);
+
+            var result = _invoiceRepository.Add(invoice);
+            if (!result.Ok)
+                return new Result(false, result.Error);
+
+            // TODO: setze Termine als billed? oder eher, wenn die invoice geissued wird?
+
+            return new Result(true, info);
         }
         catch (Exception ex)
         {
@@ -53,3 +108,4 @@ public class BillingService
         return _invoiceRepository.GetAll();
     }
 }
+
