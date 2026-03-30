@@ -2,6 +2,7 @@
 public sealed class CsvPracticeDataRecord
 {
     public string Name { get; set; } = string.Empty;
+    public string PracticeDescription { get; set; } = string.Empty;
     public string FirstNamePractitioner { get; set; } = string.Empty;
     public string LastNamePractitioner { get; set; } = string.Empty;
     public string Street { get; set; } = string.Empty;
@@ -11,6 +12,7 @@ public sealed class CsvPracticeDataRecord
     public string? Country { get; set; }
     public string? AddressAdditional { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;
+    public string PracticeEmail { get; set; } = string.Empty;
     public string IBAN { get; set; } = string.Empty;
     public string? BLZ { get; set; }
     public string? BankName { get; set; }

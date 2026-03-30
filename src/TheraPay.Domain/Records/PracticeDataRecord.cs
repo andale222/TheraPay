@@ -2,7 +2,11 @@ namespace TheraPay.Domain;
 
 public sealed record PracticeDataRecord
 {
-    public string Name { get; init; } = "";
+    public string PracticeName { get; init; } = "";
+    public string PracticeDescription { get; init; } = "";
+    public string PracticePhoneNr { get; init; } = "";
+    public string PracticeEmail { get; init; } = "";
+    public string PractitionerFirstLastName { get; init; } = "";
     public Address Address { get; init; } = new Address("street", "1", "00000", "city");
     public string TaxNumber { get; init; } = "";
     public PaymentDetails PaymentDetails { get; init; } = new PaymentDetails("DE00");
@@ -15,7 +19,11 @@ public sealed record PracticeDataRecord
 
         return new PracticeDataRecord
         {
-            Name = practiceData.Name,
+            PracticeName = practiceData.Name,
+            PracticeDescription = practiceData.PracticeDescription,
+            PractitionerFirstLastName = practiceData.FirstNamePractitioner + " " + practiceData.LastNamePractitioner,
+            PracticePhoneNr = practiceData.PhoneNumber,
+            PracticeEmail = practiceData.PracticeEmail,
             Address = new Address(
                 practiceData.Street,
                 practiceData.HouseNumber,
