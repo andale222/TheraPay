@@ -335,7 +335,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         InvoiceDate = issueDate;
         PaymentTermInDays = latestDraft.PracticeDataRecord.DefaultPaymentTermDays;
 
-        PracticeName = latestDraft.PracticeDataRecord.Name;
+        PracticeName = latestDraft.PracticeDataRecord.PracticeName;
         PracticeTaxNumber = latestDraft.PracticeDataRecord.TaxNumber;
         PracticeIban = latestDraft.PracticeDataRecord.PaymentDetails.IBAN;
         PracticeBlz = latestDraft.PracticeDataRecord.PaymentDetails.BLZ ?? "";
@@ -423,7 +423,11 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     {
         return new PracticeDataRecord
         {
-            Name = PracticeName,
+            PracticeName = PracticeName,
+            PracticeDescription = _session.PracticeData.PracticeDescription,
+            PracticePhoneNr = _session.PracticeData.PhoneNumber,
+            PracticeEmail = _session.PracticeData.PracticeEmail,
+            PractitionerFirstLastName = _session.PracticeData.FirstNamePractitioner + " " + _session.PracticeData.LastNamePractitioner,
             Address = new Address(
                 PracticeStreet,
                 PracticeHouseNumber,

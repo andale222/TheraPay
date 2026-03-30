@@ -5,7 +5,53 @@ public class InvoiceModelFactory
 {
     public InvoicePdfModel Create(Invoice invoice)
     {
+        try{
+            var invoiceLines = new List<InvoicePdfLineModel>();
+            foreach (var item in invoice.AppointmentDataList)
+            {
+                // item.TotalAmount
+                invoiceLines.Add(new InvoicePdfLineModel(
+                    AppointmentStart: item.Date,
+                    NumberOfUnits: 111, // TODO
+                    GopNr: "101X", // TODO
+                    Factor: 0.23m, // TODO
+                    Description: "oh no not yet available...", // TODO
+                    AmountEuro: item.TotalAmount
+                ));
+            }
+
          var model = new InvoicePdfModel(
+            InvoiceNumber: invoice.InvoiceNumber,
+            IssueDate: DateOnly.FromDateTime(invoice.IssueDate),
+            PracticeName: invoice.PracticeDataRecord.PracticeName,
+            PracticeDescription: invoice.PracticeDataRecord.PracticeDescription,
+            PractitionerTitle: "M. Sc.",
+            PractitionerName: invoice.PracticeDataRecord.PractitionerFirstLastName,
+            PracticeStreetNr: invoice.PracticeDataRecord.Address.GetStreetNr(),
+            PracticeCityCode: invoice.PracticeDataRecord.Address.GetPostalCodeCity(),
+            PracticeTelephone: invoice.PracticeDataRecord.PracticePhoneNr,
+            PracticeEmail: invoice.PracticeDataRecord.PracticeEmail,
+            Iban: invoice.PracticeDataRecord.PaymentDetails.IBAN,
+            Bic: invoice.PracticeDataRecord.PaymentDetails.BLZ,
+            BankName: invoice.PracticeDataRecord.PaymentDetails.BankName,
+            subject: invoice.InvoiceNumber,
+            PatientName: invoice.PatientData.Name,
+            TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
+            Diagnosis: "F41.3",
+            PatientStreetNr: "Teststraße 342",
+            PatientCityCode: "12345 Teststadt",
+            Lines: invoiceLines,
+            TotalAmountEuro: invoice.TotalAmount);
+        
+        return model;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            Console.WriteLine($"Error creating InvoicePdfModel: {ex.Message}");
+
+
+            var model = new InvoicePdfModel(
             InvoiceNumber: "RE-2026-0001",
             IssueDate: new DateOnly(2026, 3, 13),
             PracticeName: "M. Sc. Psych. Muster Therapeut",
@@ -41,7 +87,7 @@ public class InvoiceModelFactory
                     AmountEuro: 70.00m)
             },
             TotalAmountEuro: 1370.03m);
-        
-        return model;
+            return model;
+        }
     }
 }
