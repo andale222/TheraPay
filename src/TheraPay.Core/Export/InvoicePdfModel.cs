@@ -1,4 +1,4 @@
-namespace TheraPay.Infrastructure.Export.Pdf;
+namespace TheraPay.Core.Export;
 
 public sealed record InvoicePdfModel(
     string InvoiceNumber,
@@ -21,10 +21,13 @@ public sealed record InvoicePdfModel(
     string PatientStreetNr,
     string PatientCityCode,
     IReadOnlyList<InvoicePdfLineModel> Lines,
-    decimal TotalAmountEuro);
+    decimal TotalAmountEuro,
+    string Anrede = "Sehr geehrte Frau ");
 
 public sealed record InvoicePdfLineModel(
     DateTime AppointmentStart,
     decimal Factor,
     string Description,
-    decimal AmountEuro);
+    decimal AmountEuro,
+    int NumberOfUnits = 1,
+    string GopNr = "");

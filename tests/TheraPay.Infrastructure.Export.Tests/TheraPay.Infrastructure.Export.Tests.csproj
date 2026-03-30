@@ -22,4 +22,9 @@
     <ProjectReference Include="..\..\src\TheraPay.Infrastructure\Export\Export.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\data\Fonts\*.ttf"
+          Link="Assets/Fonts/%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -6,6 +6,7 @@ using TheraPay.UI.Views;
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
 using TheraPay.UI.State;
+using TheraPay.Infrastructure.Export.Pdf;
 
 namespace TheraPay.UI;
 
@@ -26,6 +27,9 @@ public static class Bootstrapper
         services.AddSingleton<IPatientRepository>(sp => sp.GetRequiredService<InMemoryPatientRepository>());
         services.AddSingleton<IAppointmentRepository>(sp => sp.GetRequiredService<InMemoryAppointmentRepository>());
         services.AddSingleton<IInvoiceRepository>(sp => sp.GetRequiredService<InMemoryInvoiceRepository>());
+
+        // Exporter
+        services.AddTransient<IInvoicePdfExporter, MigraDocInvoicePdfExporter>();
 
         // Project state + persistence orchestration
         services.AddSingleton<ProjectSession>();

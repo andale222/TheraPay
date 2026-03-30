@@ -1,4 +1,5 @@
 ﻿using TheraPay.Infrastructure.Export.Pdf;
+using TheraPay.Core.Export;
 
 namespace TheraPay.Infrastructure.Export.Tests;
 
@@ -33,9 +34,11 @@ public class MigraDocInvoicePdfExporter_test
             {
                 new(
                     AppointmentStart: new DateTime(2026, 3, 1, 9, 0, 0),
+                    NumberOfUnits: 2,
+                    GopNr: "801a",
                     Factor: 2.30m,
                     Description: "Psychotherapeutische Sprechstunde (25 Min.)",
-                    AmountEuro: 67.03m),
+                    AmountEuro: 134.06m),
                 new(
                     AppointmentStart: new DateTime(2026, 3, 8, 9, 0, 0),
                     Factor: 1.90m,
@@ -97,7 +100,7 @@ public class MigraDocInvoicePdfExporter_test
                     Description: "Psychotherapeutische Sprechstunde (25 Min.)",
                     AmountEuro: 70.00m)
             },
-            TotalAmountEuro: 137.03m);
+            TotalAmountEuro: 1370.03m);
 
         var outputDir = Path.Combine(AppContext.BaseDirectory, "Assets", "TheraPay.Infrastructure.Export.Tests");
         Directory.CreateDirectory(outputDir);
@@ -106,7 +109,7 @@ public class MigraDocInvoicePdfExporter_test
         try
         {
             var exporter = new MigraDocInvoicePdfExporter();
-            exporter.Export(model, outputFile);
+            exporter.InternalExport(model, outputFile);
 
             Assert.True(File.Exists(outputFile));
             Assert.True(new FileInfo(outputFile).Length > 0);

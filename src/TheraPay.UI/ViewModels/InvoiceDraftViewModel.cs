@@ -14,6 +14,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     private readonly BillingService _billingService;
     private readonly IPatientRepository _patientRepository;
     private readonly ProjectSession _session;
+    private readonly IInvoicePdfExporter _invoiceExporter;
     private Invoice? _currentDraft;
     private bool _issueConfirmationRequired;
 
@@ -270,12 +271,13 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         set { if (_patientAddressAdditional != value) { _patientAddressAdditional = value; OnPropertyChanged(); } }
     }
 
-    public InvoiceDraftViewModel(BillingService billingService, IPatientRepository patientRepository, ProjectSession session, NavigationService nav)
+    public InvoiceDraftViewModel(BillingService billingService, IPatientRepository patientRepository, IInvoicePdfExporter invoiceExporter,ProjectSession session, NavigationService nav)
     {
         _nav = nav;
         _billingService = billingService;
         _patientRepository = patientRepository;
         _session = session;
+        _invoiceExporter = invoiceExporter;
 
         NavigateBackCommand = new RelayCommand(() => _nav.NavigateTo<InvoiceCreationViewModel>());
         SaveAndNavigateHomeCommand = new RelayCommand(SaveAndNavigateHome);
@@ -401,6 +403,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 StatusMessage = issueResult.Error ?? "Rechnung konnte nicht ausgestellt werden.";
                 return;
             }
+            
+            _invoiceExporter.Export(_currentDraft, $"Invoice_{invoiceNumber}.pdf");
 
             ApplyPracticeDraftToSession();
             _session.MarkUnsavedChanges();

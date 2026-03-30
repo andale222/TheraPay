@@ -4,15 +4,16 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
-// using TheraPay.Core.Billing;
+using TheraPay.Core;
+using TheraPay.Core.Export;
 
 namespace TheraPay.Infrastructure.Export.Pdf;
 
-public sealed class MigraDocInvoicePdfExporter
+public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
 {
     private static readonly CultureInfo De = CultureInfo.GetCultureInfo("de-DE");
 
-    public void Export(InvoicePdfModel model, string filePath)
+    public bool InternalExport(InvoicePdfModel model, string filePath)
     {
         PdfFontBootstrap.Configure();
 
@@ -41,6 +42,8 @@ public sealed class MigraDocInvoicePdfExporter
         renderer.Document = document;
         renderer.RenderDocument();
         renderer.Save(filePath);
+
+        return true;
     }
 
     private static void DefineStyles(Document document)
@@ -188,7 +191,7 @@ public sealed class MigraDocInvoicePdfExporter
         par.Format.SpaceBefore = Unit.FromCentimeter(4.9);
         par.Format.SpaceAfter = Unit.FromCentimeter(0.5);
 
-        var letter = section.AddParagraph($"Sehr geehrtix {model.PatientName},");
+        var letter = section.AddParagraph(model.Anrede + $"{model.PatientName},");
         letter.AddLineBreak();
         letter.AddText("für meine Bemühungen erlaube ich mir entsprechend der Gebührenordnung für Psychotherapeut*innen (GOP/GOÄ)");
         letter.AddFormattedText($" {model.TotalAmountEuro.ToString("N2", De)} € ", TextFormat.Bold);
@@ -199,10 +202,11 @@ public sealed class MigraDocInvoicePdfExporter
         table.Borders.Width = 0.5;
 
         table.AddColumn(Unit.FromCentimeter(2.1)); // Datum
-        table.AddColumn(Unit.FromCentimeter(1.7)); // GOP Nr
+        table.AddColumn(Unit.FromCentimeter(1.0)); // Nr of Units
+        table.AddColumn(Unit.FromCentimeter(1.6)); // GOP Nr
         table.AddColumn(Unit.FromCentimeter(9.0)); // Bezeichnung
         table.AddColumn(Unit.FromCentimeter(1.5)); // Dauer
-        table.AddColumn(Unit.FromCentimeter(2.0)); // Betrag
+        table.AddColumn(Unit.FromCentimeter(2.1)); // Betrag
 
         var header = table.AddRow();
         header.HeadingFormat = true;
@@ -210,26 +214,29 @@ public sealed class MigraDocInvoicePdfExporter
         header.Shading.Color = Colors.LightGray;
 
         header.Cells[0].AddParagraph("Datum");
-        header.Cells[1].AddParagraph("GOP Nr.");
-        header.Cells[2].AddParagraph("Bezeichnung");
-        header.Cells[3].AddParagraph("Faktor");
-        header.Cells[4].AddParagraph("Betrag");
+        header.Cells[1].AddParagraph("Anz.");
+        header.Cells[2].AddParagraph("GOP Nr");
+        header.Cells[3].AddParagraph("Bezeichnung");
+        header.Cells[4].AddParagraph("Faktor");
+        header.Cells[5].AddParagraph("Betrag");
 
         foreach (var line in model.Lines)
         {
             var row = table.AddRow();
             row.Cells[0].AddParagraph(line.AppointmentStart.ToString("dd.MM.yyyy", De));
-            row.Cells[2].AddParagraph(line.Description);
-            row.Cells[3].AddParagraph($"{line.Factor}");
-            row.Cells[4].AddParagraph($"{line.AmountEuro.ToString("N2", De)} €");
-            row.Cells[4].Format.Alignment = ParagraphAlignment.Right;
+            row.Cells[1].AddParagraph(line.NumberOfUnits.ToString());
+            row.Cells[2].AddParagraph(line.GopNr);
+            row.Cells[3].AddParagraph(line.Description);
+            row.Cells[4].AddParagraph($"{line.Factor}");
+            row.Cells[5].AddParagraph($"{line.AmountEuro.ToString("N2", De)} €");
+            row.Cells[5].Format.Alignment = ParagraphAlignment.Right;
         }
 
         {
             table.AddRow();
             var row = table.AddRow();
             row.Cells[0].AddParagraph().AddFormattedText("Gesamt:", TextFormat.Bold);
-            row.Cells[4].AddParagraph().AddFormattedText($"{model.TotalAmountEuro.ToString("N2", De)} €", TextFormat.Bold);
+            row.Cells[5].AddParagraph().AddFormattedText($"{model.TotalAmountEuro.ToString("N2", De)} €", TextFormat.Bold);
         }
 
 
