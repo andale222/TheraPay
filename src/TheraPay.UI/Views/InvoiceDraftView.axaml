@@ -19,23 +19,28 @@
                 BorderThickness="1"
                 CornerRadius="8">
           <StackPanel Spacing="8">
-            <TextBlock Text="Praxis: " FontSize="16" FontWeight="Bold" />
-            <TextBlock Text="Praxisname" />
-            <TextBox Text="{Binding PracticeName}" />
-            <TextBlock Text="Adresszusatz" />
-            <TextBox Text="{Binding PracticeAddressAdditional}" />
-            <TextBlock Text="Straße Hausnummer" />
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBox Text="{Binding PracticeStreet}" Width="260" />
-              <TextBox Text="{Binding PracticeHouseNumber}" Width="100" />
+              <TextBlock Text="Praxis: " FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+              <CheckBox Content="Bearbeiten" IsChecked="{Binding IsPracticeDataEditable}" VerticalAlignment="Center" />
             </StackPanel>
-            <TextBlock Text="PLZ Stadt" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBox Text="{Binding PracticePostalCode}" Width="120" />
-              <TextBox Text="{Binding PracticeCity}" Width="240" />
+            <StackPanel Spacing="8" IsEnabled="{Binding IsPracticeDataEditable}">
+              <TextBlock Text="Praxisname" />
+              <TextBox Text="{Binding PracticeName}" />
+              <TextBlock Text="Adresszusatz" />
+              <TextBox Text="{Binding PracticeAddressAdditional}" />
+              <TextBlock Text="Straße Hausnummer" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PracticeStreet}" Width="260" />
+                <TextBox Text="{Binding PracticeHouseNumber}" Width="100" />
+              </StackPanel>
+              <TextBlock Text="PLZ Stadt" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PracticePostalCode}" Width="120" />
+                <TextBox Text="{Binding PracticeCity}" Width="240" />
+              </StackPanel>
+              <TextBlock Text="Land" />
+              <TextBox Text="{Binding PracticeCountry}" />
             </StackPanel>
-            <TextBlock Text="Land" />
-            <TextBox Text="{Binding PracticeCountry}" />
           </StackPanel>
         </Border>
 
@@ -46,17 +51,22 @@
                 BorderThickness="1"
                 CornerRadius="8">
           <StackPanel Spacing="8">
-            <TextBlock Text="Praxis: Abrechnungsdaten" FontSize="16" FontWeight="Bold" />
-            <TextBlock Text="Steuernummer" />
-            <TextBox Text="{Binding PracticeTaxNumber}" />
-            <TextBlock Text="IBAN" />
-            <TextBox Text="{Binding PracticeIban}" />
-            <TextBlock Text="BLZ" />
-            <TextBox Text="{Binding PracticeBlz}" />
-            <TextBlock Text="Bankname" />
-            <TextBox Text="{Binding PracticeBankName}" />
-            <TextBlock Text="Betreff der Rechnung" />
-            <TextBox Text="{Binding InvoiceSubject}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Praxis: Abrechnungsdaten" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+              <CheckBox Content="Bearbeiten" IsChecked="{Binding IsTransferDataEditable}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Spacing="8" IsEnabled="{Binding IsTransferDataEditable}">
+              <TextBlock Text="Steuernummer" />
+              <TextBox Text="{Binding PracticeTaxNumber}" />
+              <TextBlock Text="IBAN" />
+              <TextBox Text="{Binding PracticeIban}" />
+              <TextBlock Text="BLZ" />
+              <TextBox Text="{Binding PracticeBlz}" />
+              <TextBlock Text="Bankname" />
+              <TextBox Text="{Binding PracticeBankName}" />
+              <TextBlock Text="Betreff der Rechnung" />
+              <TextBox Text="{Binding InvoiceSubject}" />
+            </StackPanel>
           </StackPanel>
         </Border>
 
@@ -66,26 +76,31 @@
                 BorderThickness="1"
                 CornerRadius="8">
           <StackPanel Spacing="8">
-            <TextBlock Text="{Binding PatientId, StringFormat='Patient: {0}'}" FontSize="16" FontWeight="Bold" />
-            <TextBlock Text="Vorname Nachname" />
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBox Text="{Binding PatientFirstName}" Width="170" />
-              <TextBox Text="{Binding PatientLastName}" Width="190" />
+              <TextBlock Text="{Binding PatientId, StringFormat='Patient: {0}'}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+              <CheckBox Content="Bearbeiten" IsChecked="{Binding IsPatientDataEditable}" VerticalAlignment="Center" />
             </StackPanel>
-            <TextBlock Text="Adresszusatz" />
-            <TextBox Text="{Binding PatientAddressAdditional}" />
-            <TextBlock Text="Straße Hausnummer" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBox Text="{Binding PatientStreet}" Width="260" />
-              <TextBox Text="{Binding PatientHouseNumber}" Width="100" />
+            <StackPanel Spacing="8" IsEnabled="{Binding IsPatientDataEditable}">
+              <TextBlock Text="Vorname Nachname" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PatientFirstName}" Width="170" />
+                <TextBox Text="{Binding PatientLastName}" Width="190" />
+              </StackPanel>
+              <TextBlock Text="Adresszusatz" />
+              <TextBox Text="{Binding PatientAddressAdditional}" />
+              <TextBlock Text="Straße Hausnummer" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PatientStreet}" Width="260" />
+                <TextBox Text="{Binding PatientHouseNumber}" Width="100" />
+              </StackPanel>
+              <TextBlock Text="PLZ Stadt" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PatientPostalCode}" Width="120" />
+                <TextBox Text="{Binding PatientCity}" Width="240" />
+              </StackPanel>
+              <TextBlock Text="Land" />
+              <TextBox Text="{Binding PatientCountry}" />
             </StackPanel>
-            <TextBlock Text="PLZ Stadt" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBox Text="{Binding PatientPostalCode}" Width="120" />
-              <TextBox Text="{Binding PatientCity}" Width="240" />
-            </StackPanel>
-            <TextBlock Text="Land" />
-            <TextBox Text="{Binding PatientCountry}" />
           </StackPanel>
         </Border>
       </Grid>

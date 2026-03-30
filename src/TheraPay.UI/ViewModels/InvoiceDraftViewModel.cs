@@ -109,6 +109,27 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         set { if (_includeQrCode != value) { _includeQrCode = value; OnPropertyChanged(); } }
     }
 
+    private bool _isPracticeDataEditable;
+    public bool IsPracticeDataEditable
+    {
+        get => _isPracticeDataEditable;
+        set { if (_isPracticeDataEditable != value) { _isPracticeDataEditable = value; OnPropertyChanged(); } }
+    }
+
+    private bool _isPatientDataEditable;
+    public bool IsPatientDataEditable
+    {
+        get => _isPatientDataEditable;
+        set { if (_isPatientDataEditable != value) { _isPatientDataEditable = value; OnPropertyChanged(); } }
+    }
+
+    private bool _isTransferDataEditable;
+    public bool IsTransferDataEditable
+    {
+        get => _isTransferDataEditable;
+        set { if (_isTransferDataEditable != value) { _isTransferDataEditable = value; OnPropertyChanged(); } }
+    }
+
     private string _practiceName = "";
     public string PracticeName
     {
