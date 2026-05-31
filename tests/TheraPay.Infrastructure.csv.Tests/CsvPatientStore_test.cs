@@ -75,11 +75,15 @@ public class CsvPatientStore_test
         // Given
         var filePath = TestPaths.DataFile("testRoundtripPatients.csv");
         var csvPatientStore = new CsvPatientStore(filePath);
+        var secondPatient = new Patient("Second one", "Two", "2w");
+        secondPatient.SetInsuranceStatus(PatientInsuranceStatus.GKV);
+        var thirdPatient = new Patient("Third", "Threee", "3");
+        thirdPatient.SetInsuranceStatus(PatientInsuranceStatus.Selbstzahler);
         var patients = new List<Patient>
         {
             new Patient("Firstt", "One", "1"),
-            new Patient("Second one", "Two", "2w"),
-            new Patient("Third", "Threee", "3")
+            secondPatient,
+            thirdPatient
         };
 
         // When
@@ -94,9 +98,11 @@ public class CsvPatientStore_test
         Assert.Equal(patients[1].ID, loadedPatients[1].ID);
         Assert.Equal(patients[1].FirstName, loadedPatients[1].FirstName);
         Assert.Equal(patients[1].LastName, loadedPatients[1].LastName);
+        Assert.Equal(patients[1].InsuranceStatus, loadedPatients[1].InsuranceStatus);
         Assert.Equal(patients[2].ID, loadedPatients[2].ID);
         Assert.Equal(patients[2].FirstName, loadedPatients[2].FirstName);
         Assert.Equal(patients[2].LastName, loadedPatients[2].LastName);
+        Assert.Equal(patients[2].InsuranceStatus, loadedPatients[2].InsuranceStatus);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));

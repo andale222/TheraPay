@@ -32,7 +32,7 @@
 
     <StackPanel Orientation="Horizontal" Grid.Row= "1" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Vorname" FontSize="15"/>
+       <TextBlock Text="Straße + Hausnr." FontSize="15"/>
        <TextBox Width="160" Watermark="Straße + Hausnr." Text="{Binding }"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
@@ -55,12 +55,14 @@
        <TextBox Width="160" Watermark="E-Mail" />
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Festnetz" FontSize="15"/>
+       <TextBlock Text="Telefonnr." FontSize="15"/>
        <TextBox Width="160" Watermark="Festnetznummer" />
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Mobilnr." FontSize="15"/>
-       <TextBox Width="160" Watermark="mobile" />
+       <TextBlock Text="Versicherungsart" FontSize="15"/>
+       <ComboBox Width="160"
+                 ItemsSource="{Binding InsuranceStatuses}"
+                 SelectedItem="{Binding SelectedInsuranceStatus, Mode=TwoWay}" />
       </StackPanel>
     </StackPanel>
 

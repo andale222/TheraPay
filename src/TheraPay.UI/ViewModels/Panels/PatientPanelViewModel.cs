@@ -132,7 +132,8 @@ public sealed class PatientPanelViewModel : ViewModelBase
             {
                 Id = p.ID,
                 Name = p.LastName,
-                Vorname = p.FirstName
+                Vorname = p.FirstName,
+                Versicherungsart = p.InsuranceStatus.ToString()
             });
         }
 

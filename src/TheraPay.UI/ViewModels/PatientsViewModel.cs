@@ -1,4 +1,6 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using TheraPay.Domain;
 using TheraPay.Core;
@@ -16,6 +18,7 @@ public class PatientsViewModel : ViewModelBase
     public RelayCommand CheckDataCommand  { get; }
 
     public ObservableCollection<Patient> Patients { get; } = new();
+    public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
 
     private string _firstName = "";
     public string FirstName
@@ -44,6 +47,18 @@ public class PatientsViewModel : ViewModelBase
     }
 }
 
+    private PatientInsuranceStatus _selectedInsuranceStatus = PatientInsuranceStatus.Privat;
+    public PatientInsuranceStatus SelectedInsuranceStatus
+    {
+        get => _selectedInsuranceStatus;
+        set
+        {
+            if (_selectedInsuranceStatus == value) return;
+            _selectedInsuranceStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
     public PatientsViewModel(PatientService patientService, IPatientRepository store, ProjectSession session, NavigationService nav)
     {
         _store = store;
@@ -57,6 +72,7 @@ public class PatientsViewModel : ViewModelBase
     private void AddPatient()
     {
         var p = new Patient(FirstName.Trim(), LastName.Trim(),PatientID);
+        p.SetInsuranceStatus(SelectedInsuranceStatus);
         var addResult = _store.Add(p);
         if (addResult.Ok)
         {
@@ -66,6 +82,7 @@ public class PatientsViewModel : ViewModelBase
         FirstName = "";
         LastName = "";
         PatientID = "";
+        SelectedInsuranceStatus = PatientInsuranceStatus.Privat;
         Reload();
 
         NavigateHomeViewCommand.Execute(null);

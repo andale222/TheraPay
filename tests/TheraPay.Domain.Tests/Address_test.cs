@@ -40,4 +40,11 @@ public class Address_test
         Assert.Null(address.Country);
         Assert.Null(address.Additional);
     }
+
+    [Fact]
+    public void GivenInvalidPostalCode_CreateAddress_ThrowsArgumentException()
+    {
+        // THEN
+        Assert.Throws<ArgumentException>(() => new Address("Teststraße", "81A", "1234", "Teststadt"));
+    }
 }

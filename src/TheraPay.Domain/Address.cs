@@ -1,13 +1,17 @@
+using System.Text.RegularExpressions;
+
 namespace TheraPay.Domain;
 
 public sealed record Address
 {
-    public string Street { get; init; }
-    public string HouseNumber { get; init; }
-    public string PostalCode { get; init; }
-    public string City { get; init; }
-    public string? Country { get; init; }
-    public string? Additional { get; init; }
+    private static readonly Regex PostalCodeRegex = new(@"^\d{5}$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    public string Street { get; }
+    public string HouseNumber { get; }
+    public string PostalCode { get; }
+    public string City { get; }
+    public string? Country { get; }
+    public string? Additional { get; }
 
     public Address(
         string street,
@@ -23,15 +27,17 @@ public sealed record Address
             throw new ArgumentException("House number is required.", nameof(houseNumber));
         if (string.IsNullOrWhiteSpace(postalCode))
             throw new ArgumentException("Postal code is required.", nameof(postalCode));
+        if (PostalCodeRegex.IsMatch(postalCode.Trim()) == false)
+            throw new ArgumentException("Postal code must be exactly 5 digits.", nameof(postalCode));
         if (string.IsNullOrWhiteSpace(city))
             throw new ArgumentException("City is required.", nameof(city));
 
-        Street = street;
-        HouseNumber = houseNumber;
-        PostalCode = postalCode;
-        City = city;
-        Country = country;
-        Additional = additional;
+        Street = street.Trim();
+        HouseNumber = houseNumber.Trim();
+        PostalCode = postalCode.Trim();
+        City = city.Trim();
+        Country = string.IsNullOrWhiteSpace(country) ? null : country.Trim();
+        Additional = string.IsNullOrWhiteSpace(additional) ? null : additional.Trim();
     }
 
     public string GetStreetNr()
