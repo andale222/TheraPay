@@ -131,14 +131,14 @@ public class BillingService
         if (!result.Ok)
             return new Result(false, result.Error);
 
-        // consume invoice number after successful issueing
-        var invoiceNumberConsumed = practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
-        Console.WriteLine($"Preview Invoice Number: {invoiceNumber}");
-        Console.WriteLine($"Consumed Invoice Number: {invoiceNumberConsumed}");
+        // consume invoice number after successful issueing and thus make it invalid
+        practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
 
         foreach (var appointmentData in invoice.AppointmentDataList)
         {
-            _appointmentRepository.GetById(appointmentData.AppointmentId).SetStatusToBilled();
+            var apptId = Guid.Parse(appointmentData.AppointmentId);
+            var appt = _appointmentRepository.GetById(apptId);
+            appt.SetStatusToBilled();
         }
 
         return new Result(true, "" + invoiceNumber);
