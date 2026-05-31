@@ -41,4 +41,13 @@ public sealed class ProjectSession
     {
         _hasUnsavedChanges = false;
     }
+
+    public void SetPracticeData(PracticeData practiceData)
+    {
+        if (practiceData != null)
+        {
+            _practiceData = practiceData;
+            MarkUnsavedChanges();
+        }
+    }
 }

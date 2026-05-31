@@ -3,6 +3,7 @@ namespace TheraPay.Domain;
 public class PracticeData
 {
     public string Name { get; set; } = "practice name placeholde";
+    public string PracticeDescription { get; set; } = "practice description placeholder";
     public string FirstNamePractitioner { get; set; } = "first name practitioner placeholder";
     public string LastNamePractitioner { get; set; } = "last name practitioner placeholder";
     public string Street { get; set; } = "street placeholder";
@@ -12,6 +13,7 @@ public class PracticeData
     public string? Country { get; set; }
     public string? AddressAdditional { get; set; }
     public string PhoneNumber { get; set; } = "phone number placeholder";
+    public string PracticeEmail { get; set; } = "practice email placeholder";
     public string IBAN { get; set; } = "IBAN placeholder";
     public string? BLZ { get; set; }
     public string? BankName { get; set; }

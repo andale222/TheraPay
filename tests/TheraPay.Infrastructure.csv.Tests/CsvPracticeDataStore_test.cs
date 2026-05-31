@@ -28,6 +28,7 @@ public class CsvPracticeDataStore_test
 
         // Then
         Assert.Equal("Privatpraxis test", practiceData.Name);
+        Assert.Equal("This is a test practice.", practiceData.PracticeDescription);
         Assert.Equal("Mara", practiceData.FirstNamePractitioner);
         Assert.Equal("Mustermann", practiceData.LastNamePractitioner);
         Assert.Equal("Teststraße", practiceData.Street);
@@ -37,6 +38,7 @@ public class CsvPracticeDataStore_test
         Assert.Equal("Deutschland", practiceData.Country);
         Assert.Equal("2. OG", practiceData.AddressAdditional);
         Assert.Equal("+49 12345678901", practiceData.PhoneNumber);
+        Assert.Equal("testmail@testdomain.com", practiceData.PracticeEmail);
         Assert.Equal("DE12 3456 7890 1234 5678 9012", practiceData.IBAN);
         Assert.Equal("11112222", practiceData.BLZ);
         Assert.Equal("Testbank", practiceData.BankName);
@@ -74,6 +76,7 @@ public class CsvPracticeDataStore_test
         var practiceData = new PracticeData
         {
             Name = "Test Practice",
+            PracticeDescription = "This is a test practice.",
             FirstNamePractitioner = "John",
             LastNamePractitioner = "Doe",
             Street = "Test Street",
@@ -83,6 +86,7 @@ public class CsvPracticeDataStore_test
             Country = "Test Country",
             AddressAdditional = "Floor 3",
             PhoneNumber = "+1 234 567 8901",
+            PracticeEmail = "teatmal@testdomain.com",
             IBAN = "DE12 3456 7890 1234 5678 9012",
             BLZ = "99887766",
             BankName = "Example Bank",
@@ -98,6 +102,7 @@ public class CsvPracticeDataStore_test
 
         // Then
         Assert.Equal(practiceData.Name, loadedPracticeData.Name);
+        Assert.Equal(practiceData.PracticeDescription, loadedPracticeData.PracticeDescription);
         Assert.Equal(practiceData.FirstNamePractitioner, loadedPracticeData.FirstNamePractitioner);
         Assert.Equal(practiceData.LastNamePractitioner, loadedPracticeData.LastNamePractitioner);
         Assert.Equal(practiceData.Street, loadedPracticeData.Street);
@@ -107,6 +112,7 @@ public class CsvPracticeDataStore_test
         Assert.Equal(practiceData.Country, loadedPracticeData.Country);
         Assert.Equal(practiceData.AddressAdditional, loadedPracticeData.AddressAdditional);
         Assert.Equal(practiceData.PhoneNumber, loadedPracticeData.PhoneNumber);
+        Assert.Equal(practiceData.PracticeEmail, loadedPracticeData.PracticeEmail);
         Assert.Equal(practiceData.IBAN, loadedPracticeData.IBAN);
         Assert.Equal(practiceData.BLZ, loadedPracticeData.BLZ);
         Assert.Equal(practiceData.BankName, loadedPracticeData.BankName);

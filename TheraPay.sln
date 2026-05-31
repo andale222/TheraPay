@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csv", "src\TheraPay.Infrast
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheraPay.Infrastructure.csv.Tests", "tests\TheraPay.Infrastructure.csv.Tests\TheraPay.Infrastructure.csv.Tests.csproj", "{E858CF00-34B3-4D5B-B6A7-BE0F0C2AC3E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheraPay.Infrastructure.Export.Tests", "tests\TheraPay.Infrastructure.Export.Tests\TheraPay.Infrastructure.Export.Tests.csproj", "{B893651D-8582-4C31-B869-2B3A7C9A71A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,18 @@ Global
 		{E858CF00-34B3-4D5B-B6A7-BE0F0C2AC3E5}.Release|x64.Build.0 = Release|Any CPU
 		{E858CF00-34B3-4D5B-B6A7-BE0F0C2AC3E5}.Release|x86.ActiveCfg = Release|Any CPU
 		{E858CF00-34B3-4D5B-B6A7-BE0F0C2AC3E5}.Release|x86.Build.0 = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|x64.Build.0 = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Debug|x86.Build.0 = Debug|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|x64.ActiveCfg = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|x64.Build.0 = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|x86.ActiveCfg = Release|Any CPU
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,5 +166,6 @@ Global
 		{275EB769-2652-30AF-C747-13C85702D0B8} = {E51D5559-C930-46AE-BFA4-9FBA70CB9B0C}
 		{761BD340-6F5A-4D9D-85D9-EEDD80FBAEB3} = {275EB769-2652-30AF-C747-13C85702D0B8}
 		{E858CF00-34B3-4D5B-B6A7-BE0F0C2AC3E5} = {6B1D2B3C-ACBE-4828-8806-595ACA8205B3}
+		{B893651D-8582-4C31-B869-2B3A7C9A71A7} = {6B1D2B3C-ACBE-4828-8806-595ACA8205B3}
 	EndGlobalSection
 EndGlobal

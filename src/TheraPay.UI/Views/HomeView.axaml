@@ -34,7 +34,7 @@
         <StackPanel Spacing="8" Margin="8">
           <Button Content="Patient:in hinzufügen" Command="{Binding NavigatePatientsCommand}"/>
           <Button Content="Termin hinzufügen" Command="{Binding NavigateEditAppointmentCommand}" />
-          <Button Content="Rechnungen erstellen" />
+          <Button Content="Rechnungen erstellen" Command= "{Binding NavigateInvoiceCreationCommand}" />
         </StackPanel>
     </Border>
 </HeaderedContentControl>

@@ -70,7 +70,7 @@ public class BillingService
 
             var distinctAppointmentIds = appointmentIds.Distinct().ToList();
             if (appointmentIds.Count != distinctAppointmentIds.Count)
-                info += ""+ (appointmentIds.Count-distinctAppointmentIds.Count)+" double appointment entry was removed.";
+                info += "" + (appointmentIds.Count - distinctAppointmentIds.Count) + " double appointment entry was removed.";
 
             var appointmentList = GetExistingAppointmentsFromAppointmentIds(distinctAppointmentIds);
             if (appointmentList.Count < distinctAppointmentIds.Count)
@@ -111,5 +111,38 @@ public class BillingService
     {
         return _invoiceRepository.GetAll();
     }
+
+    public Result IssueInvoice(Invoice invoice, DateTime issueDate, PracticeData practiceData)
+    {
+        /* This function should do the following:
+        - check invoice state
+        - create new invoice number
+        - issue the invoice with the new invoice number
+        - set appointments to billed
+        - print the invoice as pdf???
+        */
+        if (invoice == null)
+            return new Result(false, "Invoice not found.");
+
+        // first only preview next serial
+        var invoiceNumber = practiceData.InvoiceNumberState.PreviewNextSerial(issueDate);
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
+        var result = invoice.Issue(practiceDataRecord, invoiceNumber);
+        if (!result.Ok)
+            return new Result(false, result.Error);
+
+        // consume invoice number after successful issueing and thus make it invalid
+        practiceData.InvoiceNumberState.ConsumeNextSerial(issueDate);
+
+        foreach (var appointmentData in invoice.AppointmentDataList)
+        {
+            var apptId = Guid.Parse(appointmentData.AppointmentId);
+            var appt = _appointmentRepository.GetById(apptId);
+            appt.SetStatusToBilled();
+        }
+
+        return new Result(true, "" + invoiceNumber);
+    }
+
 }
 

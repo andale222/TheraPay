@@ -43,6 +43,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
         return new CsvPracticeDataRecord
         {
             Name = data.Name,
+            PracticeDescription = data.PracticeDescription,
             FirstNamePractitioner = data.FirstNamePractitioner,
             LastNamePractitioner = data.LastNamePractitioner,
             Street = data.Street,
@@ -52,6 +53,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
             Country = data.Country,
             AddressAdditional = data.AddressAdditional,
             PhoneNumber = data.PhoneNumber,
+            PracticeEmail = data.PracticeEmail,
             IBAN = data.IBAN,
             BLZ = data.BLZ,
             BankName = data.BankName,
@@ -68,6 +70,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
         return new PracticeData
         {
             Name = record.Name,
+            PracticeDescription = record.PracticeDescription,
             FirstNamePractitioner = record.FirstNamePractitioner,
             LastNamePractitioner = record.LastNamePractitioner,
             Street = record.Street,
@@ -77,6 +80,7 @@ public class CsvPracticeDataStore : IPracticeDataStore
             Country = record.Country,
             AddressAdditional = record.AddressAdditional,
             PhoneNumber = record.PhoneNumber,
+            PracticeEmail = record.PracticeEmail,
             IBAN = record.IBAN,
             BLZ = record.BLZ,
             BankName = record.BankName,

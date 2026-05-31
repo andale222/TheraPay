@@ -44,7 +44,7 @@ public sealed class ProjectPersistenceService
             _patientRepository.Clear();
             _appointmentRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository, _appointmentRepository);
-            CreatePracticeDataStore().Load();
+            _session.SetPracticeData(CreatePracticeDataStore().Load());
             _session.MarkSaved();
             return new Result(true);
         }

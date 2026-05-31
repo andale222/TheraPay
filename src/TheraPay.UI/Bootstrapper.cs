@@ -6,6 +6,7 @@ using TheraPay.UI.Views;
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
 using TheraPay.UI.State;
+using TheraPay.Infrastructure.Export.Pdf;
 
 namespace TheraPay.UI;
 
@@ -27,6 +28,9 @@ public static class Bootstrapper
         services.AddSingleton<IAppointmentRepository>(sp => sp.GetRequiredService<InMemoryAppointmentRepository>());
         services.AddSingleton<IInvoiceRepository>(sp => sp.GetRequiredService<InMemoryInvoiceRepository>());
 
+        // Exporter
+        services.AddTransient<IInvoicePdfExporter, MigraDocInvoicePdfExporter>();
+
         // Project state + persistence orchestration
         services.AddSingleton<ProjectSession>();
         services.AddSingleton<ProjectPersistenceService>();
@@ -35,6 +39,7 @@ public static class Bootstrapper
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();
         services.AddSingleton<AppointmentService>();
+        services.AddSingleton<BillingService>();
 
         // ViewModels -> oft Transient (pro View eine frische Instanz)
         services.AddTransient<LoadFilesViewModel>();
@@ -42,6 +47,8 @@ public static class Bootstrapper
         services.AddTransient<PatientsViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<ExitConfirmViewModel>();
+        services.AddTransient<InvoiceCreationViewModel>();
+        services.AddTransient<InvoiceDraftViewModel>();
         services.AddTransient<MainWindowViewModel>();
         // Panels
         services.AddTransient<PatientPanelViewModel>();
@@ -51,6 +58,7 @@ public static class Bootstrapper
         services.AddTransient<LoadFilesView>();
         services.AddTransient<HomeView>();
         services.AddTransient<ExitConfirmView>();
+        services.AddTransient<InvoiceDraftView>();
         services.AddTransient<MainWindow>();
         // services.AddTransient<AppointmentEditView>();
 
