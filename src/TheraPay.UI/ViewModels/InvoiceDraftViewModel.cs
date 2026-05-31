@@ -52,8 +52,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         }
     }
 
-    private DateTime? _invoiceDate = DateTime.Today;
-    public DateTime? InvoiceDate
+    private DateTime _invoiceDate = DateTime.Today;
+    public DateTime InvoiceDate
     {
         get => _invoiceDate;
         set
@@ -82,10 +82,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     {
         get
         {
-            if (InvoiceDate is null)
-                return "-";
-
-            return InvoiceDate.Value.AddDays(PaymentTermInDays).ToString("dd.MM.yyyy");
+            return InvoiceDate.AddDays(PaymentTermInDays).ToString("dd.MM.yyyy");
         }
     }
 
@@ -393,16 +390,17 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
         try
         {
-            var issueDateForNumber = DateTime.Today;
-            var serial = _session.PracticeData.InvoiceNumberState.ConsumeNextSerial(issueDateForNumber);
-            var invoiceNumber = $"{issueDateForNumber:yyyyMM}-{serial:0000}";
 
-            var issueResult = _currentDraft.Issue(BuildPracticeDataRecordFromDraft(), invoiceNumber);
-            if (!issueResult.Ok)
+            // var invoiceNumber = _session.PracticeData.InvoiceNumberState.PreviewNextSerial(_invoiceDate);
+            var issueingResult = _billingService.IssueInvoice(_currentDraft,_invoiceDate,_session.PracticeData);
+
+            // var issueResult = _currentDraft.Issue(BuildPracticeDataRecordFromDraft(), invoiceNumber);
+            if (!issueingResult.Ok)
             {
-                StatusMessage = issueResult.Error ?? "Rechnung konnte nicht ausgestellt werden.";
+                StatusMessage = issueingResult.Error ?? "Rechnung konnte nicht ausgestellt werden.";
                 return;
             }
+            var invoiceNumber = issueingResult.Error ?? "Unbekannt";
             
             _invoiceExporter.Export(_currentDraft, $"Invoice_{invoiceNumber}.pdf");
 

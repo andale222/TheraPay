@@ -27,7 +27,15 @@ public class InvoiceNumberState
         return new InvoiceNumberState(year, randomStart, nextIssueNumber);
     }
 
-    public int ConsumeNextSerial(DateTime issueDate)
+    public string ConsumeNextSerial(DateTime issueDate)
+    {
+        var serial = PreviewNextSerial(issueDate);
+
+        NextIssueNumber++;
+        return serial;
+    }
+
+    public string PreviewNextSerial(DateTime issueDate)
     {
         if (Year != issueDate.Year)
         {
@@ -43,9 +51,9 @@ public class InvoiceNumberState
         {
             throw new InvalidOperationException("Invoice number range exceeded for the current year.");
         }
+        var issueNumber = $"{issueDate:yyyyMM}-{serial:0000}";
 
-        NextIssueNumber++;
-        return serial;
+        return issueNumber;
     }
 
     private void EnsureValidState()
