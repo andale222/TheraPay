@@ -37,6 +37,7 @@
             <dataGrid:DataGridTextColumn Header="Dauer" Binding="{Binding Duration}" IsReadOnly="True" Width="Auto" />
             <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding PatientName}" IsReadOnly="True" Width="Auto" />
             <dataGrid:DataGridTextColumn Header="Termin" Binding="{Binding AppointmentName}" IsReadOnly="True" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Status" Binding="{Binding BillingState}" IsReadOnly="True" Width="Auto" />
           </dataGrid:DataGrid.Columns>
         </dataGrid:DataGrid>
         <TextBlock Text="{Binding DraftStatusMessage}" TextWrapping="Wrap" />

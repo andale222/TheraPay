@@ -93,7 +93,8 @@ public class InvoiceCreationViewModel : ViewModelBase
                 Duration = $"{appt.DurationInMinutes} min",
                 PatientName = $"{appt.PatientID}",
                 AppointmentName = "TODO:",
-                IsSelected = true
+                IsSelected = true,
+                BillingState = $"{appt.Status}"
             });
         }
     }
@@ -166,5 +167,6 @@ public class InvoiceCreationViewModel : ViewModelBase
         public string PatientName { get; init; } = "plchldr";
         public string AppointmentName { get; init; } = "plchldr";
         public bool IsSelected { get; set; } = true;
+        public string BillingState { get; init; } = "";
     }
 }
