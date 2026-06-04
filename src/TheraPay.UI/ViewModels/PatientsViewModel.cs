@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
@@ -9,6 +10,27 @@ using TheraPay.UI.State;
 
 namespace TheraPay.UI.ViewModels;
 
+public class PatientFields
+{
+    public string PatientID { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string ICD10Diagnosis { get; set; } = "";
+    public string Street { get; set; } =  "";
+    public string HouseNumber { get; set; } =  "";
+    public string PostalCode { get; set; } =  "";
+    public string Place { get; set; } =  "";
+    public string Country { get; set; } =  "";
+    public string Email { get; set; } =  "";
+    public string PhoneNumber { get; set; } =  "";
+    public string AdditionalInfo { get; set; } =  "";
+    public bool IsActive { get; set; } =  true;
+    public string InsuranceStatus { get; set; } =  "Privat";
+    public ObservableCollection<string> InsuranceStatusSelection { get; } = new()
+    {
+        "Privat", "Selbstzahler", "Kostenerstattung"
+    };
+}
 public class PatientsViewModel : ViewModelBase
 {
     private readonly IPatientRepository _store;
@@ -20,44 +42,7 @@ public class PatientsViewModel : ViewModelBase
     public ObservableCollection<Patient> Patients { get; } = new();
     public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
 
-    private string _firstName = "";
-    public string FirstName
-    {
-        get => _firstName;
-        set { _firstName = value; OnPropertyChanged(); }
-    }
-
-    private string _lastName = "";
-    public string LastName
-    {
-        get => _lastName;
-        set { _lastName = value; OnPropertyChanged(); }
-    }
-    private string _patientID = "";
-    public string PatientID
-{
-    get => _patientID;
-    set
-    {
-        if (_patientID != value)
-        {
-            _patientID = value;
-            OnPropertyChanged();
-        }
-    }
-}
-
-    private PatientInsuranceStatus _selectedInsuranceStatus = PatientInsuranceStatus.Privat;
-    public PatientInsuranceStatus SelectedInsuranceStatus
-    {
-        get => _selectedInsuranceStatus;
-        set
-        {
-            if (_selectedInsuranceStatus == value) return;
-            _selectedInsuranceStatus = value;
-            OnPropertyChanged();
-        }
-    }
+    public PatientFields PatientFields { get; } = new();
 
     public PatientsViewModel(PatientService patientService, IPatientRepository store, ProjectSession session, NavigationService nav)
     {
@@ -71,18 +56,25 @@ public class PatientsViewModel : ViewModelBase
 
     private void AddPatient()
     {
-        var p = new Patient(FirstName.Trim(), LastName.Trim(),PatientID);
-        p.SetInsuranceStatus(SelectedInsuranceStatus);
-        var addResult = _store.Add(p);
+        var patient = new Patient(PatientFields.FirstName.Trim(), PatientFields.LastName.Trim(), PatientFields.PatientID.Trim());
+        patient.IsActive = PatientFields.IsActive;
+        // patient.SetInsuranceStatus(PatientFields.InsuranceStatus);
+
+        // if (HasCompleteAddress())
+        //     patient.SetAddress(Street, HouseNumber, PostalCode, Place, Country, AdditionalInfo);
+        // if (string.IsNullOrWhiteSpace(ICD10Diagnosis) == false)
+        //     patient.SetICD10Diagnosis(ICD10Diagnosis);
+        // if (string.IsNullOrWhiteSpace(Email) == false)
+        //     patient.SetEmail(Email);
+        // if (string.IsNullOrWhiteSpace(PhoneNumber) == false)
+        //     patient.SetPhoneNumber(PhoneNumber);
+
+        var addResult = _store.Add(patient);
         if (addResult.Ok)
         {
             _session.MarkUnsavedChanges();
         }
 
-        FirstName = "";
-        LastName = "";
-        PatientID = "";
-        SelectedInsuranceStatus = PatientInsuranceStatus.Privat;
         Reload();
 
         NavigateHomeViewCommand.Execute(null);
@@ -92,6 +84,14 @@ public class PatientsViewModel : ViewModelBase
     {
         // TODO: Implement data checking logic here
     }
+
+    // private bool HasCompleteAddress()
+    // {
+    //     return string.IsNullOrWhiteSpace(Street) == false
+    //         && string.IsNullOrWhiteSpace(HouseNumber) == false
+    //         && string.IsNullOrWhiteSpace(PostalCode) == false
+    //         && string.IsNullOrWhiteSpace(Place) == false;
+    // }
 
     private void Reload()
     {

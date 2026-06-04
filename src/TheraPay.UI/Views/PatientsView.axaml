@@ -14,55 +14,59 @@
     <StackPanel Orientation="Horizontal" Grid.Row= "0" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Vorname" FontSize="15"/>
-       <TextBox Width="160" Watermark="First name" Text="{Binding FirstName}"/>
+       <TextBox Width="160" Watermark="Vorname" Text="{Binding PatientFields.FirstName, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Nachname" FontSize="15"/>
-       <TextBox Width="160" Watermark="First name" Text="{Binding LastName}"/>
+       <TextBox Width="160" Watermark="Nachname" Text="{Binding PatientFields.LastName, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Patienten ID" FontSize="15"/>
-       <TextBox Width="160" Watermark="First name" Text="{Binding PatientID}"/>
+       <TextBox Width="160" Watermark="Patienten ID" Text="{Binding PatientFields.PatientID, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="IC-Diagnose" FontSize="15"/>
-       <TextBox Width="160" Watermark="ICD code"/>
+       <TextBox Width="160" Watermark="ICD code" Text="{Binding PatientFields.ICD10Diagnosis, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 
     <StackPanel Orientation="Horizontal" Grid.Row= "1" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Straße + Hausnr." FontSize="15"/>
-       <TextBox Width="160" Watermark="Straße + Hausnr." Text="{Binding }"/>
+       <TextBlock Text="Straße" FontSize="15"/>
+       <TextBox Width="160" Watermark="Straße" Text="{Binding PatientFields.Street, Mode=TwoWay}"/>
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Hausnr." FontSize="15"/>
+       <TextBox Width="80" Watermark="Hausnr." Text="{Binding PatientFields.HouseNumber, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="PLZ" FontSize="15"/>
-       <TextBox Width="160" Watermark="PLZ" Text="{Binding }"/>
+       <TextBox Width="100" Watermark="PLZ" Text="{Binding PatientFields.PostalCode, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="Ort" FontSize="15"/>
-       <TextBox Width="160" Watermark="Ort" Text="{Binding }"/>
+       <TextBox Width="160" Watermark="Ort" Text="{Binding PatientFields.Place, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="Land" FontSize="15"/>
-       <TextBox Width="160" Watermark="Land" Text="{Binding }"/>
+       <TextBox Width="160" Watermark="Land" Text="{Binding PatientFields.Country, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 
     <StackPanel Orientation="Horizontal" Grid.Row= "2" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="E-Mail" FontSize="15"/>
-       <TextBox Width="160" Watermark="E-Mail" />
+       <TextBox Width="160" Watermark="E-Mail" Text="{Binding PatientFields.Email, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="Telefonnr." FontSize="15"/>
-       <TextBox Width="160" Watermark="Festnetznummer" />
+       <TextBox Width="160" Watermark="Festnetznummer" Text="{Binding PatientFields.PhoneNumber, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="Versicherungsart" FontSize="15"/>
        <ComboBox Width="160"
-                 ItemsSource="{Binding InsuranceStatuses}"
-                 SelectedItem="{Binding SelectedInsuranceStatus, Mode=TwoWay}" />
+                 ItemsSource="{Binding PatientFields.InsuranceStatusSelection}"
+                 SelectedItem="{Binding PatientFields.InsuranceStatus, Mode=TwoWay}" />
       </StackPanel>
     </StackPanel>
 
@@ -70,16 +74,16 @@
 
     <StackPanel Orientation="Horizontal" Grid.Row= "3" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "3" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Notizen" FontSize="15"/>
-       <TextBox Width="500" Height="150" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Notizen" />
+       <TextBlock Text="Adresszusatz" FontSize="15"/>
+       <TextBox Width="500" Height="150" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Adresszusatz" Text="{Binding PatientFields.AdditionalInfo, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 
 
     <StackPanel Orientation="Vertical" Spacing="8" Margin="8" Grid.Column="0" Grid.Row= "4" >
       <TextBlock Text="Status:" FontSize="15"/>
-      <RadioButton GroupName="PatientenStatus" Content="aktiv"  IsChecked="True"/>
-      <RadioButton GroupName="PatientenStatus" Content="inaktiv" />
+      <RadioButton GroupName="PatientenStatus" Content="aktiv" IsChecked="{Binding PatientFields.IsActive, Mode=TwoWay}"/>
+      <RadioButton GroupName="PatientenStatus" Content="inaktiv" IsChecked="{Binding PatientFields.IsActive, Mode=TwoWay}"/>
     </StackPanel>
     <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
       <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right"/>
