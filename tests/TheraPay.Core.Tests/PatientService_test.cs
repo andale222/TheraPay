@@ -97,4 +97,65 @@ public class PatientService_test
         Assert.False(patient.IsActive);
     }
 
+    [Fact]
+    public void GivenEmptyOptionalFields_CheckPatientData_ResultIsOk()
+    {
+        // GIVEN
+        PatientService service = new PatientService(new InMemoryPatientRepository());
+
+        // WHEN
+        Result result = service.CheckPatientData("P1", "", "", "", "");
+
+        // THEN
+        Assert.True(result.Ok);
+    }
+
+    [Fact]
+    public void GivenMissingPatientId_CheckPatientData_ResultIsNotOk()
+    {
+        // GIVEN
+        PatientService service = new PatientService(new InMemoryPatientRepository());
+
+        // WHEN
+        Result result = service.CheckPatientData("", "", "", "", "");
+
+        // THEN
+        Assert.False(result.Ok);
+    }
+
+    [Fact]
+    public void GivenExistingPatientId_CheckPatientData_ResultIsNotOk()
+    {
+        // GIVEN
+        PatientService service = TestData.getPatientServiceWithInMemoryPatientRepositoryWithTwoPatients();
+        Patient existingPatient = service.ViewPatients()[0];
+
+        // WHEN
+        Result result = service.CheckPatientData(existingPatient.ID, "", "", "", "");
+
+        // THEN
+        Assert.False(result.Ok);
+    }
+
+    [Theory]
+    [InlineData("not-an-email", "", "", "")]
+    [InlineData("", "123 456", "", "")]
+    [InlineData("", "", "1234", "")]
+    [InlineData("", "", "", "free diagnosis text")]
+    public void GivenInvalidOptionalField_CheckPatientData_ResultIsNotOk(
+        string email,
+        string phoneNumber,
+        string postalCode,
+        string diagnosis)
+    {
+        // GIVEN
+        PatientService service = new PatientService(new InMemoryPatientRepository());
+
+        // WHEN
+        Result result = service.CheckPatientData("P1", email, phoneNumber, postalCode, diagnosis);
+
+        // THEN
+        Assert.False(result.Ok);
+    }
+
 }

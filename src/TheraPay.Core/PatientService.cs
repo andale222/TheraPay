@@ -14,6 +14,10 @@ public class PatientService
 
     public Result AddPatient(string firstName, string lastName, string id)
     {
+        Result checkResult = CheckPatientData(id, "", "", "", "");
+        if (checkResult.Ok == false)
+            return checkResult;
+
         Patient patient = new Patient(firstName, lastName, id);
         Result result = _repository.Add(patient);
         return result;
@@ -35,6 +39,10 @@ public class PatientService
         string insuranceStatus,
         bool isActive)
     {
+        Result checkResult = CheckPatientData(id, email, phoneNumber, postalCode, diagnosis);
+        if (checkResult.Ok == false)
+            return checkResult;
+
         Patient patient = new Patient(firstName.Trim(), lastName.Trim(), id.Trim());
 
         ModifyAddress(patient, street, houseNumber, postalCode, place, country, additionalInfo);
@@ -44,6 +52,52 @@ public class PatientService
         SetActivityStatus(patient, isActive);
 
         return _repository.Add(patient);
+    }
+
+    public Result CheckPatientData(
+        string id,
+        string email,
+        string phoneNumber,
+        string postalCode,
+        string diagnosis)
+    {
+        string resultMsg = "";
+        bool resultStatus = true;
+        string trimmedId = id.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedId))
+        {
+            resultStatus = false;
+            resultMsg += "Patienten-ID ist erforderlich.";
+        }
+        if (_repository.GetIndexById(trimmedId) >= 0)
+        {
+            resultStatus = false;
+            resultMsg += $"Patienten-ID '{trimmedId}' ist bereits vorhanden.";
+        }
+
+        Result result;
+        if ((result = CheckEmail(email)).Ok == false)
+        {
+            resultStatus = false;
+            resultMsg += "\n" + result.Error;
+        }
+        if ((result = CheckPhoneNumber(phoneNumber)).Ok == false)
+        {
+            resultStatus = false;
+            resultMsg += "\n" + result.Error;
+        }
+        if ((result = CheckPostalCode(postalCode)).Ok == false)
+        {
+            resultStatus = false;
+            resultMsg += "\n" + result.Error;
+        }
+        if ((result = CheckDiagnosis(diagnosis)).Ok == false)
+        {
+            resultStatus = false;
+            resultMsg += "\n" + result.Error;
+        }
+
+        return new Result(resultStatus, resultMsg);
     }
 
     public void ModifyAddress(
@@ -60,18 +114,28 @@ public class PatientService
 
     public Result CheckEmail(string email)
     {
-        if (Patient.EmailRegex.IsMatch(email.Trim()))
+        if (string.IsNullOrWhiteSpace(email) || Patient.EmailRegex.IsMatch(email.Trim()))
             return new Result(true);
         else
             return new Result(false, "Email must be in a valid format like user@domain.com");
     }
+
     public Result CheckPhoneNumber(string phoneNumber)
     {
-        if (Patient.PhoneNumberRegex.IsMatch(phoneNumber.Trim()))
+        if (string.IsNullOrWhiteSpace(phoneNumber) || Patient.PhoneNumberRegex.IsMatch(phoneNumber.Trim()))
             return new Result(true);
         else
             return new Result(false, "Phone number may only contain digits and an optional leading '+'.");
     }
+
+    public Result CheckPostalCode(string postalCode)
+    {
+        if (string.IsNullOrWhiteSpace(postalCode) || Address.PostalCodeRegex.IsMatch(postalCode.Trim()))
+            return new Result(true);
+        else
+            return new Result(false, "Postleitzahl muss leer sein oder aus 5 Ziffern bestehen.");
+    }
+
     public Result ModifyContactData(Patient patient, string email, string phoneNumber)
     {
         Result result;
@@ -86,11 +150,12 @@ public class PatientService
 
     public Result CheckDiagnosis(string diagnosis)
     {
-        if (Patient.Icd10DiagnosisRegex.IsMatch(diagnosis.Trim()))
+        if (string.IsNullOrWhiteSpace(diagnosis) || Patient.Icd10DiagnosisRegex.IsMatch(diagnosis.Trim()))
             return new Result(true);
         else
             return new Result(false, "Diagnosis must be a valid ICD-10-CM code.");
     }
+
     public Result ModifyDiagnosis(Patient patient, string diagnosis)
     {
         Result result;

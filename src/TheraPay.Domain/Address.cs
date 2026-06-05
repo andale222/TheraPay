@@ -4,7 +4,8 @@ namespace TheraPay.Domain;
 
 public sealed record Address
 {
-    private static readonly Regex PostalCodeRegex = new(@"^\d{5}$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    public const string PostalCodePattern = @"^\d{5}$";
+    public static readonly Regex PostalCodeRegex = new(PostalCodePattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     public string Street { get; }
     public string HouseNumber { get; }

@@ -54,7 +54,7 @@ public class Patient
     public void SetPhoneNumber(string newPhoneNumber)
     {
         string value = newPhoneNumber.Trim();
-        if (string.IsNullOrWhiteSpace(value) || !PhoneNumberRegex.IsMatch(value))
+        if (!PhoneNumberRegex.IsMatch(value))
             throw new ArgumentException("Phone number may only contain digits and an optional leading '+'.", nameof(newPhoneNumber));
 
         PhoneNumber = value;
@@ -63,7 +63,7 @@ public class Patient
     public void SetICD10Diagnosis(string newDiagnosis)
     {
         string value = newDiagnosis.Trim();
-        if (string.IsNullOrWhiteSpace(value) || !Icd10DiagnosisRegex.IsMatch(value))
+        if (!Icd10DiagnosisRegex.IsMatch(value))
             throw new ArgumentException("Diagnosis must be a valid ICD-10-CM code.", nameof(newDiagnosis));
 
         ICD10Diagnosis = value;
@@ -72,7 +72,7 @@ public class Patient
     public void SetEmail(string newEmail)
     {
         string value = newEmail.Trim();
-        if (string.IsNullOrWhiteSpace(value) || !EmailRegex.IsMatch(value))
+        if (!EmailRegex.IsMatch(value))
             throw new ArgumentException("Email must be in a valid format like xxx@xx.xx.", nameof(newEmail));
 
         Email = value;

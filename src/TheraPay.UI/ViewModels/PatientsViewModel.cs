@@ -27,7 +27,7 @@ public partial class PatientFields : ObservableValidator
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [RegularExpression(@"^\d{5}$",
+    [RegularExpression(Address.PostalCodePattern,
         ErrorMessage = "Postleitzahl muss aus 5 Ziffern bestehen")]
     private string postalCode =  "";
     public string Place { get; set; } =  "";
@@ -73,6 +73,20 @@ public class PatientsViewModel : ViewModelBase
     public ObservableCollection<Patient> Patients { get; } = new();
     public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
 
+    private string _checkDataMessage = "";
+    public string CheckDataMessage
+    {
+        get => _checkDataMessage;
+        private set
+        {
+            if (_checkDataMessage == value)
+                return;
+
+            _checkDataMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
     private PatientFields _patientFields = new();
     public PatientFields PatientFields
     {
@@ -116,16 +130,31 @@ public class PatientsViewModel : ViewModelBase
         {
             _session.MarkUnsavedChanges();
             PatientFields = new PatientFields();
+            CheckDataMessage = "Patientendaten wurden hinzugefügt.";
+        }
+        else
+        {
+            CheckDataMessage = addResult.Error ?? "Patientendaten konnten nicht hinzugefügt werden.";
         }
 
         Reload();
 
-        NavigateHomeViewCommand.Execute(null);
+        if (addResult.Ok)
+            NavigateHomeViewCommand.Execute(null);
     }
 
     private void CheckData()
     {
-        // TODO: Implement data checking logic here
+        Result result = _patientService.CheckPatientData(
+            PatientFields.PatientID,
+            PatientFields.Email,
+            PatientFields.PhoneNumber,
+            PatientFields.PostalCode,
+            PatientFields.Icd10Diagnosis);
+
+        CheckDataMessage = result.Ok
+            ? "Patientendaten können hinzugefügt werden."
+            : result.Error ?? "Patientendaten sind nicht vollständig gültig.";
     }
 
     private void Reload()
