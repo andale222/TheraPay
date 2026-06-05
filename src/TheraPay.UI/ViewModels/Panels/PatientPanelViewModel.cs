@@ -100,7 +100,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
 
                 _nav.NavigateTo<PatientsViewModel>(); // MVP: erst mal zur Patientenverwaltung springen
             },
-            canExecute: () => SelectedPatient is not null);
+            canExecute: () => false);
 
         _deleteCommand = new RelayCommand(
             execute: () =>
@@ -111,7 +111,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
 
                 _nav.NavigateTo<PatientsViewModel>(); // MVP
             },
-            canExecute: () => SelectedPatient is not null);
+            canExecute: () => false);
 
         Reload();
     }
