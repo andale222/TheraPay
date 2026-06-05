@@ -26,7 +26,7 @@
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="IC-Diagnose" FontSize="15"/>
-       <TextBox Width="160" Watermark="ICD code" Text="{Binding PatientFields.ICD10Diagnosis, Mode=TwoWay}"/>
+       <TextBox Classes="codeInput" Width="160" Watermark="ICD code" Text="{Binding PatientFields.Icd10Diagnosis, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 
@@ -41,7 +41,7 @@
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="PLZ" FontSize="15"/>
-       <TextBox Width="100" Watermark="PLZ" Text="{Binding PatientFields.PostalCode, Mode=TwoWay}"/>
+       <TextBox Classes="codeInput" Width="100" Watermark="PLZ" Text="{Binding PatientFields.PostalCode, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="Ort" FontSize="15"/>
@@ -56,11 +56,11 @@
     <StackPanel Orientation="Horizontal" Grid.Row= "2" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="E-Mail" FontSize="15"/>
-       <TextBox Width="160" Watermark="E-Mail" Text="{Binding PatientFields.Email, Mode=TwoWay}"/>
+       <TextBox Classes="codeInput" Width="160" Watermark="E-Mail" Text="{Binding PatientFields.Email, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="Telefonnr." FontSize="15"/>
-       <TextBox Width="160" Watermark="Festnetznummer" Text="{Binding PatientFields.PhoneNumber, Mode=TwoWay}"/>
+       <TextBox Classes="codeInput" Width="160" Watermark="Festnetznummer" Text="{Binding PatientFields.PhoneNumber, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="Versicherungsart" FontSize="15"/>

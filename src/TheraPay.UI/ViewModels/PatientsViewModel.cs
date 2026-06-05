@@ -6,22 +6,44 @@ using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
 using TheraPay.UI.State;
+using System.ComponentModel.DataAnnotations;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TheraPay.UI.ViewModels;
 
-public class PatientFields
+public partial class PatientFields : ObservableValidator
 {
     public string PatientID { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
-    public string ICD10Diagnosis { get; set; } = "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.Icd10DiagnosisPattern,
+        ErrorMessage = "Ungültige ICD-10 Diagnose")]
+    private string icd10Diagnosis =  "";
     public string Street { get; set; } =  "";
     public string HouseNumber { get; set; } =  "";
-    public string PostalCode { get; set; } =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(@"^\d{5}$",
+        ErrorMessage = "Postleitzahl muss aus 5 Ziffern bestehen")]
+    private string postalCode =  "";
     public string Place { get; set; } =  "";
     public string Country { get; set; } =  "";
-    public string Email { get; set; } =  "";
-    public string PhoneNumber { get; set; } =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.EmailPattern,
+        ErrorMessage = "Ungültige E-Mail-Adresse")]
+    private string email =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.PhoneNumberPattern,
+        ErrorMessage = "Ungültige Telefonnummer")]
+    private string phoneNumber =  "";
     public string AdditionalInfo { get; set; } =  "";
     public bool IsActive { get; set; } =  true;
     public string InsuranceStatus { get; set; } =  "Privat";
@@ -86,7 +108,7 @@ public class PatientsViewModel : ViewModelBase
             PatientFields.AdditionalInfo,
             PatientFields.Email,
             PatientFields.PhoneNumber,
-            PatientFields.ICD10Diagnosis,
+            PatientFields.Icd10Diagnosis,
             PatientFields.InsuranceStatus,
             PatientFields.IsActive);
 

@@ -4,11 +4,12 @@ namespace TheraPay.Domain;
 
 public class Patient
 {
-    public static readonly Regex PhoneNumberRegex = new(@"^\+?\d+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    public static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    public static readonly Regex Icd10DiagnosisRegex = new(
-        @"^[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+    public const string PhoneNumberPattern = @"^\+?\d+$";
+    public static readonly Regex PhoneNumberRegex = new(PhoneNumberPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    public const string EmailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+    public static readonly Regex EmailRegex = new(EmailPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    public const string Icd10DiagnosisPattern = @"^[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?$";
+    public static readonly Regex Icd10DiagnosisRegex = new(Icd10DiagnosisPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
     public string LastName { get; private set; } = "";
     public string FirstName { get; private set; } = "";
