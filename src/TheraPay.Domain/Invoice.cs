@@ -120,6 +120,19 @@ public sealed record InvoicePatientData
 {
     public string Name { get; init; } = "";
     public string Id { get; init; } = "";
+    public string Street { get; init; } = "";
+    public string HouseNumber { get; init; } = "";
+    public string PostalCode { get; init; } = "";
+    public string City { get; init; } = "";
+    public string Country { get; init; } = "";
+    public string AddressAdditional { get; init; } = "";
+    public string StreetAndHouseNumber => string.IsNullOrWhiteSpace(Street) && string.IsNullOrWhiteSpace(HouseNumber)
+        ? ""
+        : $"{Street} {HouseNumber}".Trim();
+    public string PostalCodeAndCity => string.IsNullOrWhiteSpace(PostalCode) && string.IsNullOrWhiteSpace(City)
+        ? ""
+        : $"{PostalCode} {City}".Trim();
+
     public static InvoicePatientData FromPatientData(Patient data)
     {
         if (data == null)
@@ -128,7 +141,13 @@ public sealed record InvoicePatientData
         return new InvoicePatientData
         {
             Name = data.FirstName + " " + data.LastName,
-            Id = data.ID
+            Id = data.ID,
+            Street = data.Address?.Street ?? "",
+            HouseNumber = data.Address?.HouseNumber ?? "",
+            PostalCode = data.Address?.PostalCode ?? "",
+            City = data.Address?.City ?? "",
+            Country = data.Address?.Country ?? "",
+            AddressAdditional = data.Address?.Additional ?? ""
         };
     }
 }

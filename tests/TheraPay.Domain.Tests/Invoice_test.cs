@@ -35,6 +35,29 @@ public class Invoice_test
         Assert.Equal(patientData.Name, invoice.PatientData.Name);
         Assert.Equal(patientData.Id, invoice.PatientData.Id);
     }
+
+    [Fact]
+    public void GivenPatientWithAddress_FromPatientData_PatientAddressIsCopied()
+    {
+        // GIVEN
+        var patient = new Patient("Ada", "Lovelace", "AL1");
+        patient.SetAddress("Imaginary Road", "42B", "12345", "London", "UK", "near the analytical engine");
+
+        // WHEN
+        var patientData = InvoicePatientData.FromPatientData(patient);
+
+        // THEN
+        Assert.Equal("Ada Lovelace", patientData.Name);
+        Assert.Equal("AL1", patientData.Id);
+        Assert.Equal("Imaginary Road", patientData.Street);
+        Assert.Equal("42B", patientData.HouseNumber);
+        Assert.Equal("12345", patientData.PostalCode);
+        Assert.Equal("London", patientData.City);
+        Assert.Equal("UK", patientData.Country);
+        Assert.Equal("near the analytical engine", patientData.AddressAdditional);
+        Assert.Equal("Imaginary Road 42B", patientData.StreetAndHouseNumber);
+        Assert.Equal("12345 London", patientData.PostalCodeAndCity);
+    }
     [Fact]
     public void GivenInvoicesAppointmentData_CreateInvoice_InvoiceHasCorrectAppointmentData()
     {

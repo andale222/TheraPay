@@ -347,6 +347,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
         PatientId = latestDraft.PatientData.Id;
         MapPatientNameFromDraft(latestDraft.PatientData.Name);
+        MapPatientAddressFromDraft(latestDraft.PatientData);
         TryLoadPatientDataFromRepository(latestDraft.PatientData.Id);
 
         foreach (var appointment in latestDraft.AppointmentDataList.OrderBy(x => x.Date))
@@ -488,11 +489,30 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             var patient = _patientRepository.GetById(patientId);
             PatientFirstName = patient.FirstName;
             PatientLastName = patient.LastName;
+            if (patient.Address is not null)
+            {
+                PatientStreet = patient.Address.Street;
+                PatientHouseNumber = patient.Address.HouseNumber;
+                PatientPostalCode = patient.Address.PostalCode;
+                PatientCity = patient.Address.City;
+                PatientCountry = patient.Address.Country ?? "";
+                PatientAddressAdditional = patient.Address.Additional ?? "";
+            }
         }
         catch
         {
             // Patientdaten im Draft bleiben erhalten; zusätzliche Felder sind optional editierbar im View.
         }
+    }
+
+    private void MapPatientAddressFromDraft(InvoicePatientData patientData)
+    {
+        PatientStreet = patientData.Street;
+        PatientHouseNumber = patientData.HouseNumber;
+        PatientPostalCode = patientData.PostalCode;
+        PatientCity = patientData.City;
+        PatientCountry = patientData.Country;
+        PatientAddressAdditional = patientData.AddressAdditional;
     }
 
     public sealed class InvoiceAppointmentRowVm
