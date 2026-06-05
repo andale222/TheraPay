@@ -30,7 +30,7 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
             PostalCode = patient.Address?.PostalCode ?? "",
             Place = patient.Address?.City ?? "",
             Country = patient.Address?.Country ?? "",
-            Email = patient.email,
+            Email = patient.Email,
             PhoneNumber = patient.PhoneNumber,
             AdditionalInfo = patient.Address?.Additional ?? "",
         };

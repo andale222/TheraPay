@@ -4,5 +4,6 @@ public enum PatientInsuranceStatus
 {
     Privat,
     GKV,
-    Selbstzahler
+    Selbstzahler,
+    Kostenerstattung
 }

@@ -1,8 +1,7 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
@@ -26,14 +25,24 @@ public class PatientFields
     public string AdditionalInfo { get; set; } =  "";
     public bool IsActive { get; set; } =  true;
     public string InsuranceStatus { get; set; } =  "Privat";
+    public bool IsInactive
+    {
+        get => IsActive == false;
+        set
+        {
+            if (value)
+                IsActive = false;
+        }
+    }
+
     public ObservableCollection<string> InsuranceStatusSelection { get; } = new()
     {
-        "Privat", "Selbstzahler", "Kostenerstattung"
+        "Privat", "GKV", "Selbstzahler", "Kostenerstattung"
     };
 }
 public class PatientsViewModel : ViewModelBase
 {
-    private readonly IPatientRepository _store;
+    private readonly PatientService _patientService;
     private readonly ProjectSession _session;
     public RelayCommand NavigateHomeViewCommand  { get; }
     public RelayCommand AddPatientCommand  { get; }
@@ -42,11 +51,20 @@ public class PatientsViewModel : ViewModelBase
     public ObservableCollection<Patient> Patients { get; } = new();
     public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
 
-    public PatientFields PatientFields { get; } = new();
-
-    public PatientsViewModel(PatientService patientService, IPatientRepository store, ProjectSession session, NavigationService nav)
+    private PatientFields _patientFields = new();
+    public PatientFields PatientFields
     {
-        _store = store;
+        get => _patientFields;
+        private set
+        {
+            _patientFields = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public PatientsViewModel(PatientService patientService, ProjectSession session, NavigationService nav)
+    {
+        _patientService = patientService;
         _session = session;
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         AddPatientCommand = new RelayCommand(AddPatient);
@@ -56,23 +74,26 @@ public class PatientsViewModel : ViewModelBase
 
     private void AddPatient()
     {
-        var patient = new Patient(PatientFields.FirstName.Trim(), PatientFields.LastName.Trim(), PatientFields.PatientID.Trim());
-        patient.IsActive = PatientFields.IsActive;
-        // patient.SetInsuranceStatus(PatientFields.InsuranceStatus);
+        var addResult = _patientService.AddPatient(
+            PatientFields.FirstName,
+            PatientFields.LastName,
+            PatientFields.PatientID,
+            PatientFields.Street,
+            PatientFields.HouseNumber,
+            PatientFields.PostalCode,
+            PatientFields.Place,
+            PatientFields.Country,
+            PatientFields.AdditionalInfo,
+            PatientFields.Email,
+            PatientFields.PhoneNumber,
+            PatientFields.ICD10Diagnosis,
+            PatientFields.InsuranceStatus,
+            PatientFields.IsActive);
 
-        // if (HasCompleteAddress())
-        //     patient.SetAddress(Street, HouseNumber, PostalCode, Place, Country, AdditionalInfo);
-        // if (string.IsNullOrWhiteSpace(ICD10Diagnosis) == false)
-        //     patient.SetICD10Diagnosis(ICD10Diagnosis);
-        // if (string.IsNullOrWhiteSpace(Email) == false)
-        //     patient.SetEmail(Email);
-        // if (string.IsNullOrWhiteSpace(PhoneNumber) == false)
-        //     patient.SetPhoneNumber(PhoneNumber);
-
-        var addResult = _store.Add(patient);
         if (addResult.Ok)
         {
             _session.MarkUnsavedChanges();
+            PatientFields = new PatientFields();
         }
 
         Reload();
@@ -85,18 +106,10 @@ public class PatientsViewModel : ViewModelBase
         // TODO: Implement data checking logic here
     }
 
-    // private bool HasCompleteAddress()
-    // {
-    //     return string.IsNullOrWhiteSpace(Street) == false
-    //         && string.IsNullOrWhiteSpace(HouseNumber) == false
-    //         && string.IsNullOrWhiteSpace(PostalCode) == false
-    //         && string.IsNullOrWhiteSpace(Place) == false;
-    // }
-
     private void Reload()
     {
         Patients.Clear();
-        foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
+        foreach (var p in _patientService.ViewPatients().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
             Patients.Add(p);
     }
 }

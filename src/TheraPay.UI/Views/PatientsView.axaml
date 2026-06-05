@@ -83,7 +83,7 @@
     <StackPanel Orientation="Vertical" Spacing="8" Margin="8" Grid.Column="0" Grid.Row= "4" >
       <TextBlock Text="Status:" FontSize="15"/>
       <RadioButton GroupName="PatientenStatus" Content="aktiv" IsChecked="{Binding PatientFields.IsActive, Mode=TwoWay}"/>
-      <RadioButton GroupName="PatientenStatus" Content="inaktiv" IsChecked="{Binding PatientFields.IsActive, Mode=TwoWay}"/>
+      <RadioButton GroupName="PatientenStatus" Content="inaktiv" IsChecked="{Binding PatientFields.IsInactive, Mode=TwoWay}"/>
     </StackPanel>
     <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
       <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right"/>

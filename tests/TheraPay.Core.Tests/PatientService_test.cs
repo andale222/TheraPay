@@ -52,4 +52,49 @@ public class PatientService_test
         Assert.False(result.Ok);
     }
 
+    [Fact]
+    public void GivenCompletePatientFormData_AddPatient_AllFieldsAreAdded()
+    {
+        // GIVEN
+        InMemoryPatientRepository repository = new InMemoryPatientRepository();
+        PatientService service = new PatientService(repository);
+
+        // WHEN
+        var result = service.AddPatient(
+            "  Ada  ",
+            "  Lovelace  ",
+            "  AL1  ",
+            "Imaginary Road",
+            "42B",
+            "12345",
+            "London",
+            "UK",
+            "near the analytical engine",
+            "my@email.com",
+            "+123",
+            "F12",
+            "Kostenerstattung",
+            false);
+
+        Patient patient = repository.GetById("AL1");
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal("Ada", patient.FirstName);
+        Assert.Equal("Lovelace", patient.LastName);
+        Assert.Equal("AL1", patient.ID);
+        Assert.NotNull(patient.Address);
+        Assert.Equal("Imaginary Road", patient.Address.Street);
+        Assert.Equal("42B", patient.Address.HouseNumber);
+        Assert.Equal("12345", patient.Address.PostalCode);
+        Assert.Equal("London", patient.Address.City);
+        Assert.Equal("UK", patient.Address.Country);
+        Assert.Equal("near the analytical engine", patient.Address.Additional);
+        Assert.Equal("my@email.com", patient.Email);
+        Assert.Equal("+123", patient.PhoneNumber);
+        Assert.Equal("F12", patient.ICD10Diagnosis);
+        Assert.Equal(PatientInsuranceStatus.Kostenerstattung, patient.InsuranceStatus);
+        Assert.False(patient.IsActive);
+    }
+
 }

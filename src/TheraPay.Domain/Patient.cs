@@ -4,9 +4,9 @@ namespace TheraPay.Domain;
 
 public class Patient
 {
-    private static readonly Regex PhoneNumberRegex = new(@"^\+?\d+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex Icd10DiagnosisRegex = new(
+    public static readonly Regex PhoneNumberRegex = new(@"^\+?\d+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    public static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    public static readonly Regex Icd10DiagnosisRegex = new(
         @"^[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
@@ -17,7 +17,7 @@ public class Patient
     public Address? Address { get; private set; }
     public PatientInsuranceStatus InsuranceStatus { get; private set; } = PatientInsuranceStatus.Privat;
     public string ICD10Diagnosis { get; private set; } = "";
-    public string email { get; private set; } = "";
+    public string Email { get; private set; } = "";
     public string PhoneNumber { get; private set; } = "";
 
 
@@ -74,6 +74,6 @@ public class Patient
         if (string.IsNullOrWhiteSpace(value) || !EmailRegex.IsMatch(value))
             throw new ArgumentException("Email must be in a valid format like xxx@xx.xx.", nameof(newEmail));
 
-        email = value;
+        Email = value;
     }
 }
