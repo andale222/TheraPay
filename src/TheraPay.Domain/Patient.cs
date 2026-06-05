@@ -30,9 +30,20 @@ public class Patient
         ID = id;
     }
 
+    public void SetName(string firstName, string lastName)
+    {
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
+    }
+
     public void SetAddress(Address address)
     {
         Address = address ?? throw new ArgumentNullException(nameof(address));
+    }
+
+    public void ClearAddress()
+    {
+        Address = null;
     }
 
     public void SetAddress(
@@ -54,6 +65,12 @@ public class Patient
     public void SetPhoneNumber(string newPhoneNumber)
     {
         string value = newPhoneNumber.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            PhoneNumber = "";
+            return;
+        }
+
         if (!PhoneNumberRegex.IsMatch(value))
             throw new ArgumentException("Phone number may only contain digits and an optional leading '+'.", nameof(newPhoneNumber));
 
@@ -63,6 +80,12 @@ public class Patient
     public void SetICD10Diagnosis(string newDiagnosis)
     {
         string value = newDiagnosis.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ICD10Diagnosis = "";
+            return;
+        }
+
         if (!Icd10DiagnosisRegex.IsMatch(value))
             throw new ArgumentException("Diagnosis must be a valid ICD-10-CM code.", nameof(newDiagnosis));
 
@@ -72,6 +95,12 @@ public class Patient
     public void SetEmail(string newEmail)
     {
         string value = newEmail.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Email = "";
+            return;
+        }
+
         if (!EmailRegex.IsMatch(value))
             throw new ArgumentException("Email must be in a valid format like xxx@xx.xx.", nameof(newEmail));
 

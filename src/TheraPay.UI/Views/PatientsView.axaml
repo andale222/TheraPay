@@ -7,7 +7,7 @@
              x:DataType="vm:PatientsViewModel">
 
   <StackPanel Margin="16" Spacing="8">
-    <TextBlock Text="Patient hinzufügen/bearbeiten" FontSize="18"/>
+    <TextBlock Text="{Binding PatientFormTitle}" FontSize="18"/>
 
     <Grid ColumnDefinitions="Auto,*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="16">
 
@@ -22,7 +22,7 @@
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Patienten ID" FontSize="15"/>
-       <TextBox Width="160" Watermark="Patienten ID" Text="{Binding PatientFields.PatientID, Mode=TwoWay}"/>
+       <TextBox Width="160" Watermark="Patienten ID" IsEnabled="{Binding IsPatientIdEditable}" Text="{Binding PatientFields.PatientID, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="IC-Diagnose" FontSize="15"/>
@@ -87,7 +87,7 @@
     </StackPanel>
     <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
       <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right"/>
-      <Button Content="Hinzufügen" Command="{Binding AddPatientCommand}" Background="#71CE82" HorizontalAlignment="Right"/>
+      <Button Content="{Binding SavePatientButtonText}" Command="{Binding AddPatientCommand}" Background="#71CE82" HorizontalAlignment="Right"/>
       <TextBlock Text="{Binding CheckDataMessage}" TextWrapping="Wrap" MaxWidth="260" HorizontalAlignment="Right" Foreground="Red" FontWeight="Bold"/>
     </StackPanel>
 

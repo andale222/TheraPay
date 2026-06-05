@@ -88,7 +88,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
         _nav = nav;
 
         _editCommand = new RelayCommand(
-            execute: () => _nav.NavigateTo<PatientsViewModel>(),
+            execute: () => _nav.NavigateTo<PatientsViewModel>(vm => vm.LoadPatientForEdit(SelectedPatient!.Id)),
             canExecute: () => SelectedPatient is not null);
 
         _toggleActiveCommand = new RelayCommand(
@@ -133,11 +133,23 @@ public sealed class PatientPanelViewModel : ViewModelBase
                 Id = p.ID,
                 Name = p.LastName,
                 Vorname = p.FirstName,
-                Versicherungsart = p.InsuranceStatus.ToString()
+                Adresse = FormatAddress(p.Address),
+                Email = p.Email,
+                Telefon = p.PhoneNumber,
+                Versicherungsart = p.InsuranceStatus.ToString(),
+                Diagnose = p.ICD10Diagnosis
             });
         }
 
         SelectedPatient = Patients.FirstOrDefault();
+    }
+
+    private static string FormatAddress(Address? address)
+    {
+        if (address is null)
+            return "";
+
+        return $"{address.GetStreetNr()}, {address.GetPostalCodeCity()}";
     }
 
     public sealed class PatientRowVm

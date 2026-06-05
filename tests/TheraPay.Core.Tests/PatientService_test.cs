@@ -158,4 +158,77 @@ public class PatientService_test
         Assert.False(result.Ok);
     }
 
+    [Fact]
+    public void GivenExistingPatient_UpdatePatient_AllFieldsAreUpdated()
+    {
+        // GIVEN
+        InMemoryPatientRepository repository = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        PatientService service = new PatientService(repository);
+
+        // WHEN
+        Result result = service.UpdatePatient(
+            "L5R",
+            "  Grace  ",
+            "  Hopper  ",
+            "Compiler Street",
+            "7",
+            "54321",
+            "Arlington",
+            "USA",
+            "rear entrance",
+            "grace@example.com",
+            "+987",
+            "A12",
+            "GKV",
+            false);
+
+        Patient patient = repository.GetById("L5R");
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(2, repository.Count());
+        Assert.Equal("Grace", patient.FirstName);
+        Assert.Equal("Hopper", patient.LastName);
+        Assert.Equal("L5R", patient.ID);
+        Assert.NotNull(patient.Address);
+        Assert.Equal("Compiler Street", patient.Address.Street);
+        Assert.Equal("7", patient.Address.HouseNumber);
+        Assert.Equal("54321", patient.Address.PostalCode);
+        Assert.Equal("Arlington", patient.Address.City);
+        Assert.Equal("USA", patient.Address.Country);
+        Assert.Equal("rear entrance", patient.Address.Additional);
+        Assert.Equal("grace@example.com", patient.Email);
+        Assert.Equal("+987", patient.PhoneNumber);
+        Assert.Equal("A12", patient.ICD10Diagnosis);
+        Assert.Equal(PatientInsuranceStatus.GKV, patient.InsuranceStatus);
+        Assert.False(patient.IsActive);
+    }
+
+    [Fact]
+    public void GivenUnknownPatient_UpdatePatient_ResultIsNotOk()
+    {
+        // GIVEN
+        PatientService service = TestData.getPatientServiceWithInMemoryPatientRepositoryWithTwoPatients();
+
+        // WHEN
+        Result result = service.UpdatePatient(
+            "unknown",
+            "Grace",
+            "Hopper",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Privat",
+            true);
+
+        // THEN
+        Assert.False(result.Ok);
+    }
+
 }

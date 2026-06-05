@@ -45,17 +45,29 @@ public class PatientService
 
         Patient patient = new Patient(firstName.Trim(), lastName.Trim(), id.Trim());
 
-        ModifyAddress(patient, street, houseNumber, postalCode, place, country, additionalInfo);
-        ModifyContactData(patient, email, phoneNumber);
-        ModifyDiagnosis(patient, diagnosis);
-        SetInsuranceStatus(patient, insuranceStatus);
-        SetActivityStatus(patient, isActive);
+        Result applyResult = ApplyPatientFormData(
+            patient,
+            firstName,
+            lastName,
+            street,
+            houseNumber,
+            postalCode,
+            place,
+            country,
+            additionalInfo,
+            email,
+            phoneNumber,
+            diagnosis,
+            insuranceStatus,
+            isActive);
+
+        if (applyResult.Ok == false)
+            return applyResult;
 
         return _repository.Add(patient);
     }
 
-    public Result CheckPatientData(
-        string id,
+    private Result CheckOtherPatientData(
         string email,
         string phoneNumber,
         string postalCode,
@@ -63,17 +75,6 @@ public class PatientService
     {
         string resultMsg = "";
         bool resultStatus = true;
-        string trimmedId = id.Trim();
-        if (string.IsNullOrWhiteSpace(trimmedId))
-        {
-            resultStatus = false;
-            resultMsg += "Patienten-ID ist erforderlich.";
-        }
-        if (_repository.GetIndexById(trimmedId) >= 0)
-        {
-            resultStatus = false;
-            resultMsg += $"Patienten-ID '{trimmedId}' ist bereits vorhanden.";
-        }
 
         Result result;
         if ((result = CheckEmail(email)).Ok == false)
@@ -99,6 +100,106 @@ public class PatientService
 
         return new Result(resultStatus, resultMsg);
     }
+    public Result CheckPatientData(
+        string id,
+        string email,
+        string phoneNumber,
+        string postalCode,
+        string diagnosis)
+    {
+        string resultMsg = "";
+        bool resultStatus = true;
+        string trimmedId = id.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedId))
+        {
+            resultStatus = false;
+            resultMsg += "Patienten-ID ist erforderlich.";
+        }
+        if (_repository.GetIndexById(trimmedId) >= 0)
+        {
+            resultStatus = false;
+            resultMsg += $"Patienten-ID '{trimmedId}' ist bereits vorhanden.";
+        }
+
+        Result result = CheckOtherPatientData(email, phoneNumber, postalCode, diagnosis);
+
+        return new Result(resultStatus && result.Ok, resultMsg+result.Error);
+    }
+
+    public Result CheckPatientUpdateData(
+        string id,
+        string email,
+        string phoneNumber,
+        string postalCode,
+        string diagnosis)
+    {
+        string resultMsg = "";
+        bool resultStatus = true;
+        string trimmedId = id.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedId))
+        {
+            resultStatus = false;
+            resultMsg += "Patienten-ID ist erforderlich.";
+        }
+        else if (_repository.GetIndexById(trimmedId) < 0)
+        {
+            resultStatus = false;
+            resultMsg += $"Patienten-ID '{trimmedId}' wurde nicht gefunden.";
+        }
+
+        Result result = CheckOtherPatientData(email, phoneNumber, postalCode, diagnosis);
+
+        return new Result(resultStatus && result.Ok, resultMsg+result.Error);
+    }
+
+    public Patient? FindPatientById(string id)
+    {
+        string trimmedId = id.Trim();
+        int index = _repository.GetIndexById(trimmedId);
+        return index >= 0 ? _repository.GetByIndex(index) : null;
+    }
+
+    public Result UpdatePatient(
+        string id,
+        string firstName,
+        string lastName,
+        string street,
+        string houseNumber,
+        string postalCode,
+        string place,
+        string? country,
+        string? additionalInfo,
+        string email,
+        string phoneNumber,
+        string diagnosis,
+        string insuranceStatus,
+        bool isActive)
+    {
+        string trimmedId = id.Trim();
+        Result checkResult = CheckPatientUpdateData(trimmedId, email, phoneNumber, postalCode, diagnosis);
+        if (checkResult.Ok == false)
+            return checkResult;
+
+        Patient? patient = FindPatientById(trimmedId);
+        if (patient is null)
+            return new Result(false, $"Patienten-ID '{trimmedId}' wurde nicht gefunden.");
+
+        return ApplyPatientFormData(
+            patient,
+            firstName,
+            lastName,
+            street,
+            houseNumber,
+            postalCode,
+            place,
+            country,
+            additionalInfo,
+            email,
+            phoneNumber,
+            diagnosis,
+            insuranceStatus,
+            isActive);
+    }
 
     public void ModifyAddress(
         Patient patient,
@@ -110,6 +211,95 @@ public class PatientService
         string? additionalInfo = null)
     {
         patient.SetAddress(new Address(street, houseNumber, postalCode, place, country, additionalInfo));
+    }
+
+    private Result ApplyPatientFormData(
+        Patient patient,
+        string firstName,
+        string lastName,
+        string street,
+        string houseNumber,
+        string postalCode,
+        string place,
+        string? country,
+        string? additionalInfo,
+        string email,
+        string phoneNumber,
+        string diagnosis,
+        string insuranceStatus,
+        bool isActive)
+    {
+        try
+        {
+            patient.SetName(firstName, lastName);
+
+            Result addressResult = ModifyAddressFromFormData(
+                patient,
+                street,
+                houseNumber,
+                postalCode,
+                place,
+                country,
+                additionalInfo);
+            if (addressResult.Ok == false)
+                return addressResult;
+
+            Result contactResult = ModifyContactData(patient, email, phoneNumber);
+            if (contactResult.Ok == false)
+                return contactResult;
+
+            Result diagnosisResult = ModifyDiagnosis(patient, diagnosis);
+            if (diagnosisResult.Ok == false)
+                return diagnosisResult;
+
+            SetInsuranceStatus(patient, insuranceStatus);
+            SetActivityStatus(patient, isActive);
+
+            return new Result(true);
+        }
+        catch (ArgumentException ex)
+        {
+            return new Result(false, ex.Message);
+        }
+    }
+
+    private Result ModifyAddressFromFormData(
+        Patient patient,
+        string street,
+        string houseNumber,
+        string postalCode,
+        string place,
+        string? country,
+        string? additionalInfo)
+    {
+        bool hasRequiredAddressData =
+            string.IsNullOrWhiteSpace(street) == false ||
+            string.IsNullOrWhiteSpace(houseNumber) == false ||
+            string.IsNullOrWhiteSpace(postalCode) == false ||
+            string.IsNullOrWhiteSpace(place) == false;
+        bool hasOptionalAddressData =
+            string.IsNullOrWhiteSpace(country) == false ||
+            string.IsNullOrWhiteSpace(additionalInfo) == false;
+
+        if (hasRequiredAddressData == false)
+        {
+            if (hasOptionalAddressData)
+                return new Result(false, "Adressdaten sind unvollständig: Straße, Hausnr., PLZ und Ort sind erforderlich.");
+
+            patient.ClearAddress();
+            return new Result(true);
+        }
+
+        if (string.IsNullOrWhiteSpace(street) ||
+            string.IsNullOrWhiteSpace(houseNumber) ||
+            string.IsNullOrWhiteSpace(postalCode) ||
+            string.IsNullOrWhiteSpace(place))
+        {
+            return new Result(false, "Adressdaten sind unvollständig: Straße, Hausnr., PLZ und Ort sind erforderlich.");
+        }
+
+        ModifyAddress(patient, street, houseNumber, postalCode, place, country, additionalInfo);
+        return new Result(true);
     }
 
     public Result CheckEmail(string email)
