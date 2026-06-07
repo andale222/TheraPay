@@ -157,6 +157,8 @@ public sealed record InvoiceAppointmentData
     public string AppointmentId { get; init; } = "";
     public string PatientId { get; init; } = "";
     public decimal TotalAmount { get; init; } = 0m;
+    public IReadOnlyList<BillingNumber> BillingNumbers { get; init; } = [];
+
     public static InvoiceAppointmentData FromAppointmentData(Appointment data)
     {
         if (data == null)
@@ -167,7 +169,8 @@ public sealed record InvoiceAppointmentData
             AppointmentId = data.Id.ToString("D"),
             Date = data.Date,
             PatientId = data.PatientID,
-            TotalAmount = data.TotalAmount
+            TotalAmount = data.TotalAmount,
+            BillingNumbers = data.BillingNumbers.ToList()
         };
     }
 }

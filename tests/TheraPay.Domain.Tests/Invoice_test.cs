@@ -10,6 +10,9 @@ public class Invoice_test
     {
         Appointment appointment1 = TestData.Appointment1();
         Appointment appointment2 = TestData.Appointment1_2();
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+        appointment1.AssignBillingNumber(billingNumber);
+        appointment2.AssignBillingNumber(billingNumber);
         var appointmentData = new List<InvoiceAppointmentData>()
         {
             InvoiceAppointmentData.FromAppointmentData(appointment1),
@@ -73,6 +76,7 @@ public class Invoice_test
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(appointmentData[0].AppointmentId, invoice.AppointmentDataList[0].AppointmentId);
         Assert.Equal(appointmentData[0].Date, invoice.AppointmentDataList[0].Date);
+        Assert.Equal(appointmentData[0].BillingNumbers, invoice.AppointmentDataList[0].BillingNumbers);
     }
     [Fact]
     public void GivenInvoicesAppointmentData_CreateInvoice_InvoiceHasCorrectTotalAmount()
@@ -86,7 +90,7 @@ public class Invoice_test
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
 
         // THEN
-        Assert.Equal(2.468m, invoice.TotalAmount); // TODO: add actual correct amount!
+        Assert.Equal(appointmentData.Sum(appointment => appointment.TotalAmount), invoice.TotalAmount);
     }
     [Fact]
     public void GivenInvoiceData_CreateInvoice_InvoiceIsDraft()
