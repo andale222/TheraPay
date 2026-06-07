@@ -170,7 +170,8 @@
         <Button Content="Speichern"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"
-                MinWidth="170" />
+                MinWidth="170"
+                IsEnabled="False" />
         <Button Content="Speichern und zu Home"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"
