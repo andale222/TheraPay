@@ -56,9 +56,14 @@ public static class BillingNumberCatalog
     private static readonly IReadOnlyList<BillingNumber> SeedBillingNumbers =
     [
         // Temporary seed data until this catalogue is backed by an editable CSV database.
-        new("801a", 2.30m, 58.286956521739m, "Psychotherapeutische Sprechstunde (25 Min.)", BillingNumberType.Privat),
-        new("870", 1.90m, 36.842105263158m, "Psychotherapeutische Behandlung", BillingNumberType.Kostenerstattung),
-        new("S-001", 1.00m, 100.00m, "Selbstzahler-Sitzung", BillingNumberType.Selbstzahler)
+        new("0", 1.00m, 110.00m, "Psychotherapeutisches Erstgespräch", BillingNumberType.Privat),
+        new("801a", 2.30m, 14.57m, "Erhebung des aktuellen psychischen Befundes", BillingNumberType.Privat),
+        new("812a", 2.30m, 29.14m, "Psychotherapeutische Sprechstunde (25 Min.)", BillingNumberType.Privat),
+        new("860", 2.30m, 53.62m, "Biographische Anamnese", BillingNumberType.Privat),
+        new("861", 2.30m, 40.22m, "Tiefenpsychologisch fundierte Psychotherapie, Einzelbehandlung (50 Min.)", BillingNumberType.Privat),
+        new("870", 2.30m, 43.72m, "Verhaltenstherapie, Einzelbehandlung (50 Min.)", BillingNumberType.Privat),
+        new("870", 1.90m, 43.72m, "Psychotherapeutische Behandlung", BillingNumberType.Kostenerstattung),
+        new("S-01", 1.00m, 100.00m, "Selbstzahler-Sitzung", BillingNumberType.Selbstzahler)
     ];
 
     public static IReadOnlyList<BillingNumber> GetDefaultNumbers()
