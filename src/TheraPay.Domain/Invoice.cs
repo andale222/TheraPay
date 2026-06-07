@@ -4,6 +4,7 @@ namespace TheraPay.Domain;
 
 public class Invoice
 {
+    public const string DefaultSubject = "Ambulante Psychotherapie";
     public InvoicePatientData PatientData { get; private set; }
     public PracticeDataRecord PracticeDataRecord { get; private set; }
     private List<InvoiceAppointmentData> _appointmentDataList = new List<InvoiceAppointmentData>();
@@ -15,6 +16,7 @@ public class Invoice
     public DateTime DueDate { get; private set; }
     public string InvoiceNumber { get; private set; } = "";
     public string AdditionalText { get; private set; } = "";
+    public string Subject { get; private set; } = DefaultSubject;
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
     {
@@ -60,7 +62,11 @@ public class Invoice
 
     private bool IsEditable() => Status == InvoiceStatus.Draft;
 
-    public Result SetDraftDetails(DateTime issueDate, int paymentTermInDays, string additionalText = "")
+    public Result SetDraftDetails(
+        DateTime issueDate,
+        int paymentTermInDays,
+        string additionalText = "",
+        string subject = DefaultSubject)
     {
         if (!IsEditable())
             return new Result(false, "Issue is not editable anymore.");
@@ -72,6 +78,7 @@ public class Invoice
         PracticeDataRecord = PracticeDataRecord with { DefaultPaymentTermDays = paymentTermInDays };
         DueDate = IssueDate.AddDays(paymentTermInDays);
         AdditionalText = additionalText ?? "";
+        Subject = string.IsNullOrWhiteSpace(subject) ? DefaultSubject : subject.Trim();
 
         return new Result(true);
     }

@@ -99,7 +99,8 @@ public class BillingService_test
             TestData.PracticeData1(),
             issueDate,
             21,
-            "Zusatztext");
+            "Zusatztext",
+            "Ambulante Gruppentherapie");
 
         // THEN
         Assert.True(result.Ok);
@@ -108,6 +109,7 @@ public class BillingService_test
         Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
         Assert.Equal(21, invoice.PracticeDataRecord.DefaultPaymentTermDays);
         Assert.Equal("Zusatztext", invoice.AdditionalText);
+        Assert.Equal("Ambulante Gruppentherapie", invoice.Subject);
     }
 
     [Fact]

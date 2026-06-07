@@ -37,6 +37,7 @@ public class Invoice_test
         Assert.NotEqual(Guid.Empty, invoice.Id);
         Assert.Equal(patientData.Name, invoice.PatientData.Name);
         Assert.Equal(patientData.Id, invoice.PatientData.Id);
+        Assert.Equal(Invoice.DefaultSubject, invoice.Subject);
     }
 
     [Fact]
@@ -104,7 +105,7 @@ public class Invoice_test
         var issueDate = new DateTime(2026, 3, 13);
 
         // WHEN
-        var result = invoice.SetDraftDetails(issueDate, 21, "Bitte beachten.");
+        var result = invoice.SetDraftDetails(issueDate, 21, "Bitte beachten.", "Individuelle Therapie");
 
         // THEN
         Assert.True(result.Ok);
@@ -112,6 +113,7 @@ public class Invoice_test
         Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
         Assert.Equal(21, invoice.PracticeDataRecord.DefaultPaymentTermDays);
         Assert.Equal("Bitte beachten.", invoice.AdditionalText);
+        Assert.Equal("Individuelle Therapie", invoice.Subject);
     }
     [Fact]
     public void GivenInvoiceData_CreateInvoice_InvoiceIsDraft()

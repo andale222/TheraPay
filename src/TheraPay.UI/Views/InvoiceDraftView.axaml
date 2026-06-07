@@ -64,8 +64,6 @@
               <TextBox Text="{Binding PracticeBlz}" />
               <TextBlock Text="Bankname" />
               <TextBox Text="{Binding PracticeBankName}" />
-              <TextBlock Text="Betreff der Rechnung" />
-              <TextBox Text="{Binding InvoiceSubject}" />
             </StackPanel>
           </StackPanel>
         </Border>
@@ -135,6 +133,8 @@
                 CornerRadius="8">
           <StackPanel Spacing="8">
             <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
+            <TextBlock Text="Subject" />
+            <TextBox Text="{Binding InvoiceSubject, Mode=TwoWay}" />
             <StackPanel Spacing="8" Orientation= "Horizontal">
               <StackPanel Spacing="8" Orientation= "Vertical">
                 <TextBlock Text="Rechnungsdatum" />
@@ -150,9 +150,11 @@
             </StackPanel>
             <TextBlock Text="{Binding DueDatePreview, StringFormat='Faelligkeitsdatum: {0}'}" />
             <CheckBox Content="Unterschriftbereich einfuegen"
-                      IsChecked="{Binding IncludeSignatureSection}" />
+                      IsChecked="{Binding IncludeSignatureSection}" 
+                      IsEnabled="False"/>
             <CheckBox Content="QR-Code fuer Rechnungsdetails erzeugen"
-                      IsChecked="{Binding IncludeQrCode}" />
+                      IsChecked="{Binding IncludeQrCode}" 
+                      IsEnabled="False"/>
           </StackPanel>
         </Border>
       </Grid>

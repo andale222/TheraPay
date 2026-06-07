@@ -52,7 +52,7 @@ public class InvoiceModelFactory
                 Iban: invoice.PracticeDataRecord.PaymentDetails.IBAN,
                 Bic: invoice.PracticeDataRecord.PaymentDetails.BLZ,
                 BankName: invoice.PracticeDataRecord.PaymentDetails.BankName,
-                Subject: invoice.InvoiceNumber,
+                Subject: invoice.Subject,
                 PatientName: invoice.PatientData.Name,
                 TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
                 Diagnosis: "F41.3",

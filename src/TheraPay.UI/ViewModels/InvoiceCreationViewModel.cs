@@ -36,6 +36,12 @@ public class InvoiceCreationViewModel : ViewModelBase
         get => _additionalText;
         set { _additionalText = value; OnPropertyChanged(); }
     }
+    private string _subject = Invoice.DefaultSubject;
+    public string Subject
+    {
+        get => _subject;
+        set { _subject = value; OnPropertyChanged(); }
+    }
     public ObservableCollection<AppointmentRowVm> Appointments { get; } = new();
     public PatientPanelViewModel PatientsPanel { get; }
     public RelayCommand NavigateHomeViewCommand { get; }
@@ -150,7 +156,8 @@ public class InvoiceCreationViewModel : ViewModelBase
             _session.PracticeData,
             IssueDate ?? DateTime.Today,
             PaymentTermInDays,
-            AdditionalText);
+            AdditionalText,
+            Subject);
     }
 
     private void OnPatientsPanelPropertyChanged(object? sender, PropertyChangedEventArgs e)

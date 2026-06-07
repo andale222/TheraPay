@@ -61,7 +61,8 @@ public class BillingService
         PracticeData practiceData,
         DateTime? issueDate = null,
         int? paymentTermInDays = null,
-        string additionalText = "")
+        string additionalText = "",
+        string subject = Invoice.DefaultSubject)
     {
         try
         {
@@ -109,7 +110,8 @@ public class BillingService
             var draftDetailsResult = invoice.SetDraftDetails(
                 issueDate ?? DateTime.Today,
                 practiceDataRecord.DefaultPaymentTermDays,
-                additionalText);
+                additionalText,
+                subject);
             if (!draftDetailsResult.Ok)
                 return new Result(false, draftDetailsResult.Error);
 

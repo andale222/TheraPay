@@ -81,6 +81,7 @@ public class InvoiceModelFactory_test
         var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
         var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
         var issueDate = new DateTime(2026, 3, 13);
+        invoice.SetDraftDetails(issueDate, 21, subject: "Ambulante Gruppentherapie");
         invoice.Issue(practiceDataRecord, $"{issueDate:yyyyMM}-1201", issueDate);
         var factory = new InvoiceModelFactory();
 
@@ -90,5 +91,6 @@ public class InvoiceModelFactory_test
         // THEN
         Assert.Equal(issueDate, model.IssueDate.ToDateTime(TimeOnly.MinValue));
         Assert.Equal(21, model.PaymentTermInDays);
+        Assert.Equal("Ambulante Gruppentherapie", model.Subject);
     }
 }

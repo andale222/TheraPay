@@ -47,8 +47,12 @@
                           DataContext="{Binding PatientsPanel}" />
 
     <StackPanel Spacing="8" Grid.Row="0" Grid.Column="1" Orientation="Vertical" >
-        <TextBlock Text="Rechnungsdetails" FontSize="16"/>
 
+        <StackPanel Spacing="8" Orientation="Vertical" >
+        <TextBlock Text="Rechnungsdetails" FontSize="16" />
+        <TextBlock Text="Subject:"/>
+        <TextBox Text="{Binding Subject, Mode=TwoWay}" Width="320" HorizontalAlignment="Left" />
+        </StackPanel>
 
         <StackPanel Spacing="8" Orientation="Horizontal" >
             <StackPanel Spacing="8" Orientation="Vertical" >
@@ -59,7 +63,7 @@
                 <TextBlock Text="Zahlungsfrist:"/>
                   <StackPanel Spacing="8" Orientation="Horizontal" >
                     <TextBox Text="{Binding PaymentTermInDays, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="20" Width= "30" TextWrapping="Wrap"/>
-                    <TextBlock Text="Tage ()"/>
+                    <TextBlock Text="Tage"/>
                   </StackPanel>
             </StackPanel>
         </StackPanel>

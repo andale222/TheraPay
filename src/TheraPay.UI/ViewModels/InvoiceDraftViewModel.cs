@@ -293,7 +293,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeIban = practiceData.IBAN;
         PracticeBlz = practiceData.BLZ ?? "";
         PracticeBankName = practiceData.BankName ?? "";
-        InvoiceSubject = practiceData.Subject ?? "Rechnung";
+        InvoiceSubject = Invoice.DefaultSubject;
         PracticeStreet = practiceData.Street;
         PracticeHouseNumber = practiceData.HouseNumber;
         PracticePostalCode = practiceData.PostalCode;
@@ -302,7 +302,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeAddressAdditional = practiceData.AddressAdditional ?? "";
         InvoiceDate = DateTime.Today;
         IncludeSignatureSection = true;
-        IncludeQrCode = true;
+        IncludeQrCode = false;
     }
 
     private void LoadLatestDraft()
@@ -337,7 +337,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeIban = latestDraft.PracticeDataRecord.PaymentDetails.IBAN;
         PracticeBlz = latestDraft.PracticeDataRecord.PaymentDetails.BLZ ?? "";
         PracticeBankName = latestDraft.PracticeDataRecord.PaymentDetails.BankName ?? "";
-        InvoiceSubject = latestDraft.PracticeDataRecord.PaymentDetails.Subject ?? "Rechnung";
+        InvoiceSubject = latestDraft.Subject;
         PracticeStreet = latestDraft.PracticeDataRecord.Address.Street;
         PracticeHouseNumber = latestDraft.PracticeDataRecord.Address.HouseNumber;
         PracticePostalCode = latestDraft.PracticeDataRecord.Address.PostalCode;
@@ -441,15 +441,19 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             PaymentDetails = new PaymentDetails(
                 PracticeIban,
                 string.IsNullOrWhiteSpace(PracticeBlz) ? null : PracticeBlz,
-                string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName,
-                string.IsNullOrWhiteSpace(InvoiceSubject) ? null : InvoiceSubject),
+                string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName),
             DefaultPaymentTermDays = PaymentTermInDays
         };
     }
 
     private void ApplyInvoiceDraftDetails()
     {
-        _currentDraft?.SetDraftDetails(InvoiceDate, PaymentTermInDays);
+        if (_currentDraft is null)
+        {
+            return;
+        }
+
+        _currentDraft.SetDraftDetails(InvoiceDate, PaymentTermInDays, _currentDraft.AdditionalText, InvoiceSubject);
     }
 
     private void ApplyPracticeDraftToSession()
@@ -459,7 +463,6 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _session.PracticeData.IBAN = PracticeIban;
         _session.PracticeData.BLZ = string.IsNullOrWhiteSpace(PracticeBlz) ? null : PracticeBlz;
         _session.PracticeData.BankName = string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName;
-        _session.PracticeData.Subject = string.IsNullOrWhiteSpace(InvoiceSubject) ? null : InvoiceSubject;
         _session.PracticeData.Street = PracticeStreet;
         _session.PracticeData.HouseNumber = PracticeHouseNumber;
         _session.PracticeData.PostalCode = PracticePostalCode;
