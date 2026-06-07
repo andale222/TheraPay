@@ -319,7 +319,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeAddressAdditional = practiceData.AddressAdditional ?? "";
         InvoiceDate = DateTime.Today;
         IncludeSignatureSection = true;
-        IncludeQrCode = false;
+        IncludeQrCode = true;
         PdfExportDirectory = ResolveDefaultPdfExportDirectory();
     }
 
@@ -441,7 +441,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             var invoiceNumber = issueingResult.Error ?? "Unbekannt";
             var exportPath = Path.Combine(exportDirectory, BuildPdfFileName(invoiceNumber));
 
-            _invoiceExporter.Export(_currentDraft, exportPath);
+            _invoiceExporter.Export(_currentDraft, exportPath, IncludeQrCode);
 
             ApplyPracticeDraftToSession();
             _session.MarkUnsavedChanges();

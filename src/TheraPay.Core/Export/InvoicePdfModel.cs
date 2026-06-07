@@ -25,7 +25,8 @@ public sealed record InvoicePdfModel(
     IReadOnlyList<InvoicePdfLineModel> Lines,
     decimal TotalAmountEuro,
     int PaymentTermInDays = 14,
-    string Anrede = "Sehr geehrte Frau ");
+    string Anrede = "Sehr geehrte Frau ",
+    bool IncludePaymentQrCode = true);
 
 public sealed record InvoicePdfLineModel(
     DateTime AppointmentStart,
