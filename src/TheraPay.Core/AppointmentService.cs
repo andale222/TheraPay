@@ -29,10 +29,18 @@ public class AppointmentService
         return appointments;
     }
 
-    public Result AddAppointment(DateTime date, string patientID, int durationInMinutes)
+    public Result AddAppointment(
+        DateTime date,
+        string patientID,
+        int durationInMinutes,
+        IEnumerable<BillingNumber>? billingNumbers = null)
     {
         Appointment appointment = new Appointment(date, patientID);
         appointment.SetDuration(durationInMinutes);
+        if (billingNumbers != null)
+        {
+            appointment.SetBillingNumbers(billingNumbers);
+        }
 
         if (_repository.GetAll().Any(a => a.OverlapsWith(appointment)))
         {

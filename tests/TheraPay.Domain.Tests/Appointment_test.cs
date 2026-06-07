@@ -43,6 +43,29 @@ public class Appointment_test
     }
 
     [Fact]
+    public void GivenPersistedAppointmentDataWithBillingNumbers_RehydrateAppointment_AppointmentHasBillingNumbers()
+    {
+        // GIVEN
+        var id = Guid.Parse("89ec0878-12eb-42a3-9041-13a9d5f22f01");
+        DateTime date = new DateTime(2026, 1, 1, 14, 0, 0);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+
+        // WHEN
+        var appointment = Appointment.Rehydrate(
+            id,
+            date,
+            "L5R",
+            60,
+            AppointmentStatus.Open,
+            [billingNumber]);
+
+        // THEN
+        Assert.Single(appointment.BillingNumbers);
+        Assert.Equal(billingNumber, appointment.BillingNumbers[0]);
+        Assert.Equal(billingNumber.Amount, appointment.TotalAmount);
+    }
+
+    [Fact]
     public void GivenEmptyId_RehydrateAppointment_ThrowsArgumentException()
     {
         // WHEN THEN
@@ -114,6 +137,40 @@ public class Appointment_test
         // THEN
         Assert.Equal(expectedEnd, appointment.End);
     }
+
+    [Fact]
+    public void GivenAppointment_AssignBillingNumber_BillingNumberListAndTotalAreUpdated()
+    {
+        // GIVEN
+        var appointment = CreateAppointment();
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+
+        // WHEN
+        appointment.AssignBillingNumber(billingNumber);
+        appointment.AssignBillingNumber(billingNumber);
+
+        // THEN
+        Assert.Equal(2, appointment.BillingNumbers.Count);
+        Assert.Equal(billingNumber.Amount * 2, appointment.TotalAmount);
+    }
+
+    [Fact]
+    public void GivenAppointment_RemoveBillingNumber_BillingNumberIsRemoved()
+    {
+        // GIVEN
+        var appointment = CreateAppointment();
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+        appointment.AssignBillingNumber(billingNumber);
+
+        // WHEN
+        var wasRemoved = appointment.RemoveBillingNumber("801A");
+
+        // THEN
+        Assert.True(wasRemoved);
+        Assert.Empty(appointment.BillingNumbers);
+        Assert.Equal(0m, appointment.TotalAmount);
+    }
+
     [Fact]
     public void GivenTwoAppointments_OverlappingEnd_ReturnsTrue()
     {        // GIVEN

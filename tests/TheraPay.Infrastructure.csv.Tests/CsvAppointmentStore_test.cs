@@ -51,6 +51,8 @@ public class CsvAppointmentStore_test
         Assert.Equal(Guid.Parse("22222222-2222-2222-2222-222222222222"), appointments[1].Id);
         Assert.Equal(AppointmentStatus.Open, appointments[0].Status);
         Assert.Equal(AppointmentStatus.Billed, appointments[1].Status);
+        Assert.Empty(appointments[0].BillingNumbers);
+        Assert.Empty(appointments[1].BillingNumbers);
     }
 
     [Fact]
@@ -95,7 +97,34 @@ public class CsvAppointmentStore_test
             Assert.Equal(appointments[i].DurationInMinutes, loadedAppointments[i].DurationInMinutes);
             Assert.Equal(appointments[i].PatientID, loadedAppointments[i].PatientID);
             Assert.Equal(appointments[i].Id, loadedAppointments[i].Id);
+            Assert.Empty(loadedAppointments[i].BillingNumbers);
         }
+
+        File.Delete(filePath);
+        Assert.False(File.Exists(filePath));
+    }
+
+    [Fact]
+    public void GivenAppointmentWithBillingNumbers_SaveAllLoadAll_SavesAndLoadsBillingNumbers()
+    {
+        // Given
+        var filePath = TestPaths.DataFile("testRoundtripAppointmentsWithBillingNumbers.csv");
+        var csvAppointmentStore = new CsvAppointmentStore(filePath);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+        var appointment = new Appointment(DateTime.Now, "Pat1");
+        appointment.AssignBillingNumber(billingNumber);
+        appointment.AssignBillingNumber(billingNumber);
+        var appointments = new List<Appointment> { appointment };
+
+        // When
+        csvAppointmentStore.SaveAll(appointments);
+        var loadedAppointments = csvAppointmentStore.LoadAll();
+
+        // Then
+        Assert.Single(loadedAppointments);
+        Assert.Equal(2, loadedAppointments[0].BillingNumbers.Count);
+        Assert.Equal(billingNumber, loadedAppointments[0].BillingNumbers[0]);
+        Assert.Equal(billingNumber.Amount * 2, loadedAppointments[0].TotalAmount);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));

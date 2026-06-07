@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using TheraPay.Domain;
 using TheraPay.Core;
@@ -20,6 +21,64 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     public RelayCommand NavigateHomeViewCommand { get; }
     public RelayCommand SaveAppointmentCommand { get; }
     public RelayCommand CheckDataCommand { get; }
+    public RelayCommand AddBillingNumberCommand { get; }
+    public RelayCommand RemoveBillingNumberCommand { get; }
+
+    public ObservableCollection<BillingNumber> AvailableBillingNumbers { get; } = new(BillingNumberCatalog.GetDefaultNumbers());
+    public ObservableCollection<BillingNumber> AssignedBillingNumbers { get; } = [];
+
+    private BillingNumber? _selectedBillingNumber;
+    public BillingNumber? SelectedBillingNumber
+    {
+        get => _selectedBillingNumber;
+        set
+        {
+            _selectedBillingNumber = value;
+            LoadBillingNumberDraft(value);
+            OnPropertyChanged();
+        }
+    }
+
+    private BillingNumber? _selectedAssignedBillingNumber;
+    public BillingNumber? SelectedAssignedBillingNumber
+    {
+        get => _selectedAssignedBillingNumber;
+        set { _selectedAssignedBillingNumber = value; OnPropertyChanged(); }
+    }
+
+    public decimal TotalAmountPreview => AssignedBillingNumbers.Sum(billingNumber => billingNumber.Amount);
+    public decimal DraftAmountPreview => TryReadDraftAmount(out var amount) ? amount : 0m;
+
+    private string _draftDescription = "";
+    public string DraftDescription
+    {
+        get => _draftDescription;
+        set { _draftDescription = value; OnPropertyChanged(); }
+    }
+
+    private string _draftFactor = "";
+    public string DraftFactor
+    {
+        get => _draftFactor;
+        set
+        {
+            _draftFactor = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(DraftAmountPreview));
+        }
+    }
+
+    private string _draftBaseValue = "";
+    public string DraftBaseValue
+    {
+        get => _draftBaseValue;
+        set
+        {
+            _draftBaseValue = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(DraftAmountPreview));
+        }
+    }
 
     private DateTime? _startDate = DateTime.Now.Date; // heute
     public DateTime? StartDate
@@ -63,6 +122,9 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         SaveAppointmentCommand = new RelayCommand(SaveAppointment);
         CheckDataCommand = new RelayCommand(CheckData);
+        AddBillingNumberCommand = new RelayCommand(AddSelectedBillingNumber);
+        RemoveBillingNumberCommand = new RelayCommand(RemoveSelectedBillingNumber);
+        SelectedBillingNumber = AvailableBillingNumbers.FirstOrDefault();
     }
 
     private void NotifyCalculated()
@@ -86,7 +148,11 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
 
         DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
-        _appointmentService.AddAppointment(startDateTime, selectedPatientId, DurationInMinutes ?? 0);
+        _appointmentService.AddAppointment(
+            startDateTime,
+            selectedPatientId,
+            DurationInMinutes ?? 0,
+            AssignedBillingNumbers.ToList());
 
         _session.MarkUnsavedChanges();
 
@@ -99,5 +165,97 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         // - Endzeit nach Startzeit?
         // - Überschneidungen mit anderen Terminen?
         // - Patient ausgewählt?
+    }
+
+    private void AddSelectedBillingNumber()
+    {
+        if (SelectedBillingNumber is null)
+        {
+            return;
+        }
+
+        if (!TryReadDraftValues(out var factor, out var baseValue))
+        {
+            return;
+        }
+
+        var billingNumber = new BillingNumber(
+            SelectedBillingNumber.NumberIdentifier,
+            factor,
+            baseValue,
+            DraftDescription,
+            SelectedBillingNumber.Type);
+
+        AssignedBillingNumbers.Add(billingNumber);
+        SelectedAssignedBillingNumber = billingNumber;
+        OnPropertyChanged(nameof(TotalAmountPreview));
+    }
+
+    private void RemoveSelectedBillingNumber()
+    {
+        if (SelectedAssignedBillingNumber is null)
+        {
+            return;
+        }
+
+        AssignedBillingNumbers.Remove(SelectedAssignedBillingNumber);
+        SelectedAssignedBillingNumber = AssignedBillingNumbers.LastOrDefault();
+        OnPropertyChanged(nameof(TotalAmountPreview));
+    }
+
+    private void LoadBillingNumberDraft(BillingNumber? billingNumber)
+    {
+        if (billingNumber is null)
+        {
+            DraftDescription = "";
+            DraftFactor = "";
+            DraftBaseValue = "";
+            return;
+        }
+
+        DraftDescription = billingNumber.Description;
+        DraftFactor = billingNumber.Factor.ToString("0.##", CultureInfo.CurrentCulture);
+        DraftBaseValue = billingNumber.BaseValue.ToString("0.00", CultureInfo.CurrentCulture);
+    }
+
+    private static bool TryParseDecimal(string value, out decimal result)
+    {
+        value ??= "";
+        var styles = NumberStyles.Number;
+        if (decimal.TryParse(value, styles, CultureInfo.CurrentCulture, out result))
+        {
+            return true;
+        }
+
+        if (decimal.TryParse(value, styles, CultureInfo.GetCultureInfo("de-DE"), out result))
+        {
+            return true;
+        }
+
+        if (decimal.TryParse(value, styles, CultureInfo.InvariantCulture, out result))
+        {
+            return true;
+        }
+
+        return decimal.TryParse(value.Replace(',', '.'), styles, CultureInfo.InvariantCulture, out result);
+    }
+
+    private bool TryReadDraftValues(out decimal factor, out decimal baseValue)
+    {
+        var factorIsValid = TryParseDecimal(DraftFactor, out factor);
+        var baseValueIsValid = TryParseDecimal(DraftBaseValue, out baseValue);
+        return factorIsValid && baseValueIsValid;
+    }
+
+    private bool TryReadDraftAmount(out decimal amount)
+    {
+        if (!TryReadDraftValues(out var factor, out var baseValue))
+        {
+            amount = 0m;
+            return false;
+        }
+
+        amount = Math.Round(factor * baseValue, 2, MidpointRounding.AwayFromZero);
+        return true;
     }
 }

@@ -8,6 +8,7 @@ public sealed class AppointmentCsvRecord
     public string StartDateTime { get; set; } = "";
     public string Duration { get; set; } = "";
     public string PatientId { get; set; } = "";
+    public string BillingNumbersJson { get; set; } = "";
     public bool IsDeleted { get; set; }
     public AppointmentStatus Status {get; set; }
 }

@@ -36,47 +36,68 @@
         </StackPanel>
 
 
-        <StackPanel Spacing="8" Orientation="Horizontal" >
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="Bezeichnung:"/>
-                <TextBox Text="{Binding }" AcceptsReturn="True" Height="50" TextWrapping="Wrap"/>
+        <StackPanel Spacing="8" Orientation="Vertical" >
+            <TextBlock Text="Abrechnungsnummern:"/>
+            <StackPanel Spacing="8" Orientation="Horizontal" >
+                <ComboBox ItemsSource="{Binding AvailableBillingNumbers}"
+                          SelectedItem="{Binding SelectedBillingNumber}"
+                          Width="520">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="domain:BillingNumber">
+                            <Grid Width="490" ColumnDefinitions="70,*" RowDefinitions="Auto,Auto" ColumnSpacing="8">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding NumberIdentifier}" FontWeight="Bold"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Type}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Amount, StringFormat='{}{0:0.00} €'}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
-        </StackPanel>
-        <StackPanel Spacing="8" Orientation="Horizontal" >
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="GOÄ Nr:"/>
-                <TextBox Text="{Binding }" Width="60"/>
-            </StackPanel>
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="Anzahl:"/>
-                <StackPanel Spacing="8" Orientation="Horizontal" >
-                    <TextBox Text="{Binding }" Width="60"/>
-                    <TextBlock Text="Stk."/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="Betrag:"/>
-                <StackPanel Spacing="8" Orientation="Horizontal" >
-                    <TextBox Text="{Binding }" Width="60"/>
-                    <TextBlock Text="€"/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="Faktor:"/>
-                <TextBox Text="{Binding }" Width="60"/>
-            </StackPanel>
-            <StackPanel Spacing="8" Orientation="Vertical" >
-                <TextBlock Text="Gesamtbetrag:"/>
-                <StackPanel Spacing="8" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBox Text="{Binding }" Width="60"/>
-                    <TextBlock Text="€"/>
-                </StackPanel>
-            </StackPanel>
-        </StackPanel>
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,1*,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding SelectedBillingNumber.NumberIdentifier, StringFormat='Nummer: {0}'}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedBillingNumber.Type, StringFormat='Typ: {0}'}"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Faktor:"/>
+                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding DraftFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="Basisbetrag:"/>
+                <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding DraftBaseValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
 
-        <!-- Notes -->
-        <TextBlock Text="Notizen:" VerticalAlignment="Top" Margin="0,8,0,0"/>
-        <TextBox Text="{Binding }" AcceptsReturn="True" Height="100" TextWrapping="Wrap"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Bezeichnung:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5"
+                         Text="{Binding DraftDescription, Mode=TwoWay}"
+                         Width="410"
+                         Height="65"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"/>
+            </Grid>
+            <StackPanel Spacing="8" Orientation="Horizontal" >
+                <Button Content="Hinzufügen" Command="{Binding AddBillingNumberCommand}" MinWidth="110"/>
+                <Button Content="Entfernen" Command="{Binding RemoveBillingNumberCommand}" MinWidth="100"/>
+                <TextBlock Text="Entwurfsbetrag:" VerticalAlignment="Center" FontWeight="Bold"/>
+                <TextBlock Text="{Binding DraftAmountPreview, StringFormat='{}{0:0.00} €'}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+            <ListBox ItemsSource="{Binding AssignedBillingNumbers}"
+                     SelectedItem="{Binding SelectedAssignedBillingNumber}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     Height="120"
+                     Width="520">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:BillingNumber">
+                        <Grid ColumnDefinitions="40,60,40,40,*" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="{Binding NumberIdentifier}" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Amount, StringFormat='{}{0:0.00} €'}" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Type}"/>
+                            <TextBlock Grid.Column="3" Text="{Binding Factor, StringFormat='F: {0:0.##}'}"/>
+                            <TextBlock Grid.Column="4" Text="{Binding Description}" TextWrapping="Wrap"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="Gesamtbetrag:" FontWeight="Bold"/>
+                <TextBlock Text="{Binding TotalAmountPreview, StringFormat='{}{0:0.00} €'}" FontWeight="Bold"/>
+            </StackPanel>
+        </StackPanel>
 
     </StackPanel>
 

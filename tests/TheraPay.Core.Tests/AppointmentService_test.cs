@@ -38,6 +38,30 @@ public class AppointmentService_test
         Assert.Equal(appointment.PatientID, result[0].PatientID);
         Assert.Equal(appointment.End, result[0].End);
     }
+
+    [Fact]
+    public void GivenBillingNumbers_AddAppointment_AssignsBillingNumbers()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        AppointmentService service = new AppointmentService(repository);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+
+        // WHEN
+        service.AddAppointment(
+            new DateTime(2026, 1, 1, 14, 0, 0),
+            "Pat1",
+            60,
+            [billingNumber]);
+
+        // THEN
+        var result = service.ViewAppointments();
+        Assert.Single(result);
+        Assert.Single(result[0].BillingNumbers);
+        Assert.Equal(billingNumber, result[0].BillingNumbers[0]);
+        Assert.Equal(billingNumber.Amount, result[0].TotalAmount);
+    }
+
     [Fact]
     public void GivenEmptyAppointmentRepository_AddTwoAppointments_ReturnListWithTwoAppointments()
     {

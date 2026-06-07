@@ -12,6 +12,38 @@ public class AppointmentEditViewModel_test
     }
 
     [Fact]
+    public void GivenSelectedBillingNumber_EditDraftAndAdd_AssignsEditedBillingNumber()
+    {
+        // GIVEN
+        var appointmentRepository = new InMemoryAppointmentRepository();
+        var patientRepository = new InMemoryPatientRepository();
+        var navigationService = new NavigationService(new NavigationStore(), new ServiceCollection().BuildServiceProvider());
+        var appointmentService = new AppointmentService(appointmentRepository);
+        var patientService = new PatientService(patientRepository);
+        var viewModel = new AppointmentEditViewModel(
+            appointmentService,
+            new CalendarPanelViewModel(navigationService, appointmentService),
+            new PatientPanelViewModel(patientService, navigationService),
+            navigationService,
+            new ProjectSession());
+
+        // WHEN
+        viewModel.DraftDescription = "Bearbeitete Sprechstunde";
+        viewModel.DraftFactor = "2.5";
+        viewModel.DraftBaseValue = "80";
+        viewModel.AddBillingNumberCommand.Execute(null);
+
+        // THEN
+        Assert.Single(viewModel.AssignedBillingNumbers);
+        var billingNumber = viewModel.AssignedBillingNumbers[0];
+        Assert.Equal(viewModel.SelectedBillingNumber!.NumberIdentifier, billingNumber.NumberIdentifier);
+        Assert.Equal("Bearbeitete Sprechstunde", billingNumber.Description);
+        Assert.Equal(2.5m, billingNumber.Factor);
+        Assert.Equal(80m, billingNumber.BaseValue);
+        Assert.Equal(200m, billingNumber.Amount);
+    }
+
+    [Fact]
     public void GivenPatient_PatientFieldsFromPatient_PopulatesFormFields()
     {
         // GIVEN
