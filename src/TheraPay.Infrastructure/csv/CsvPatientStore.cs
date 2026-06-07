@@ -20,8 +20,10 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
         return new PatientCsvRecord
         {
             Id = patient.ID,
+            Salutation = patient.Salutation,
             FirstName = patient.FirstName,
             LastName = patient.LastName,
+            DateOfBirth = FormatDateOfBirth(patient.DateOfBirth),
             InsuranceStatus = patient.InsuranceStatus.ToString(),
             Street = patient.Address?.Street ?? "",
             HouseNumber = patient.Address?.HouseNumber ?? "",
@@ -41,6 +43,10 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
         var patient = new Patient(record.FirstName, record.LastName, record.Id);
         var (street, houseNumber) = GetStreetAndHouseNumber(record);
 
+        if (PatientSalutation.TryNormalize(record.Salutation, out var salutation))
+            patient.SetSalutation(salutation);
+        if (TryParseDateOfBirth(record.DateOfBirth, out var dateOfBirth))
+            patient.SetDateOfBirth(dateOfBirth);
         if (HasCompleteAddress(street, houseNumber, record.PostalCode, record.Place))
             patient.SetAddress(street, houseNumber, record.PostalCode, record.Place, record.Country, record.AdditionalInfo);
         if (string.IsNullOrWhiteSpace(record.ICD10Diagnosis) == false)
@@ -53,6 +59,27 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
             patient.SetInsuranceStatus(insuranceStatus);
 
         return patient;
+    }
+
+    private static string FormatDateOfBirth(DateOnly? dateOfBirth)
+    {
+        return dateOfBirth?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "";
+    }
+
+    private static bool TryParseDateOfBirth(string dateOfBirth, out DateOnly parsedDateOfBirth)
+    {
+        string value = dateOfBirth.Trim();
+        return DateOnly.TryParseExact(
+                value,
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out parsedDateOfBirth)
+            || DateOnly.TryParse(
+                value,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out parsedDateOfBirth);
     }
 
     private static bool TryParseInsuranceStatus(string insuranceStatus, out PatientInsuranceStatus parsedStatus)

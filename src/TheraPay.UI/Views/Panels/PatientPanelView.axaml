@@ -42,6 +42,7 @@
               <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Vorname" Binding="{Binding Vorname}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Geburtsdatum" Binding="{Binding Geburtsdatum}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Adresse" Binding="{Binding Adresse}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Tel." Binding="{Binding Telefon}" Width="Auto" />

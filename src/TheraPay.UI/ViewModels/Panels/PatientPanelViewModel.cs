@@ -1,4 +1,6 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Input;
 using TheraPay.Domain;
@@ -131,8 +133,10 @@ public sealed class PatientPanelViewModel : ViewModelBase
             Patients.Add(new PatientRowVm
             {
                 Id = p.ID,
+                Anrede = p.Salutation,
                 Name = p.LastName,
                 Vorname = p.FirstName,
+                Geburtsdatum = FormatDateOfBirth(p.DateOfBirth),
                 Adresse = FormatAddress(p.Address),
                 Email = p.Email,
                 Telefon = p.PhoneNumber,
@@ -157,12 +161,18 @@ public sealed class PatientPanelViewModel : ViewModelBase
         return $"{address.GetStreetNr()}, {address.GetPostalCodeCity()}";
     }
 
+    private static string FormatDateOfBirth(DateOnly? dateOfBirth)
+    {
+        return dateOfBirth?.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("de-DE")) ?? "";
+    }
+
     public sealed class PatientRowVm
     {
         public string Id { get; init; } = "";
+        public string Anrede { get; init; } = "";
         public string Name { get; init; } = "";
         public string Vorname { get; init; } = "";
-        public string Geburtsdatum { get; init; } = "plchldr";
+        public string Geburtsdatum { get; init; } = "";
         public string Adresse { get; init; } = "plchldr";
         public string Email { get; init; } = "plchldr";
         public string Telefon { get; init; } = "plchldr";

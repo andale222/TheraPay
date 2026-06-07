@@ -14,8 +14,10 @@ namespace TheraPay.UI.ViewModels;
 public partial class PatientFields : ObservableValidator
 {
     public string PatientID { get; set; } = "";
+    public string Salutation { get; set; } = PatientSalutation.Options[0];
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
+    public DateTime? DateOfBirth { get; set; }
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -62,13 +64,17 @@ public partial class PatientFields : ObservableValidator
         "Privat", "GKV", "Selbstzahler", "Kostenerstattung"
     };
 
+    public ObservableCollection<string> SalutationSelection { get; } = new(PatientSalutation.Options);
+
     public static PatientFields FromPatient(Patient patient)
     {
         return new PatientFields
         {
             PatientID = patient.ID,
+            Salutation = string.IsNullOrWhiteSpace(patient.Salutation) ? PatientSalutation.Options[0] : patient.Salutation,
             FirstName = patient.FirstName,
             LastName = patient.LastName,
+            DateOfBirth = patient.DateOfBirth?.ToDateTime(TimeOnly.MinValue),
             Icd10Diagnosis = patient.ICD10Diagnosis,
             Street = patient.Address?.Street ?? "",
             HouseNumber = patient.Address?.HouseNumber ?? "",
@@ -176,7 +182,9 @@ public class PatientsViewModel : ViewModelBase
             PatientFields.PhoneNumber,
             PatientFields.Icd10Diagnosis,
             PatientFields.InsuranceStatus,
-            PatientFields.IsActive);
+            PatientFields.IsActive,
+            PatientFields.Salutation,
+            ToDateOnly(PatientFields.DateOfBirth));
 
         if (addResult.Ok)
         {
@@ -212,7 +220,9 @@ public class PatientsViewModel : ViewModelBase
             PatientFields.PhoneNumber,
             PatientFields.Icd10Diagnosis,
             PatientFields.InsuranceStatus,
-            PatientFields.IsActive);
+            PatientFields.IsActive,
+            PatientFields.Salutation,
+            ToDateOnly(PatientFields.DateOfBirth));
 
         if (updateResult.Ok)
         {
@@ -249,6 +259,11 @@ public class PatientsViewModel : ViewModelBase
         Patients.Clear();
         foreach (var p in _patientService.ViewPatients().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
             Patients.Add(p);
+    }
+
+    private static DateOnly? ToDateOnly(DateTime? date)
+    {
+        return date.HasValue ? DateOnly.FromDateTime(date.Value) : null;
     }
 
     private void NotifyEditModeChanged()

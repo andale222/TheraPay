@@ -122,6 +122,8 @@ public class AppointmentEditViewModel_test
     {
         // GIVEN
         Patient patient = new("Ada", "Lovelace", "AL1");
+        patient.SetSalutation("Frau");
+        patient.SetDateOfBirth(new DateOnly(1815, 12, 10));
         patient.SetAddress("Imaginary Road", "42B", "12345", "London", "UK", "near the analytical engine");
         patient.SetEmail("ada@example.com");
         patient.SetPhoneNumber("+123");
@@ -134,8 +136,10 @@ public class AppointmentEditViewModel_test
 
         // THEN
         Assert.Equal("AL1", fields.PatientID);
+        Assert.Equal("Frau", fields.Salutation);
         Assert.Equal("Ada", fields.FirstName);
         Assert.Equal("Lovelace", fields.LastName);
+        Assert.Equal(new DateTime(1815, 12, 10), fields.DateOfBirth);
         Assert.Equal("Imaginary Road", fields.Street);
         Assert.Equal("42B", fields.HouseNumber);
         Assert.Equal("12345", fields.PostalCode);

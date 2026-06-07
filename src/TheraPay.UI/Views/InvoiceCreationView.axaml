@@ -88,6 +88,7 @@
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Id, StringFormat='ID: {0}', TargetNullValue='ID: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Vorname, StringFormat='Vorname: {0}', TargetNullValue='Vorname: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Name, StringFormat='Nachname: {0}', TargetNullValue='Nachname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Anrede, StringFormat='Anrede: {0}', TargetNullValue='Anrede: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Geburtsdatum, StringFormat='Geburtsdatum: {0}', TargetNullValue='Geburtsdatum: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Versicherungsart, StringFormat='Versicherungsart: {0}', TargetNullValue='Versicherungsart: -'}" FontSize="16" />
                 </StackPanel>
