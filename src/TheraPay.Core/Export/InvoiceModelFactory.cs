@@ -60,7 +60,8 @@ public class InvoiceModelFactory
                 PatientCityCode: invoice.PatientData.PostalCodeAndCity,
                 Lines: invoiceLines,
                 TotalAmountEuro: invoice.TotalAmount,
-                PaymentTermInDays: invoice.PracticeDataRecord.DefaultPaymentTermDays);
+                PaymentTermInDays: invoice.PracticeDataRecord.DefaultPaymentTermDays,
+                Anrede : invoice.PatientData.Salutation == "Herr" ? "Sehr geehrter Herr " : invoice.PatientData.Salutation == "Frau" ? "Sehr geehrte Frau " : "Sehr geehrte*r ");
 
             return model;
         }

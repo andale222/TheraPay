@@ -160,6 +160,7 @@ public sealed record InvoicePatientData
     public string PostalCodeAndCity => string.IsNullOrWhiteSpace(PostalCode) && string.IsNullOrWhiteSpace(City)
         ? ""
         : $"{PostalCode} {City}".Trim();
+    public string Salutation { get; init; } = "";
 
     public static InvoicePatientData FromPatientData(Patient data)
     {
