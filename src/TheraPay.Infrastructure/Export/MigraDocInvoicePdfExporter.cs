@@ -180,7 +180,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         textFrame.AddParagraph($"Rechnungsnummer: {model.InvoiceNumber}");
         textFrame.AddParagraph($"SteuerNr.: {model.TaxIdNumber}");
         textFrame.AddParagraph("");
-        textFrame.AddParagraph($"Betr.: {model.subject}");
+        textFrame.AddParagraph($"Betr.: {model.Subject}");
         textFrame.AddParagraph($"ICD-Diagnose: {model.Diagnosis}");
     }
 

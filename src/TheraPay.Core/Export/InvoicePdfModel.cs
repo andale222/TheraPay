@@ -16,7 +16,7 @@ public sealed record InvoicePdfModel(
     string Iban,
     string Bic,
     string BankName,
-    string subject,
+    string Subject,
     string TaxIdNumber,
     string PatientName,
     string Diagnosis,
