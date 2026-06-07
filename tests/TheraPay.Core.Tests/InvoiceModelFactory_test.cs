@@ -14,6 +14,8 @@ public class InvoiceModelFactory_test
         var patientData = InvoicePatientData.FromPatientData(patient);
         var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
         appointment.SetDuration(60);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+        appointment.AssignBillingNumber(billingNumber);
         var appointmentData = new List<InvoiceAppointmentData>
         {
             InvoiceAppointmentData.FromAppointmentData(appointment)
@@ -29,5 +31,37 @@ public class InvoiceModelFactory_test
         // THEN
         Assert.Equal("Imaginary Road 42B", model.PatientStreetNr);
         Assert.Equal("12345 London", model.PatientCityCode);
+    }
+
+    [Fact]
+    public void GivenInvoiceWithBillingNumbers_Create_UsesBillingNumbersInPdfLines()
+    {
+        // GIVEN
+        var patient = TestData.Patient1();
+        var patientData = InvoicePatientData.FromPatientData(patient);
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+        appointment.AssignBillingNumber(billingNumber);
+        appointment.AssignBillingNumber(billingNumber);
+        var appointmentData = new List<InvoiceAppointmentData>
+        {
+            InvoiceAppointmentData.FromAppointmentData(appointment)
+        };
+        var practiceData = TestData.PracticeData1();
+        var invoice = new Invoice(patientData, appointmentData, PracticeDataRecord.FromPracticeData(practiceData));
+        invoice.Issue(PracticeDataRecord.FromPracticeData(practiceData), $"{DateTime.Today:yyyyMM}-1201");
+        var factory = new InvoiceModelFactory();
+
+        // WHEN
+        var model = factory.Create(invoice);
+
+        // THEN
+        Assert.Single(model.Lines);
+        Assert.Equal(2, model.Lines[0].NumberOfUnits);
+        Assert.Equal(billingNumber.NumberIdentifier, model.Lines[0].GopNr);
+        Assert.Equal(billingNumber.Factor, model.Lines[0].Factor);
+        Assert.Equal(billingNumber.Description, model.Lines[0].Description);
+        Assert.Equal(billingNumber.Amount * 2, model.Lines[0].AmountEuro);
+        Assert.Equal(billingNumber.Type, model.Lines[0].BillingType);
     }
 }

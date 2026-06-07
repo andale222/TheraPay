@@ -1,7 +1,12 @@
 ﻿namespace TheraPay.UI.Tests;
 
+using Microsoft.Extensions.DependencyInjection;
+using TheraPay.Core;
 using TheraPay.Domain;
+using TheraPay.UI.Navigation;
 using TheraPay.UI.ViewModels;
+using TheraPay.UI.ViewModels.Panels;
+using TheraPay.UI.State;
 
 public class AppointmentEditViewModel_test
 {

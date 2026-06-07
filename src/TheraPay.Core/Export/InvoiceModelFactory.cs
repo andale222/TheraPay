@@ -1,49 +1,67 @@
 namespace TheraPay.Core.Export;
 
 using TheraPay.Domain;
+
 public class InvoiceModelFactory
 {
     public InvoicePdfModel Create(Invoice invoice)
     {
-        try{
+        try
+        {
             var invoiceLines = new List<InvoicePdfLineModel>();
             foreach (var item in invoice.AppointmentDataList)
             {
-                // item.TotalAmount
-                invoiceLines.Add(new InvoicePdfLineModel(
-                    AppointmentStart: item.Date,
-                    NumberOfUnits: 111, // TODO
-                    GopNr: "101X", // TODO
-                    Factor: 0.23m, // TODO
-                    Description: "oh no not yet available...", // TODO
-                    AmountEuro: item.TotalAmount
-                ));
+                if (item.BillingNumbers.Count == 0)
+                {
+                    invoiceLines.Add(new InvoicePdfLineModel(
+                        AppointmentStart: item.Date,
+                        NumberOfUnits: 1,
+                        GopNr: "",
+                        Factor: 0m,
+                        Description: "Termin ohne hinterlegte Abrechnungsnummer",
+                        AmountEuro: item.TotalAmount));
+                    continue;
+                }
+
+                foreach (var billingNumberGroup in item.BillingNumbers.GroupBy(billingNumber => billingNumber))
+                {
+                    var billingNumber = billingNumberGroup.Key;
+                    var numberOfUnits = billingNumberGroup.Count();
+                    invoiceLines.Add(new InvoicePdfLineModel(
+                        AppointmentStart: item.Date,
+                        NumberOfUnits: numberOfUnits,
+                        GopNr: billingNumber.NumberIdentifier,
+                        Factor: billingNumber.Factor,
+                        Description: billingNumber.Description,
+                        AmountEuro: billingNumber.Amount * numberOfUnits,
+                        BillingType: billingNumber.Type));
+                }
             }
 
-         var model = new InvoicePdfModel(
-            InvoiceNumber: invoice.InvoiceNumber,
-            IssueDate: DateOnly.FromDateTime(invoice.IssueDate),
-            PracticeName: invoice.PracticeDataRecord.PracticeName,
-            PracticeDescription: invoice.PracticeDataRecord.PracticeDescription,
-            PractitionerTitle: "M. Sc.",
-            PractitionerName: invoice.PracticeDataRecord.PractitionerFirstLastName,
-            PracticeStreetNr: invoice.PracticeDataRecord.Address.GetStreetNr(),
-            PracticeCityCode: invoice.PracticeDataRecord.Address.GetPostalCodeCity(),
-            PracticeTelephone: invoice.PracticeDataRecord.PracticePhoneNr,
-            PracticeEmail: invoice.PracticeDataRecord.PracticeEmail,
-            Iban: invoice.PracticeDataRecord.PaymentDetails.IBAN,
-            Bic: invoice.PracticeDataRecord.PaymentDetails.BLZ,
-            BankName: invoice.PracticeDataRecord.PaymentDetails.BankName,
-            subject: invoice.InvoiceNumber,
-            PatientName: invoice.PatientData.Name,
-            TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
-            Diagnosis: "F41.3",
-            PatientStreetNr: invoice.PatientData.StreetAndHouseNumber,
-            PatientCityCode: invoice.PatientData.PostalCodeAndCity,
-            Lines: invoiceLines,
-            TotalAmountEuro: invoice.TotalAmount);
-        
-        return model;
+            var model = new InvoicePdfModel(
+                InvoiceNumber: invoice.InvoiceNumber,
+                IssueDate: DateOnly.FromDateTime(invoice.IssueDate),
+                PracticeName: invoice.PracticeDataRecord.PracticeName,
+                PracticeDescription: invoice.PracticeDataRecord.PracticeDescription,
+                PractitionerTitle: "M. Sc.",
+                PractitionerName: invoice.PracticeDataRecord.PractitionerFirstLastName,
+                PracticeStreetNr: invoice.PracticeDataRecord.Address.GetStreetNr(),
+                PracticeCityCode: invoice.PracticeDataRecord.Address.GetPostalCodeCity(),
+                PracticeTelephone: invoice.PracticeDataRecord.PracticePhoneNr,
+                PracticeEmail: invoice.PracticeDataRecord.PracticeEmail,
+                Iban: invoice.PracticeDataRecord.PaymentDetails.IBAN,
+                Bic: invoice.PracticeDataRecord.PaymentDetails.BLZ,
+                BankName: invoice.PracticeDataRecord.PaymentDetails.BankName,
+                subject: invoice.InvoiceNumber,
+                PatientName: invoice.PatientData.Name,
+                TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
+                Diagnosis: "F41.3",
+                PatientStreetNr: invoice.PatientData.StreetAndHouseNumber,
+                PatientCityCode: invoice.PatientData.PostalCodeAndCity,
+                Lines: invoiceLines,
+                TotalAmountEuro: invoice.TotalAmount);
+
+            return model;
         }
         catch (Exception ex)
         {
