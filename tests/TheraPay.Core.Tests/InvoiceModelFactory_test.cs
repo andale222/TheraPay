@@ -64,4 +64,31 @@ public class InvoiceModelFactory_test
         Assert.Equal(billingNumber.Amount * 2, model.Lines[0].AmountEuro);
         Assert.Equal(billingNumber.Type, model.Lines[0].BillingType);
     }
+
+    [Fact]
+    public void GivenInvoiceWithPaymentTerm_Create_UsesPaymentTermInPdfModel()
+    {
+        // GIVEN
+        var patient = TestData.Patient1();
+        var patientData = InvoicePatientData.FromPatientData(patient);
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
+        var appointmentData = new List<InvoiceAppointmentData>
+        {
+            InvoiceAppointmentData.FromAppointmentData(appointment)
+        };
+        var practiceData = TestData.PracticeData1();
+        practiceData.DefaultPaymentTermDays = 21;
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
+        var issueDate = new DateTime(2026, 3, 13);
+        invoice.Issue(practiceDataRecord, $"{issueDate:yyyyMM}-1201", issueDate);
+        var factory = new InvoiceModelFactory();
+
+        // WHEN
+        var model = factory.Create(invoice);
+
+        // THEN
+        Assert.Equal(issueDate, model.IssueDate.ToDateTime(TimeOnly.MinValue));
+        Assert.Equal(21, model.PaymentTermInDays);
+    }
 }

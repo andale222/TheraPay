@@ -145,7 +145,7 @@
               </StackPanel>
               <StackPanel Spacing="8" Orientation= "Vertical">
                 <TextBlock Text="Zahlungsfrist (Tage)" />
-                <TextBox Text="{Binding PaymentTermInDays}" Width="80" />
+                <TextBox Text="{Binding PaymentTermInDays, UpdateSourceTrigger=PropertyChanged}" Width="80" />
               </StackPanel>
             </StackPanel>
             <TextBlock Text="{Binding DueDatePreview, StringFormat='Faelligkeitsdatum: {0}'}" />

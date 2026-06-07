@@ -92,6 +92,27 @@ public class Invoice_test
         // THEN
         Assert.Equal(appointmentData.Sum(appointment => appointment.TotalAmount), invoice.TotalAmount);
     }
+
+    [Fact]
+    public void GivenInvoiceDraft_SetDraftDetails_InvoiceDateAndPaymentTermAreStored()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(TestData.PracticeData1());
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
+        var issueDate = new DateTime(2026, 3, 13);
+
+        // WHEN
+        var result = invoice.SetDraftDetails(issueDate, 21, "Bitte beachten.");
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(issueDate, invoice.IssueDate);
+        Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
+        Assert.Equal(21, invoice.PracticeDataRecord.DefaultPaymentTermDays);
+        Assert.Equal("Bitte beachten.", invoice.AdditionalText);
+    }
     [Fact]
     public void GivenInvoiceData_CreateInvoice_InvoiceIsDraft()
     {
@@ -123,6 +144,29 @@ public class Invoice_test
         Assert.Equal(InvoiceStatus.Issued, invoice.Status);
         Assert.Equal(DateTime.Today, invoice.IssueDate);
         Assert.Equal(DateTime.Today.AddDays(practiceData.DefaultPaymentTermDays), invoice.DueDate);
+        Assert.Equal(invoiceNr, invoice.InvoiceNumber);
+    }
+
+    [Fact]
+    public void GivenInvoiceAndExplicitIssueDate_IssueInvoice_UsesExplicitIssueDateAndPaymentTerm()
+    {
+        // GIVEN
+        var patientData = CreatePatientData();
+        var appointmentData = CreateAppointmenttDataListWithTwoEntries();
+        var practiceData = TestData.PracticeData1();
+        practiceData.DefaultPaymentTermDays = 21;
+        var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
+        var invoice = new Invoice(patientData, appointmentData, practiceDataRecord);
+        var issueDate = new DateTime(2026, 3, 13);
+        var invoiceNr = $"{issueDate:yyyyMM}-1201";
+
+        // WHEN
+        var result = invoice.Issue(practiceDataRecord, invoiceNr, issueDate);
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(issueDate, invoice.IssueDate);
+        Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
         Assert.Equal(invoiceNr, invoice.InvoiceNumber);
     }
 

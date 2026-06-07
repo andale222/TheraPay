@@ -147,7 +147,10 @@ public class InvoiceCreationViewModel : ViewModelBase
         return _billingService.AddInvoiceForPatientAndAppointments(
             patientId,
             appointmentIds,
-            _session.PracticeData);
+            _session.PracticeData,
+            IssueDate ?? DateTime.Today,
+            PaymentTermInDays,
+            AdditionalText);
     }
 
     private void OnPatientsPanelPropertyChanged(object? sender, PropertyChangedEventArgs e)

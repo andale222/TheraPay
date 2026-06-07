@@ -58,7 +58,7 @@
             <StackPanel Spacing="8" Orientation="Vertical" >
                 <TextBlock Text="Zahlungsfrist:"/>
                   <StackPanel Spacing="8" Orientation="Horizontal" >
-                    <TextBox Text="{Binding PaymentTermInDays}" AcceptsReturn="True" Height="20" Width= "30" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding PaymentTermInDays, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="20" Width= "30" TextWrapping="Wrap"/>
                     <TextBlock Text="Tage ()"/>
                   </StackPanel>
             </StackPanel>

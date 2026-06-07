@@ -24,6 +24,7 @@ public sealed record InvoicePdfModel(
     string PatientCityCode,
     IReadOnlyList<InvoicePdfLineModel> Lines,
     decimal TotalAmountEuro,
+    int PaymentTermInDays = 14,
     string Anrede = "Sehr geehrte Frau ");
 
 public sealed record InvoicePdfLineModel(

@@ -55,7 +55,13 @@ public class BillingService
         }
         return appointmentDataList;
     }
-    public Result AddInvoiceForPatientAndAppointments(string patientId, List<Guid> appointmentIds, PracticeData practiceData)
+    public Result AddInvoiceForPatientAndAppointments(
+        string patientId,
+        List<Guid> appointmentIds,
+        PracticeData practiceData,
+        DateTime? issueDate = null,
+        int? paymentTermInDays = null,
+        string additionalText = "")
     {
         try
         {
@@ -91,7 +97,21 @@ public class BillingService
 
 
             var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
+            if (paymentTermInDays.HasValue)
+            {
+                if (paymentTermInDays.Value < 0)
+                    return new Result(false, "Payment term cannot be negative.");
+
+                practiceDataRecord = practiceDataRecord with { DefaultPaymentTermDays = paymentTermInDays.Value };
+            }
+
             var invoice = new Invoice(patientData, appointmentDataList, practiceDataRecord);
+            var draftDetailsResult = invoice.SetDraftDetails(
+                issueDate ?? DateTime.Today,
+                practiceDataRecord.DefaultPaymentTermDays,
+                additionalText);
+            if (!draftDetailsResult.Ok)
+                return new Result(false, draftDetailsResult.Error);
 
 
             var result = _invoiceRepository.Add(invoice);
@@ -127,7 +147,7 @@ public class BillingService
         // first only preview next serial
         var invoiceNumber = practiceData.InvoiceNumberState.PreviewNextSerial(issueDate);
         var practiceDataRecord = PracticeDataRecord.FromPracticeData(practiceData);
-        var result = invoice.Issue(practiceDataRecord, invoiceNumber);
+        var result = invoice.Issue(practiceDataRecord, invoiceNumber, issueDate);
         if (!result.Ok)
             return new Result(false, result.Error);
 
@@ -145,4 +165,3 @@ public class BillingService
     }
 
 }
-

@@ -248,7 +248,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         var paymentDetails = section.AddParagraph();
         paymentDetails.Format.KeepTogether = true;
         // total.Format.Alignment = ParagraphAlignment.Right;
-        paymentDetails.AddFormattedText("Bitte überweisen Sie den Gesamtbetrag innerhalb von 14 Tagen auf folgendes Konto: ", TextFormat.Bold);
+        paymentDetails.AddFormattedText($"Bitte überweisen Sie den Gesamtbetrag innerhalb von {model.PaymentTermInDays} Tagen auf folgendes Konto: ", TextFormat.Bold);
         paymentDetails.AddLineBreak();
         paymentDetails.AddText($"IBAN: {model.Iban}");
         paymentDetails.AddLineBreak();

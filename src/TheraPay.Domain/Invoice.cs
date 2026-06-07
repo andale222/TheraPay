@@ -60,6 +60,22 @@ public class Invoice
 
     private bool IsEditable() => Status == InvoiceStatus.Draft;
 
+    public Result SetDraftDetails(DateTime issueDate, int paymentTermInDays, string additionalText = "")
+    {
+        if (!IsEditable())
+            return new Result(false, "Issue is not editable anymore.");
+
+        if (paymentTermInDays < 0)
+            return new Result(false, "Payment term cannot be negative.");
+
+        IssueDate = issueDate.Date;
+        PracticeDataRecord = PracticeDataRecord with { DefaultPaymentTermDays = paymentTermInDays };
+        DueDate = IssueDate.AddDays(paymentTermInDays);
+        AdditionalText = additionalText ?? "";
+
+        return new Result(true);
+    }
+
     private static bool InvoiceNumberFormatIsOk(string invoiceNumber, DateTime issueDate)
     {
         if (string.IsNullOrWhiteSpace(invoiceNumber) || invoiceNumber.Length != 11)
@@ -82,10 +98,15 @@ public class Invoice
     }
     public Result Issue(PracticeDataRecord practiceData, string invoiceNumber)
     {
+        return Issue(practiceData, invoiceNumber, DateTime.Today);
+    }
+
+    public Result Issue(PracticeDataRecord practiceData, string invoiceNumber, DateTime issueDate)
+    {
         if (!IsEditable())
             return new Result(false, "Issue is not editable anymore.");
 
-        var draftIssueDate = DateTime.Today;
+        var draftIssueDate = issueDate.Date;
         if (!InvoiceNumberFormatIsOk(invoiceNumber, draftIssueDate))
             return new Result(false, "Error in invoice number or invoice number format.");
 

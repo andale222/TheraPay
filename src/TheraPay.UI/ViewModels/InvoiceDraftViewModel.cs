@@ -366,6 +366,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
     private void SaveAndNavigateHome()
     {
+        ApplyInvoiceDraftDetails();
         ApplyPracticeDraftToSession();
         _session.MarkUnsavedChanges();
         StatusMessage = "Draft-Daten gespeichert.";
@@ -391,6 +392,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
         try
         {
+            ApplyInvoiceDraftDetails();
+            ApplyPracticeDraftToSession();
 
             // var invoiceNumber = _session.PracticeData.InvoiceNumberState.PreviewNextSerial(_invoiceDate);
             var issueingResult = _billingService.IssueInvoice(_currentDraft,_invoiceDate,_session.PracticeData);
@@ -442,6 +445,11 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 string.IsNullOrWhiteSpace(InvoiceSubject) ? null : InvoiceSubject),
             DefaultPaymentTermDays = PaymentTermInDays
         };
+    }
+
+    private void ApplyInvoiceDraftDetails()
+    {
+        _currentDraft?.SetDraftDetails(InvoiceDate, PaymentTermInDays);
     }
 
     private void ApplyPracticeDraftToSession()

@@ -59,7 +59,8 @@ public class InvoiceModelFactory
                 PatientStreetNr: invoice.PatientData.StreetAndHouseNumber,
                 PatientCityCode: invoice.PatientData.PostalCodeAndCity,
                 Lines: invoiceLines,
-                TotalAmountEuro: invoice.TotalAmount);
+                TotalAmountEuro: invoice.TotalAmount,
+                PaymentTermInDays: invoice.PracticeDataRecord.DefaultPaymentTermDays);
 
             return model;
         }
