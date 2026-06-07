@@ -10,5 +10,6 @@ public interface IRepository<TDomain>
     TDomain GetById(object id);
     int GetIndexById(object id);
     IReadOnlyList<TDomain> GetAll();
+    Result RemoveById(object id);
     void Clear();
 }

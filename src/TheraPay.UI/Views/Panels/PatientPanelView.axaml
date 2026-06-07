@@ -8,11 +8,8 @@
   <!-- Patientenlisten Box mit mini filter -->
   <StackPanel Spacing="12">
     <HeaderedContentControl>
-      <HeaderedContentControl.Header>
-        <TextBlock Text="Patienten:" FontSize="18" FontWeight="Bold"/>
-      </HeaderedContentControl.Header>
 
-      <Border Margin="0,8,0,0"
+      <Border Margin="0,0,0,0"
               Padding="12"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
               BorderThickness="1"
@@ -20,11 +17,12 @@
 
         <Grid ColumnDefinitions="Auto,1*,Auto"
               RowDefinitions="*,Auto"
-              Margin="16"
+              Margin="16,0,8,0"
               ColumnSpacing="16">
 
           <!-- Filter -->
           <StackPanel Spacing="8" Margin="8" Grid.Column="0">
+          <TextBlock Text="Patienten:" FontSize="18" FontWeight="Bold"/>
             <RadioButton GroupName="PatientenFilter" Content="alle"
                          IsChecked="{Binding FilterAll, Mode=TwoWay}" />
             <RadioButton GroupName="PatientenFilter" Content="aktiv"
@@ -39,7 +37,7 @@
                              SelectedItem="{Binding SelectedPatient, Mode=TwoWay}"
                              AutoGenerateColumns="False"
                              IsReadOnly="True"
-                             Height="250">
+                             Height="240">
             <dataGrid:DataGrid.Columns>
               <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Vorname" Binding="{Binding Vorname}" Width="Auto" />

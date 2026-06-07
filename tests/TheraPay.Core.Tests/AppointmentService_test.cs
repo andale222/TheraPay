@@ -81,6 +81,78 @@ public class AppointmentService_test
         Assert.True(result1.Ok);
         Assert.True(result2.Ok);
     }
+
+    [Fact]
+    public void GivenExistingAppointment_UpdateAppointment_UpdatesAppointmentData()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        AppointmentService service = new AppointmentService(repository);
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "Pat1");
+        appointment.SetDuration(60);
+        repository.Add(appointment);
+        var billingNumber = BillingNumberCatalog.FindByIdentifier("801a")!;
+
+        // WHEN
+        var result = service.UpdateAppointment(
+            appointment.Id,
+            new DateTime(2026, 1, 1, 16, 0, 0),
+            "Pat2",
+            30,
+            [billingNumber]);
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(new DateTime(2026, 1, 1, 16, 0, 0), appointment.Date);
+        Assert.Equal("Pat2", appointment.PatientID);
+        Assert.Equal(30, appointment.DurationInMinutes);
+        Assert.Single(appointment.BillingNumbers);
+        Assert.Equal(billingNumber, appointment.BillingNumbers[0]);
+    }
+
+    [Fact]
+    public void GivenExistingAppointment_UpdateAppointmentToOverlap_ReturnsWarning()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        AppointmentService service = new AppointmentService(repository);
+        var appointment1 = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "Pat1");
+        appointment1.SetDuration(60);
+        var appointment2 = new Appointment(new DateTime(2026, 1, 1, 16, 0, 0), "Pat2");
+        appointment2.SetDuration(60);
+        repository.Add(appointment1);
+        repository.Add(appointment2);
+
+        // WHEN
+        var result = service.UpdateAppointment(
+            appointment2.Id,
+            new DateTime(2026, 1, 1, 14, 30, 0),
+            "Pat2",
+            60);
+
+        // THEN
+        Assert.False(result.Ok);
+        Assert.Equal("Overlapping appointment", result.Error);
+        Assert.Equal(new DateTime(2026, 1, 1, 16, 0, 0), appointment2.Date);
+    }
+
+    [Fact]
+    public void GivenExistingAppointment_DeleteAppointment_RemovesAppointment()
+    {
+        // GIVEN
+        InMemoryAppointmentRepository repository = new InMemoryAppointmentRepository();
+        AppointmentService service = new AppointmentService(repository);
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), "Pat1");
+        repository.Add(appointment);
+
+        // WHEN
+        var result = service.DeleteAppointment(appointment.Id);
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Empty(service.ViewAppointments());
+    }
+
     [Fact]
     public void GivenAppointmentRepositoryWithTwoAppointments_AddOverlappingAppointment_ReturnWarning()
     {

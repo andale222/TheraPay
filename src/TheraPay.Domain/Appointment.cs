@@ -92,6 +92,19 @@ public class Appointment
         }
     }
 
+    public void UpdateDetails(DateTime date, string patientID, int durationInMinutes, IEnumerable<BillingNumber> billingNumbers)
+    {
+        if (string.IsNullOrWhiteSpace(patientID))
+        {
+            throw new ArgumentException("Patient ID cannot be empty.", nameof(patientID));
+        }
+
+        Date = date;
+        PatientID = patientID;
+        SetDuration(durationInMinutes);
+        SetBillingNumbers(billingNumbers);
+    }
+
     public bool RemoveBillingNumber(string numberIdentifier, BillingNumberType? type = null)
     {
         var billingNumber = _billingNumbers.FirstOrDefault(item =>

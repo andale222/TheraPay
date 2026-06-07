@@ -144,6 +144,11 @@ public sealed class PatientPanelViewModel : ViewModelBase
         SelectedPatient = Patients.FirstOrDefault();
     }
 
+    public void SelectPatient(string patientId)
+    {
+        SelectedPatient = Patients.FirstOrDefault(patient => patient.Id == patientId);
+    }
+
     private static string FormatAddress(Address? address)
     {
         if (address is null)

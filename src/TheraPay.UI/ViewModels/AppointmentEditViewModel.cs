@@ -15,6 +15,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     private readonly NavigationService _nav;
     private readonly ProjectSession _session;
     private readonly AppointmentService _appointmentService;
+    private Guid? _editingAppointmentId;
     public CalendarPanelViewModel CalendarPanel { get; }
     public PatientPanelViewModel PatientsPanel { get; }
 
@@ -26,6 +27,21 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
     public ObservableCollection<BillingNumber> AvailableBillingNumbers { get; } = new(BillingNumberCatalog.GetDefaultNumbers());
     public ObservableCollection<BillingNumber> AssignedBillingNumbers { get; } = [];
+    public bool IsEditing => _editingAppointmentId.HasValue;
+    public string ViewTitle => IsEditing ? "Termin bearbeiten" : "Termin hinzufügen";
+    public string SaveButtonText => IsEditing ? "Änderungen speichern + Zurück" : "Speichern + Zurück";
+
+    private string _statusMessage = "";
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set
+        {
+            if (_statusMessage == value) return;
+            _statusMessage = value;
+            OnPropertyChanged();
+        }
+    }
 
     private BillingNumber? _selectedBillingNumber;
     public BillingNumber? SelectedBillingNumber
@@ -43,7 +59,12 @@ public sealed class AppointmentEditViewModel : ViewModelBase
     public BillingNumber? SelectedAssignedBillingNumber
     {
         get => _selectedAssignedBillingNumber;
-        set { _selectedAssignedBillingNumber = value; OnPropertyChanged(); }
+        set
+        {
+            _selectedAssignedBillingNumber = value;
+            LoadAssignedBillingNumberDraft(value);
+            OnPropertyChanged();
+        }
     }
 
     public decimal TotalAmountPreview => AssignedBillingNumbers.Sum(billingNumber => billingNumber.Amount);
@@ -148,16 +169,62 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
 
         DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
-        _appointmentService.AddAppointment(
-            startDateTime,
-            selectedPatientId,
-            DurationInMinutes ?? 0,
-            AssignedBillingNumbers.ToList());
+        var billingNumbers = AssignedBillingNumbers.ToList();
+        var result = _editingAppointmentId is Guid editingAppointmentId
+            ? _appointmentService.UpdateAppointment(
+                editingAppointmentId,
+                startDateTime,
+                selectedPatientId,
+                DurationInMinutes ?? 0,
+                billingNumbers)
+            : _appointmentService.AddAppointment(
+                startDateTime,
+                selectedPatientId,
+                DurationInMinutes ?? 0,
+                billingNumbers);
+
+        if (!result.Ok)
+        {
+            StatusMessage = result.Error ?? "Termin konnte nicht gespeichert werden.";
+            return;
+        }
 
         _session.MarkUnsavedChanges();
 
         NavigateHomeViewCommand.Execute(null);
     }
+
+    public void LoadAppointmentForEdit(Guid appointmentId)
+    {
+        try
+        {
+            var appointment = _appointmentService.GetAppointmentById(appointmentId);
+            _editingAppointmentId = appointmentId;
+            OnPropertyChanged(nameof(IsEditing));
+            OnPropertyChanged(nameof(ViewTitle));
+            OnPropertyChanged(nameof(SaveButtonText));
+
+            StartDate = appointment.Date.Date;
+            StartTime = appointment.Date.TimeOfDay;
+            EndTime = appointment.End.TimeOfDay;
+            PatientsPanel.SelectPatient(appointment.PatientID);
+
+            AssignedBillingNumbers.Clear();
+            foreach (var billingNumber in appointment.BillingNumbers)
+            {
+                AssignedBillingNumbers.Add(billingNumber);
+            }
+
+            SelectedAssignedBillingNumber = AssignedBillingNumbers.FirstOrDefault();
+            OnPropertyChanged(nameof(TotalAmountPreview));
+            StatusMessage = "";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+    }
+
     private void CheckData()
     {
         // Plausibilitätsprüfungen, z.B.:
@@ -216,6 +283,22 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         DraftDescription = billingNumber.Description;
         DraftFactor = billingNumber.Factor.ToString("0.##", CultureInfo.CurrentCulture);
         DraftBaseValue = billingNumber.BaseValue.ToString("0.00", CultureInfo.CurrentCulture);
+    }
+
+    private void LoadAssignedBillingNumberDraft(BillingNumber? billingNumber)
+    {
+        if (billingNumber is null)
+        {
+            return;
+        }
+
+        var catalogMatch = AvailableBillingNumbers.FirstOrDefault(candidate =>
+            string.Equals(candidate.NumberIdentifier, billingNumber.NumberIdentifier, StringComparison.OrdinalIgnoreCase)
+            && candidate.Type == billingNumber.Type);
+
+        _selectedBillingNumber = catalogMatch ?? billingNumber;
+        OnPropertyChanged(nameof(SelectedBillingNumber));
+        LoadBillingNumberDraft(billingNumber);
     }
 
     private static bool TryParseDecimal(string value, out decimal result)
