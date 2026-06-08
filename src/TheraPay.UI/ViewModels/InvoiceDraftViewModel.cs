@@ -2,9 +2,11 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 
 namespace TheraPay.UI.ViewModels;
@@ -16,8 +18,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     private readonly IPatientRepository _patientRepository;
     private readonly ProjectSession _session;
     private readonly IInvoicePdfExporter _invoiceExporter;
+    private readonly IMessageBoxService _messageBox;
     private Invoice? _currentDraft;
-    private bool _issueConfirmationRequired;
 
     public ObservableCollection<InvoiceAppointmentRowVm> Appointments { get; } = new();
     public RelayCommand NavigateBackCommand { get; }
@@ -25,10 +27,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     public RelayCommand SaveAndNavigateHomeCommand { get; }
     public RelayCommand IssueInvoiceCommand { get; }
 
-    public string IssueActionText => _issueConfirmationRequired ? "Wirklich ausstellen" : "Rechnung ausstellen";
-    public string IssueWarningText => _issueConfirmationRequired
-        ? "Achtung: Nach dem Ausstellen ist die Rechnung nicht mehr änderbar."
-        : "";
+    public string IssueActionText => "Rechnung ausstellen";
 
     public string PdfExportFilePreview => Path.Combine(PdfExportDirectory, "Invoice_<Rechnungsnummer>.pdf");
 
@@ -286,18 +285,25 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         set { if (_patientAddressAdditional != value) { _patientAddressAdditional = value; OnPropertyChanged(); } }
     }
 
-    public InvoiceDraftViewModel(BillingService billingService, IPatientRepository patientRepository, IInvoicePdfExporter invoiceExporter,ProjectSession session, NavigationService nav)
+    public InvoiceDraftViewModel(
+        BillingService billingService,
+        IPatientRepository patientRepository,
+        IInvoicePdfExporter invoiceExporter,
+        ProjectSession session,
+        NavigationService nav,
+        IMessageBoxService messageBox)
     {
         _nav = nav;
         _billingService = billingService;
         _patientRepository = patientRepository;
         _session = session;
         _invoiceExporter = invoiceExporter;
+        _messageBox = messageBox;
 
         NavigateBackCommand = new RelayCommand(() => _nav.NavigateTo<InvoiceCreationViewModel>());
         NavigateHomeWithoutSavingCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         SaveAndNavigateHomeCommand = new RelayCommand(SaveAndNavigateHome);
-        IssueInvoiceCommand = new RelayCommand(IssueInvoiceWithWarning);
+        IssueInvoiceCommand = new RelayCommand(async () => await IssueInvoiceWithWarningAsync());
 
         LoadDefaultsFromSession();
         LoadLatestDraft();
@@ -333,7 +339,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
     public void ReportPdfExportDirectorySelectionError(string message)
     {
-        StatusMessage = message;
+        _ = _messageBox.ShowErrorAsync("Ordnerauswahl fehlgeschlagen", message);
     }
 
     public void LoadDraft(Guid invoiceId)
@@ -345,7 +351,9 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         if (draft is null)
         {
             ClearDraftSelection();
-            StatusMessage = $"Draft mit ID '{invoiceId:D}' wurde nicht gefunden.";
+            _ = _messageBox.ShowWarningAsync(
+                "Invoice-Draft",
+                $"Draft mit ID '{invoiceId:D}' wurde nicht gefunden.");
             return;
         }
 
@@ -362,7 +370,9 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         if (latestDraft is null)
         {
             ClearDraftSelection();
-            StatusMessage = "Kein Invoice-Draft gefunden.";
+            _ = _messageBox.ShowWarningAsync(
+                "Invoice-Draft",
+                "Kein Invoice-Draft gefunden.");
             return;
         }
 
@@ -375,9 +385,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         StatusMessage = "";
         DraftId = "-";
         _currentDraft = null;
-        _issueConfirmationRequired = false;
         OnPropertyChanged(nameof(IssueActionText));
-        OnPropertyChanged(nameof(IssueWarningText));
     }
 
     private void LoadDraftInvoice(Invoice latestDraft)
@@ -430,26 +438,26 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _nav.NavigateTo<HomeViewModel>();
     }
 
-    private void IssueInvoiceWithWarning()
+    private async Task IssueInvoiceWithWarningAsync()
     {
         if (_currentDraft is null)
         {
-            StatusMessage = "Kein Draft verfuegbar.";
+            await _messageBox.ShowErrorAsync("Rechnung ausstellen", "Kein Draft verfuegbar.");
             return;
         }
 
-        if (!_issueConfirmationRequired)
-        {
-            _issueConfirmationRequired = true;
-            OnPropertyChanged(nameof(IssueActionText));
-            OnPropertyChanged(nameof(IssueWarningText));
-            StatusMessage = "Bitte erneut auf \"Rechnung ausstellen\" klicken, um final auszustellen.";
+        var confirmed = await _messageBox.ConfirmWarningAsync(
+            "Rechnung ausstellen",
+            "Achtung: Nach dem Ausstellen ist die Rechnung nicht mehr aenderbar.",
+            "Ausstellen",
+            "Abbrechen");
+        if (!confirmed)
             return;
-        }
 
         try
         {
-            if (!TryPreparePdfExportDirectory(out var exportDirectory))
+            var exportDirectory = await TryPreparePdfExportDirectoryAsync();
+            if (exportDirectory is null)
             {
                 return;
             }
@@ -463,7 +471,9 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             // var issueResult = _currentDraft.Issue(BuildPracticeDataRecordFromDraft(), invoiceNumber);
             if (!issueingResult.Ok)
             {
-                StatusMessage = issueingResult.Error ?? "Rechnung konnte nicht ausgestellt werden.";
+                await _messageBox.ShowErrorAsync(
+                    "Rechnung konnte nicht ausgestellt werden",
+                    issueingResult.Error ?? "Rechnung konnte nicht ausgestellt werden.");
                 return;
             }
             var invoiceNumber = issueingResult.Error ?? "Unbekannt";
@@ -473,35 +483,37 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
             ApplyPracticeDraftToSession();
             _session.MarkUnsavedChanges();
-            _issueConfirmationRequired = false;
             OnPropertyChanged(nameof(IssueActionText));
-            OnPropertyChanged(nameof(IssueWarningText));
             StatusMessage = $"Rechnung wurde ausgestellt (Nr.: {invoiceNumber}), ist jetzt nicht mehr editierbar und wurde als PDF exportiert: {exportPath}";
         }
         catch (Exception ex)
         {
-            StatusMessage = ex.Message;
+            await _messageBox.ShowErrorAsync("Rechnung konnte nicht ausgestellt werden", ex.Message);
         }
     }
 
-    private bool TryPreparePdfExportDirectory(out string exportDirectory)
+    private async Task<string?> TryPreparePdfExportDirectoryAsync()
     {
-        exportDirectory = PdfExportDirectory.Trim();
+        var exportDirectory = PdfExportDirectory.Trim();
         if (string.IsNullOrWhiteSpace(exportDirectory))
         {
-            StatusMessage = "Bitte einen PDF-Exportordner auswählen.";
-            return false;
+            await _messageBox.ShowWarningAsync(
+                "PDF-Exportordner fehlt",
+                "Bitte einen PDF-Exportordner auswaehlen.");
+            return null;
         }
 
         try
         {
             Directory.CreateDirectory(exportDirectory);
-            return true;
+            return exportDirectory;
         }
         catch (Exception ex)
         {
-            StatusMessage = $"PDF-Exportordner konnte nicht vorbereitet werden: {ex.Message}";
-            return false;
+            await _messageBox.ShowErrorAsync(
+                "PDF-Exportordner konnte nicht vorbereitet werden",
+                ex.Message);
+            return null;
         }
     }
 

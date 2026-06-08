@@ -3,6 +3,7 @@ using TheraPay.Core;
 using TheraPay.Core.Export;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 using TheraPay.UI.ViewModels;
 using TheraPay.UI.ViewModels.Panels;
@@ -57,7 +58,8 @@ public class InvoiceCreationViewModel_test
             patientRepository,
             new NoopInvoicePdfExporter(),
             session,
-            navigationService!));
+            navigationService!,
+            new ConfirmingMessageBoxService()));
         var serviceProvider = services.BuildServiceProvider();
         navigationService = new NavigationService(new NavigationStore(), serviceProvider);
         var patientsPanel = new PatientPanelViewModel(patientService, navigationService);
@@ -92,6 +94,24 @@ public class InvoiceCreationViewModel_test
         public bool InternalExport(InvoicePdfModel invoice, string filePath)
         {
             return true;
+        }
+    }
+
+    private sealed class ConfirmingMessageBoxService : IMessageBoxService
+    {
+        public Task ShowErrorAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ShowWarningAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> ConfirmWarningAsync(string title, string message, string confirmText = "OK", string cancelText = "Abbrechen")
+        {
+            return Task.FromResult(true);
         }
     }
 }

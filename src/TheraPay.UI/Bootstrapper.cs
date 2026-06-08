@@ -35,6 +35,7 @@ public static class Bootstrapper
         services.AddSingleton<ProjectSession>();
         services.AddSingleton<ProjectPersistenceService>();
         services.AddSingleton<ExitConfirmationService>();
+        services.AddSingleton<IMessageBoxService, MessageBoxService>();
 
         // Services (Use-Cases) -> Singleton ok im MVP
         services.AddSingleton<PatientService>();

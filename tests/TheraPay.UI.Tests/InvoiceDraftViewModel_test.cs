@@ -3,6 +3,7 @@ using TheraPay.Core;
 using TheraPay.Core.Export;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 using TheraPay.UI.ViewModels;
 
@@ -50,13 +51,15 @@ public class InvoiceDraftViewModel_test
         var session = new ProjectSession();
         session.SetPracticeData(practiceData);
         var exporter = new CapturingInvoicePdfExporter();
+        var messageBox = new ConfirmingMessageBoxService();
         var navigationService = new NavigationService(new NavigationStore(), new ServiceCollection().BuildServiceProvider());
         var viewModel = new InvoiceDraftViewModel(
             billingService,
             patientRepository,
             exporter,
             session,
-            navigationService)
+            navigationService,
+            messageBox)
         {
             PdfExportDirectory = exportDirectory
         };
@@ -65,9 +68,9 @@ public class InvoiceDraftViewModel_test
         {
             // WHEN
             viewModel.IssueInvoiceCommand.Execute(null);
-            viewModel.IssueInvoiceCommand.Execute(null);
 
             // THEN
+            Assert.Equal(1, messageBox.ConfirmationCount);
             Assert.NotNull(exporter.LastFilePath);
             Assert.StartsWith(exportDirectory, exporter.LastFilePath);
             Assert.EndsWith(".pdf", exporter.LastFilePath);
@@ -94,6 +97,27 @@ public class InvoiceDraftViewModel_test
             LastFilePath = filePath;
             LastInvoice = invoice;
             return true;
+        }
+    }
+
+    private sealed class ConfirmingMessageBoxService : IMessageBoxService
+    {
+        public int ConfirmationCount { get; private set; }
+
+        public Task ShowErrorAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ShowWarningAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> ConfirmWarningAsync(string title, string message, string confirmText = "OK", string cancelText = "Abbrechen")
+        {
+            ConfirmationCount++;
+            return Task.FromResult(true);
         }
     }
 }
