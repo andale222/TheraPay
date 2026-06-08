@@ -14,6 +14,8 @@ public class Patient
     public string LastName { get; private set; } = "";
     public string FirstName { get; private set; } = "";
     public string ID { get; init; } = "";
+    public string Salutation { get; private set; } = "";
+    public DateOnly? DateOfBirth { get; private set; }
     public bool IsActive { get; set; } = true;
     public Address? Address { get; private set; }
     public PatientInsuranceStatus InsuranceStatus { get; private set; } = PatientInsuranceStatus.Privat;
@@ -34,6 +36,19 @@ public class Patient
     {
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
+    }
+
+    public void SetSalutation(string salutation)
+    {
+        if (!PatientSalutation.TryNormalize(salutation, out var normalizedSalutation))
+            throw new ArgumentException("Anrede muss Herr, Frau oder Divers sein.", nameof(salutation));
+
+        Salutation = normalizedSalutation;
+    }
+
+    public void SetDateOfBirth(DateOnly? dateOfBirth)
+    {
+        DateOfBirth = dateOfBirth;
     }
 
     public void SetAddress(Address address)

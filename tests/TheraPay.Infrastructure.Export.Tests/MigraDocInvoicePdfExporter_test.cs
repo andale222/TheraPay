@@ -24,7 +24,7 @@ public class MigraDocInvoicePdfExporter_test
             Iban: "DE12 3456 7890 1234 5678 90",
             Bic: "BYS032480",
             BankName: "testbank",
-            subject: "testsubject",
+            Subject: "testsubject",
             PatientName: "Max Mustermann",
             TaxIdNumber: "00/00/000000",
             Diagnosis: "F41.3",

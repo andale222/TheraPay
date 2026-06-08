@@ -1,5 +1,7 @@
 namespace TheraPay.Core.Export;
 
+using TheraPay.Domain;
+
 public sealed record InvoicePdfModel(
     string InvoiceNumber,
     DateOnly IssueDate,
@@ -14,7 +16,7 @@ public sealed record InvoicePdfModel(
     string Iban,
     string Bic,
     string BankName,
-    string subject,
+    string Subject,
     string TaxIdNumber,
     string PatientName,
     string Diagnosis,
@@ -22,6 +24,7 @@ public sealed record InvoicePdfModel(
     string PatientCityCode,
     IReadOnlyList<InvoicePdfLineModel> Lines,
     decimal TotalAmountEuro,
+    int PaymentTermInDays = 14,
     string Anrede = "Sehr geehrte Frau ");
 
 public sealed record InvoicePdfLineModel(
@@ -30,4 +33,5 @@ public sealed record InvoicePdfLineModel(
     string Description,
     decimal AmountEuro,
     int NumberOfUnits = 1,
-    string GopNr = "");
+    string GopNr = "",
+    BillingNumberType BillingType = BillingNumberType.Privat);

@@ -76,8 +76,12 @@ public class CsvPatientStore_test
         var filePath = TestPaths.DataFile("testRoundtripPatients.csv");
         var csvPatientStore = new CsvPatientStore(filePath);
         var secondPatient = new Patient("Second one", "Two", "2w");
+        secondPatient.SetSalutation("Frau");
+        secondPatient.SetDateOfBirth(new DateOnly(1991, 4, 12));
         secondPatient.SetInsuranceStatus(PatientInsuranceStatus.GKV);
         var thirdPatient = new Patient("Third", "Threee", "3");
+        thirdPatient.SetSalutation("Divers");
+        thirdPatient.SetDateOfBirth(new DateOnly(1985, 9, 30));
         thirdPatient.SetInsuranceStatus(PatientInsuranceStatus.Selbstzahler);
         var patients = new List<Patient>
         {
@@ -96,13 +100,22 @@ public class CsvPatientStore_test
         Assert.Equal(patients[0].FirstName, loadedPatients[0].FirstName);
         Assert.Equal(patients[0].LastName, loadedPatients[0].LastName);
         Assert.Equal(patients[1].ID, loadedPatients[1].ID);
+        Assert.Equal(patients[1].Salutation, loadedPatients[1].Salutation);
         Assert.Equal(patients[1].FirstName, loadedPatients[1].FirstName);
         Assert.Equal(patients[1].LastName, loadedPatients[1].LastName);
+        Assert.Equal(patients[1].DateOfBirth, loadedPatients[1].DateOfBirth);
         Assert.Equal(patients[1].InsuranceStatus, loadedPatients[1].InsuranceStatus);
         Assert.Equal(patients[2].ID, loadedPatients[2].ID);
+        Assert.Equal(patients[2].Salutation, loadedPatients[2].Salutation);
         Assert.Equal(patients[2].FirstName, loadedPatients[2].FirstName);
         Assert.Equal(patients[2].LastName, loadedPatients[2].LastName);
+        Assert.Equal(patients[2].DateOfBirth, loadedPatients[2].DateOfBirth);
         Assert.Equal(patients[2].InsuranceStatus, loadedPatients[2].InsuranceStatus);
+
+        string savedCsv = File.ReadAllText(filePath);
+        Assert.Contains("Salutation", savedCsv);
+        Assert.Contains("DateOfBirth", savedCsv);
+        Assert.Contains("1991-04-12", savedCsv);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));

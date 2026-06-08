@@ -4,6 +4,7 @@ namespace TheraPay.Domain;
 
 public class Invoice
 {
+    public const string DefaultSubject = "Ambulante Psychotherapie";
     public InvoicePatientData PatientData { get; private set; }
     public PracticeDataRecord PracticeDataRecord { get; private set; }
     private List<InvoiceAppointmentData> _appointmentDataList = new List<InvoiceAppointmentData>();
@@ -15,6 +16,7 @@ public class Invoice
     public DateTime DueDate { get; private set; }
     public string InvoiceNumber { get; private set; } = "";
     public string AdditionalText { get; private set; } = "";
+    public string Subject { get; private set; } = DefaultSubject;
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
     {
@@ -60,6 +62,27 @@ public class Invoice
 
     private bool IsEditable() => Status == InvoiceStatus.Draft;
 
+    public Result SetDraftDetails(
+        DateTime issueDate,
+        int paymentTermInDays,
+        string additionalText = "",
+        string subject = DefaultSubject)
+    {
+        if (!IsEditable())
+            return new Result(false, "Issue is not editable anymore.");
+
+        if (paymentTermInDays < 0)
+            return new Result(false, "Payment term cannot be negative.");
+
+        IssueDate = issueDate.Date;
+        PracticeDataRecord = PracticeDataRecord with { DefaultPaymentTermDays = paymentTermInDays };
+        DueDate = IssueDate.AddDays(paymentTermInDays);
+        AdditionalText = additionalText ?? "";
+        Subject = string.IsNullOrWhiteSpace(subject) ? DefaultSubject : subject.Trim();
+
+        return new Result(true);
+    }
+
     private static bool InvoiceNumberFormatIsOk(string invoiceNumber, DateTime issueDate)
     {
         if (string.IsNullOrWhiteSpace(invoiceNumber) || invoiceNumber.Length != 11)
@@ -82,10 +105,15 @@ public class Invoice
     }
     public Result Issue(PracticeDataRecord practiceData, string invoiceNumber)
     {
+        return Issue(practiceData, invoiceNumber, DateTime.Today);
+    }
+
+    public Result Issue(PracticeDataRecord practiceData, string invoiceNumber, DateTime issueDate)
+    {
         if (!IsEditable())
             return new Result(false, "Issue is not editable anymore.");
 
-        var draftIssueDate = DateTime.Today;
+        var draftIssueDate = issueDate.Date;
         if (!InvoiceNumberFormatIsOk(invoiceNumber, draftIssueDate))
             return new Result(false, "Error in invoice number or invoice number format.");
 
@@ -132,6 +160,7 @@ public sealed record InvoicePatientData
     public string PostalCodeAndCity => string.IsNullOrWhiteSpace(PostalCode) && string.IsNullOrWhiteSpace(City)
         ? ""
         : $"{PostalCode} {City}".Trim();
+    public string Salutation { get; init; } = "";
 
     public static InvoicePatientData FromPatientData(Patient data)
     {
@@ -157,6 +186,8 @@ public sealed record InvoiceAppointmentData
     public string AppointmentId { get; init; } = "";
     public string PatientId { get; init; } = "";
     public decimal TotalAmount { get; init; } = 0m;
+    public IReadOnlyList<BillingNumber> BillingNumbers { get; init; } = [];
+
     public static InvoiceAppointmentData FromAppointmentData(Appointment data)
     {
         if (data == null)
@@ -167,7 +198,8 @@ public sealed record InvoiceAppointmentData
             AppointmentId = data.Id.ToString("D"),
             Date = data.Date,
             PatientId = data.PatientID,
-            TotalAmount = data.TotalAmount
+            TotalAmount = data.TotalAmount,
+            BillingNumbers = data.BillingNumbers.ToList()
         };
     }
 }

@@ -37,7 +37,9 @@ public class PatientService
         string phoneNumber,
         string diagnosis,
         string insuranceStatus,
-        bool isActive)
+        bool isActive,
+        string salutation = "",
+        DateOnly? dateOfBirth = null)
     {
         Result checkResult = CheckPatientData(id, email, phoneNumber, postalCode, diagnosis);
         if (checkResult.Ok == false)
@@ -59,7 +61,9 @@ public class PatientService
             phoneNumber,
             diagnosis,
             insuranceStatus,
-            isActive);
+            isActive,
+            salutation,
+            dateOfBirth);
 
         if (applyResult.Ok == false)
             return applyResult;
@@ -173,7 +177,9 @@ public class PatientService
         string phoneNumber,
         string diagnosis,
         string insuranceStatus,
-        bool isActive)
+        bool isActive,
+        string salutation = "",
+        DateOnly? dateOfBirth = null)
     {
         string trimmedId = id.Trim();
         Result checkResult = CheckPatientUpdateData(trimmedId, email, phoneNumber, postalCode, diagnosis);
@@ -198,7 +204,9 @@ public class PatientService
             phoneNumber,
             diagnosis,
             insuranceStatus,
-            isActive);
+            isActive,
+            salutation,
+            dateOfBirth);
     }
 
     public void ModifyAddress(
@@ -227,11 +235,15 @@ public class PatientService
         string phoneNumber,
         string diagnosis,
         string insuranceStatus,
-        bool isActive)
+        bool isActive,
+        string salutation,
+        DateOnly? dateOfBirth)
     {
         try
         {
             patient.SetName(firstName, lastName);
+            patient.SetSalutation(salutation);
+            patient.SetDateOfBirth(dateOfBirth);
 
             Result addressResult = ModifyAddressFromFormData(
                 patient,

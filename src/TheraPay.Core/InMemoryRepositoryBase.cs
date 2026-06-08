@@ -35,6 +35,21 @@ public abstract class InMemoryRepositoryBase<TDomain> : IRepository<TDomain>
     }
 
     public IReadOnlyList<TDomain> GetAll() => Items.ToList();
+
+    public Result RemoveById(object id)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+
+        var index = GetIndexById(id);
+        if (index < 0)
+        {
+            return new Result(false, $"Entity with ID '{id}' not found.");
+        }
+
+        Items.RemoveAt(index);
+        return new Result(true);
+    }
+
     public void Clear() => Items.Clear();
 
     protected abstract object GetEntityId(TDomain entity);

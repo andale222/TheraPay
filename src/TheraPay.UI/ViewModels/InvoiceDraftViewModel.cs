@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using TheraPay.Core;
 using TheraPay.Domain;
@@ -27,6 +28,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     public string IssueWarningText => _issueConfirmationRequired
         ? "Achtung: Nach dem Ausstellen ist die Rechnung nicht mehr änderbar."
         : "";
+
+    public string PdfExportFilePreview => Path.Combine(PdfExportDirectory, "Invoice_<Rechnungsnummer>.pdf");
 
     private string _statusMessage = "";
     public string StatusMessage
@@ -91,6 +94,20 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     {
         get => _invoiceSubject;
         set { if (_invoiceSubject != value) { _invoiceSubject = value; OnPropertyChanged(); } }
+    }
+
+    private string _pdfExportDirectory = "";
+    public string PdfExportDirectory
+    {
+        get => _pdfExportDirectory;
+        set
+        {
+            var normalized = value?.Trim() ?? "";
+            if (_pdfExportDirectory == normalized) return;
+            _pdfExportDirectory = normalized;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PdfExportFilePreview));
+        }
     }
 
     private bool _includeSignatureSection = true;
@@ -293,7 +310,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeIban = practiceData.IBAN;
         PracticeBlz = practiceData.BLZ ?? "";
         PracticeBankName = practiceData.BankName ?? "";
-        InvoiceSubject = practiceData.Subject ?? "Rechnung";
+        InvoiceSubject = Invoice.DefaultSubject;
         PracticeStreet = practiceData.Street;
         PracticeHouseNumber = practiceData.HouseNumber;
         PracticePostalCode = practiceData.PostalCode;
@@ -302,7 +319,19 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeAddressAdditional = practiceData.AddressAdditional ?? "";
         InvoiceDate = DateTime.Today;
         IncludeSignatureSection = true;
-        IncludeQrCode = true;
+        IncludeQrCode = false;
+        PdfExportDirectory = ResolveDefaultPdfExportDirectory();
+    }
+
+    public void SetPdfExportDirectory(string folderPath)
+    {
+        PdfExportDirectory = folderPath;
+        StatusMessage = "PDF-Exportordner übernommen.";
+    }
+
+    public void ReportPdfExportDirectorySelectionError(string message)
+    {
+        StatusMessage = message;
     }
 
     private void LoadLatestDraft()
@@ -337,7 +366,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PracticeIban = latestDraft.PracticeDataRecord.PaymentDetails.IBAN;
         PracticeBlz = latestDraft.PracticeDataRecord.PaymentDetails.BLZ ?? "";
         PracticeBankName = latestDraft.PracticeDataRecord.PaymentDetails.BankName ?? "";
-        InvoiceSubject = latestDraft.PracticeDataRecord.PaymentDetails.Subject ?? "Rechnung";
+        InvoiceSubject = latestDraft.Subject;
         PracticeStreet = latestDraft.PracticeDataRecord.Address.Street;
         PracticeHouseNumber = latestDraft.PracticeDataRecord.Address.HouseNumber;
         PracticePostalCode = latestDraft.PracticeDataRecord.Address.PostalCode;
@@ -366,6 +395,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
     private void SaveAndNavigateHome()
     {
+        ApplyInvoiceDraftDetails();
         ApplyPracticeDraftToSession();
         _session.MarkUnsavedChanges();
         StatusMessage = "Draft-Daten gespeichert.";
@@ -391,6 +421,13 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
         try
         {
+            if (!TryPreparePdfExportDirectory(out var exportDirectory))
+            {
+                return;
+            }
+
+            ApplyInvoiceDraftDetails();
+            ApplyPracticeDraftToSession();
 
             // var invoiceNumber = _session.PracticeData.InvoiceNumberState.PreviewNextSerial(_invoiceDate);
             var issueingResult = _billingService.IssueInvoice(_currentDraft,_invoiceDate,_session.PracticeData);
@@ -402,20 +439,65 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 return;
             }
             var invoiceNumber = issueingResult.Error ?? "Unbekannt";
-            
-            _invoiceExporter.Export(_currentDraft, $"Invoice_{invoiceNumber}.pdf");
+            var exportPath = Path.Combine(exportDirectory, BuildPdfFileName(invoiceNumber));
+
+            _invoiceExporter.Export(_currentDraft, exportPath);
 
             ApplyPracticeDraftToSession();
             _session.MarkUnsavedChanges();
             _issueConfirmationRequired = false;
             OnPropertyChanged(nameof(IssueActionText));
             OnPropertyChanged(nameof(IssueWarningText));
-            StatusMessage = $"Rechnung wurde ausgestellt (Nr.: {invoiceNumber}) und ist jetzt nicht mehr editierbar.";
+            StatusMessage = $"Rechnung wurde ausgestellt (Nr.: {invoiceNumber}), ist jetzt nicht mehr editierbar und wurde als PDF exportiert: {exportPath}";
         }
         catch (Exception ex)
         {
             StatusMessage = ex.Message;
         }
+    }
+
+    private bool TryPreparePdfExportDirectory(out string exportDirectory)
+    {
+        exportDirectory = PdfExportDirectory.Trim();
+        if (string.IsNullOrWhiteSpace(exportDirectory))
+        {
+            StatusMessage = "Bitte einen PDF-Exportordner auswählen.";
+            return false;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(exportDirectory);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"PDF-Exportordner konnte nicht vorbereitet werden: {ex.Message}";
+            return false;
+        }
+    }
+
+    private string ResolveDefaultPdfExportDirectory()
+    {
+        if (!string.IsNullOrWhiteSpace(_session.PracticeDataPath))
+        {
+            var projectDirectory = Path.GetDirectoryName(_session.PracticeDataPath);
+            if (!string.IsNullOrWhiteSpace(projectDirectory))
+            {
+                return projectDirectory;
+            }
+        }
+
+        var documentsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return string.IsNullOrWhiteSpace(documentsDirectory)
+            ? AppContext.BaseDirectory
+            : documentsDirectory;
+    }
+
+    private static string BuildPdfFileName(string invoiceNumber)
+    {
+        var safeInvoiceNumber = string.Join("_", invoiceNumber.Split(Path.GetInvalidFileNameChars()));
+        return $"Invoice_{safeInvoiceNumber}.pdf";
     }
 
     private PracticeDataRecord BuildPracticeDataRecordFromDraft()
@@ -438,10 +520,19 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             PaymentDetails = new PaymentDetails(
                 PracticeIban,
                 string.IsNullOrWhiteSpace(PracticeBlz) ? null : PracticeBlz,
-                string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName,
-                string.IsNullOrWhiteSpace(InvoiceSubject) ? null : InvoiceSubject),
+                string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName),
             DefaultPaymentTermDays = PaymentTermInDays
         };
+    }
+
+    private void ApplyInvoiceDraftDetails()
+    {
+        if (_currentDraft is null)
+        {
+            return;
+        }
+
+        _currentDraft.SetDraftDetails(InvoiceDate, PaymentTermInDays, _currentDraft.AdditionalText, InvoiceSubject);
     }
 
     private void ApplyPracticeDraftToSession()
@@ -451,7 +542,6 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _session.PracticeData.IBAN = PracticeIban;
         _session.PracticeData.BLZ = string.IsNullOrWhiteSpace(PracticeBlz) ? null : PracticeBlz;
         _session.PracticeData.BankName = string.IsNullOrWhiteSpace(PracticeBankName) ? null : PracticeBankName;
-        _session.PracticeData.Subject = string.IsNullOrWhiteSpace(InvoiceSubject) ? null : InvoiceSubject;
         _session.PracticeData.Street = PracticeStreet;
         _session.PracticeData.HouseNumber = PracticeHouseNumber;
         _session.PracticeData.PostalCode = PracticePostalCode;

@@ -47,8 +47,12 @@
                           DataContext="{Binding PatientsPanel}" />
 
     <StackPanel Spacing="8" Grid.Row="0" Grid.Column="1" Orientation="Vertical" >
-        <TextBlock Text="Rechnungsdetails" FontSize="16"/>
 
+        <StackPanel Spacing="8" Orientation="Vertical" >
+        <TextBlock Text="Rechnungsdetails" FontSize="16" />
+        <TextBlock Text="Subject:"/>
+        <TextBox Text="{Binding Subject, Mode=TwoWay}" Width="320" HorizontalAlignment="Left" />
+        </StackPanel>
 
         <StackPanel Spacing="8" Orientation="Horizontal" >
             <StackPanel Spacing="8" Orientation="Vertical" >
@@ -58,8 +62,8 @@
             <StackPanel Spacing="8" Orientation="Vertical" >
                 <TextBlock Text="Zahlungsfrist:"/>
                   <StackPanel Spacing="8" Orientation="Horizontal" >
-                    <TextBox Text="{Binding PaymentTermInDays}" AcceptsReturn="True" Height="20" Width= "30" TextWrapping="Wrap"/>
-                    <TextBlock Text="Tage ()"/>
+                    <TextBox Text="{Binding PaymentTermInDays, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="20" Width= "30" TextWrapping="Wrap"/>
+                    <TextBlock Text="Tage"/>
                   </StackPanel>
             </StackPanel>
         </StackPanel>
@@ -84,6 +88,7 @@
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Id, StringFormat='ID: {0}', TargetNullValue='ID: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Vorname, StringFormat='Vorname: {0}', TargetNullValue='Vorname: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Name, StringFormat='Nachname: {0}', TargetNullValue='Nachname: -'}" FontSize="16" />
+                    <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Anrede, StringFormat='Anrede: {0}', TargetNullValue='Anrede: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Geburtsdatum, StringFormat='Geburtsdatum: {0}', TargetNullValue='Geburtsdatum: -'}" FontSize="16" />
                     <TextBlock Text="{Binding PatientsPanel.SelectedPatient.Versicherungsart, StringFormat='Versicherungsart: {0}', TargetNullValue='Versicherungsart: -'}" FontSize="16" />
                 </StackPanel>

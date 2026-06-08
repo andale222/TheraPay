@@ -74,7 +74,9 @@ public class PatientService_test
             "+123",
             "F12",
             "Kostenerstattung",
-            false);
+            false,
+            "Frau",
+            new DateOnly(1815, 12, 10));
 
         Patient patient = repository.GetById("AL1");
 
@@ -83,6 +85,8 @@ public class PatientService_test
         Assert.Equal("Ada", patient.FirstName);
         Assert.Equal("Lovelace", patient.LastName);
         Assert.Equal("AL1", patient.ID);
+        Assert.Equal("Frau", patient.Salutation);
+        Assert.Equal(new DateOnly(1815, 12, 10), patient.DateOfBirth);
         Assert.NotNull(patient.Address);
         Assert.Equal("Imaginary Road", patient.Address.Street);
         Assert.Equal("42B", patient.Address.HouseNumber);
@@ -180,7 +184,9 @@ public class PatientService_test
             "+987",
             "A12",
             "GKV",
-            false);
+            false,
+            "Divers",
+            new DateOnly(1906, 12, 9));
 
         Patient patient = repository.GetById("L5R");
 
@@ -190,6 +196,8 @@ public class PatientService_test
         Assert.Equal("Grace", patient.FirstName);
         Assert.Equal("Hopper", patient.LastName);
         Assert.Equal("L5R", patient.ID);
+        Assert.Equal("Divers", patient.Salutation);
+        Assert.Equal(new DateOnly(1906, 12, 9), patient.DateOfBirth);
         Assert.NotNull(patient.Address);
         Assert.Equal("Compiler Street", patient.Address.Street);
         Assert.Equal("7", patient.Address.HouseNumber);

@@ -20,11 +20,12 @@
                        IsChecked="{Binding FilterAll, Mode=TwoWay}" />
           <RadioButton GroupName="AppointmentFilter" Content="Tag"
                        IsChecked="{Binding FilterSelectedDay, Mode=TwoWay}" />
-          <Button Content="Bearbeiten" Command="{Binding }" />
-          <Button Content="Löschen" Command="{Binding }" />
+          <Button Content="Bearbeiten" Command="{Binding EditAppointmentCommand}" />
+          <Button Content="{Binding DeleteButtonText}" Command="{Binding DeleteAppointmentCommand}" />
         </StackPanel>
 
         <dataGrid:DataGrid ItemsSource="{Binding Appointments}"
+                           SelectedItem="{Binding SelectedAppointment, Mode=TwoWay}"
                            AutoGenerateColumns="False"
                            IsReadOnly="True"
                            Height="300"

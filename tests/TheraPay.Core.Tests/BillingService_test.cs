@@ -79,6 +79,65 @@ public class BillingService_test
         Assert.Equal("UK", invoice.PatientData.Country);
         Assert.Equal("near the analytical engine", invoice.PatientData.AddressAdditional);
     }
+
+    [Fact]
+    public void GivenInvoiceDraftDetails_AddInvoiceForPatientAndAppointments_InvoiceContainsIssueDateAndPaymentTerm()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        var service = new BillingService(invoiceRepo, appointmentRepo, patientRepo);
+        var patientId = TestData.Patient1().ID;
+        var appointmentId = appointmentRepo.GetByIndex(0).Id;
+        var issueDate = new DateTime(2026, 3, 13);
+
+        // WHEN
+        var result = service.AddInvoiceForPatientAndAppointments(
+            patientId,
+            [appointmentId],
+            TestData.PracticeData1(),
+            issueDate,
+            21,
+            "Zusatztext",
+            "Ambulante Gruppentherapie");
+
+        // THEN
+        Assert.True(result.Ok);
+        var invoice = Assert.Single(service.ViewInvoices());
+        Assert.Equal(issueDate, invoice.IssueDate);
+        Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
+        Assert.Equal(21, invoice.PracticeDataRecord.DefaultPaymentTermDays);
+        Assert.Equal("Zusatztext", invoice.AdditionalText);
+        Assert.Equal("Ambulante Gruppentherapie", invoice.Subject);
+    }
+
+    [Fact]
+    public void GivenDraftAndIssueDate_IssueInvoice_UsesIssueDateAndPaymentTerm()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        var service = new BillingService(invoiceRepo, appointmentRepo, patientRepo);
+        var practiceData = TestData.PracticeData1();
+        practiceData.DefaultPaymentTermDays = 21;
+        var patientId = TestData.Patient1().ID;
+        var appointmentId = appointmentRepo.GetByIndex(0).Id;
+        var issueDate = new DateTime(2026, 3, 13);
+        service.AddInvoiceForPatientAndAppointments(patientId, [appointmentId], practiceData, issueDate, 21);
+        var invoice = service.ViewInvoices()[0];
+
+        // WHEN
+        var result = service.IssueInvoice(invoice, issueDate, practiceData);
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(issueDate, invoice.IssueDate);
+        Assert.Equal(issueDate.AddDays(21), invoice.DueDate);
+        Assert.StartsWith("202603-", invoice.InvoiceNumber);
+    }
+
     [Fact]
     public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndAppointmentsWithMismatchingPatientId_InvoiceIsNotAddedToInvoiceRepository()
     {

@@ -13,6 +13,12 @@
 
     <StackPanel Orientation="Horizontal" Grid.Row= "0" Grid.Column="0" Spacing="8">
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="Anrede" FontSize="15"/>
+       <ComboBox Width="110"
+                 ItemsSource="{Binding PatientFields.SalutationSelection}"
+                 SelectedItem="{Binding PatientFields.Salutation, Mode=TwoWay}" />
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Vorname" FontSize="15"/>
        <TextBox Width="160" Watermark="Vorname" Text="{Binding PatientFields.FirstName, Mode=TwoWay}"/>
       </StackPanel>
@@ -21,12 +27,16 @@
        <TextBox Width="160" Watermark="Nachname" Text="{Binding PatientFields.LastName, Mode=TwoWay}"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
-       <TextBlock Text="Patienten ID" FontSize="15"/>
-       <TextBox Width="160" Watermark="Patienten ID" IsEnabled="{Binding IsPatientIdEditable}" Text="{Binding PatientFields.PatientID, Mode=TwoWay}"/>
+       <TextBlock Text="Geburtsdatum" FontSize="15"/>
+       <CalendarDatePicker SelectedDate="{Binding PatientFields.DateOfBirth, Mode=TwoWay}"
+                           Width="140"
+                           SelectedDateFormat="Custom"
+                           CustomDateFormatString="dd.MM.yyyy"
+                           Watermark="dd.MM.yyyy"/>
       </StackPanel>
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
-       <TextBlock Text="IC-Diagnose" FontSize="15"/>
-       <TextBox Classes="codeInput" Width="160" Watermark="ICD code" Text="{Binding PatientFields.Icd10Diagnosis, Mode=TwoWay}"/>
+       <TextBlock Text="Patienten ID" FontSize="15"/>
+       <TextBox Width="160" Watermark="Patienten ID" IsEnabled="{Binding IsPatientIdEditable}" Text="{Binding PatientFields.PatientID, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 
@@ -67,6 +77,10 @@
        <ComboBox Width="160"
                  ItemsSource="{Binding PatientFields.InsuranceStatusSelection}"
                  SelectedItem="{Binding PatientFields.InsuranceStatus, Mode=TwoWay}" />
+      </StackPanel>
+      <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
+       <TextBlock Text="IC-Diagnose" FontSize="15"/>
+       <TextBox Classes="codeInput" Width="160" Watermark="ICD code" Text="{Binding PatientFields.Icd10Diagnosis, Mode=TwoWay}"/>
       </StackPanel>
     </StackPanel>
 

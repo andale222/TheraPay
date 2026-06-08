@@ -50,6 +50,31 @@ public class Patient_test
     }
 
     [Fact]
+    public void GivenPatient_SetSalutationAndDateOfBirth_ValuesAreUpdated()
+    {
+        // GIVEN
+        Patient patient = new Patient("A", "J", "L5R");
+
+        // WHEN
+        patient.SetSalutation("frau");
+        patient.SetDateOfBirth(new DateOnly(1990, 5, 23));
+
+        // THEN
+        Assert.Equal("Frau", patient.Salutation);
+        Assert.Equal(new DateOnly(1990, 5, 23), patient.DateOfBirth);
+    }
+
+    [Fact]
+    public void GivenInvalidSalutation_SetSalutation_ThrowsArgumentException()
+    {
+        // GIVEN
+        Patient patient = new Patient("A", "J", "L5R");
+
+        // WHEN / THEN
+        Assert.Throws<ArgumentException>(() => patient.SetSalutation("Dr."));
+    }
+
+    [Fact]
     public void GivenPatient_SetInsuranceStatus_InsuranceStatusIsUpdated()
     {
         // GIVEN

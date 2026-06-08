@@ -64,8 +64,6 @@
               <TextBox Text="{Binding PracticeBlz}" />
               <TextBlock Text="Bankname" />
               <TextBox Text="{Binding PracticeBankName}" />
-              <TextBlock Text="Betreff der Rechnung" />
-              <TextBox Text="{Binding InvoiceSubject}" />
             </StackPanel>
           </StackPanel>
         </Border>
@@ -135,6 +133,8 @@
                 CornerRadius="8">
           <StackPanel Spacing="8">
             <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
+            <TextBlock Text="Subject" />
+            <TextBox Text="{Binding InvoiceSubject, Mode=TwoWay}" />
             <StackPanel Spacing="8" Orientation= "Horizontal">
               <StackPanel Spacing="8" Orientation= "Vertical">
                 <TextBlock Text="Rechnungsdatum" />
@@ -145,14 +145,28 @@
               </StackPanel>
               <StackPanel Spacing="8" Orientation= "Vertical">
                 <TextBlock Text="Zahlungsfrist (Tage)" />
-                <TextBox Text="{Binding PaymentTermInDays}" Width="80" />
+                <TextBox Text="{Binding PaymentTermInDays, UpdateSourceTrigger=PropertyChanged}" Width="80" />
               </StackPanel>
+            <TextBlock Text="{Binding DueDatePreview, StringFormat='Fälligkeitsdatum: {0}'}" />
             </StackPanel>
-            <TextBlock Text="{Binding DueDatePreview, StringFormat='Faelligkeitsdatum: {0}'}" />
-            <CheckBox Content="Unterschriftbereich einfuegen"
-                      IsChecked="{Binding IncludeSignatureSection}" />
+            <TextBlock Text="{Binding PdfExportFilePreview, StringFormat='PDF-Export: {0}'}" TextWrapping="Wrap" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBox Grid.Column="0"
+                       Text="{Binding PdfExportDirectory, UpdateSourceTrigger=PropertyChanged}"
+                       Watermark="/pfad/zum/exportordner" />
+              <Button Grid.Column="1"
+                      Content="Ordner auswählen"
+                      Click="SelectPdfExportDirectoryClick"
+                      MinWidth="150" />
+            </Grid>
+            <StackPanel Spacing="8" Orientation= "Horizontal">
+            <CheckBox Content="Unterschriftbereich einfügen"
+                      IsChecked="{Binding IncludeSignatureSection}" 
+                      IsEnabled="False"/>
             <CheckBox Content="QR-Code fuer Rechnungsdetails erzeugen"
-                      IsChecked="{Binding IncludeQrCode}" />
+                      IsChecked="{Binding IncludeQrCode}" 
+                      IsEnabled="False"/>
+            </StackPanel>
           </StackPanel>
         </Border>
       </Grid>
@@ -168,7 +182,8 @@
         <Button Content="Speichern"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"
-                MinWidth="170" />
+                MinWidth="170"
+                IsEnabled="False" />
         <Button Content="Speichern und zu Home"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"

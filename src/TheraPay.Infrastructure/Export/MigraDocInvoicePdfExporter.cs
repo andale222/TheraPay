@@ -180,7 +180,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         textFrame.AddParagraph($"Rechnungsnummer: {model.InvoiceNumber}");
         textFrame.AddParagraph($"SteuerNr.: {model.TaxIdNumber}");
         textFrame.AddParagraph("");
-        textFrame.AddParagraph($"Betr.: {model.subject}");
+        textFrame.AddParagraph($"Betr.: {model.Subject}");
         textFrame.AddParagraph($"ICD-Diagnose: {model.Diagnosis}");
     }
 
@@ -248,7 +248,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         var paymentDetails = section.AddParagraph();
         paymentDetails.Format.KeepTogether = true;
         // total.Format.Alignment = ParagraphAlignment.Right;
-        paymentDetails.AddFormattedText("Bitte überweisen Sie den Gesamtbetrag innerhalb von 14 Tagen auf folgendes Konto: ", TextFormat.Bold);
+        paymentDetails.AddFormattedText($"Bitte überweisen Sie den Gesamtbetrag innerhalb von {model.PaymentTermInDays} Tagen auf folgendes Konto: ", TextFormat.Bold);
         paymentDetails.AddLineBreak();
         paymentDetails.AddText($"IBAN: {model.Iban}");
         paymentDetails.AddLineBreak();
