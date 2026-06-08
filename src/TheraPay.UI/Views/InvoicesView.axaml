@@ -7,8 +7,8 @@
 
   <ScrollViewer>
     <Grid Margin="16"
-          ColumnDefinitions="2*,1*"
-          RowDefinitions="Auto,Auto,*"
+          ColumnDefinitions="2*,280"
+          RowDefinitions="Auto,*"
           ColumnSpacing="16"
           RowSpacing="12">
 
@@ -57,35 +57,29 @@
               BorderThickness="1"
               CornerRadius="8">
         <StackPanel Spacing="8">
-          <TextBlock Text="Patientendetails" FontSize="16" FontWeight="Bold" />
-          <TextBlock Text="{Binding PatientDetailsIdAndName, StringFormat='ID + Name: {0}'}" TextWrapping="Wrap" />
-          <TextBlock Text="{Binding PatientDateOfBirth, StringFormat='Geburtsdatum: {0}'}" />
-          <TextBlock Text="{Binding PatientInsuranceStatus, StringFormat='Typ: {0}'}" />
+          <TextBlock Text="Aktionen" FontSize="16" FontWeight="Bold" />
+          <Button Content="Draft bearbeiten"
+                  Command="{Binding EditDraftCommand}"
+                  MinWidth="220"
+                  HorizontalAlignment="Stretch"
+                  Background="#71CE82" />
+          <Button Content="Rechnung erneut drucken"
+                  Command="{Binding PrintInvoiceCommand}"
+                  MinWidth="220"
+                  HorizontalAlignment="Stretch"
+                  Background="#F2B134" />
+          <Button Content="Zurück"
+                  Command="{Binding NavigateHomeViewCommand}"
+                  MinWidth="220"
+                  HorizontalAlignment="Stretch"
+                  Background="#FF6B6B" />
+          <TextBlock Text="{Binding StatusMessage}"
+                     TextWrapping="Wrap"
+                     Margin="0,8,0,0" />
         </StackPanel>
       </Border>
 
-      <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="8">
-        <Button Content="Draft bearbeiten"
-                Command="{Binding EditDraftCommand}"
-                MinWidth="150"
-                Background="#71CE82" />
-        <Button Content="Rechnung erneut drucken"
-                Command="{Binding PrintInvoiceCommand}"
-                MinWidth="190"
-                Background="#F2B134" />
-        <Button Content="Zurück"
-                Command="{Binding NavigateHomeViewCommand}"
-                MinWidth="100"
-                Background="#FF6B6B" />
-      </StackPanel>
-
-      <TextBlock Grid.Row="1"
-                 Grid.Column="1"
-                 Text="{Binding StatusMessage}"
-                 TextWrapping="Wrap"
-                 VerticalAlignment="Center" />
-
-      <Border Grid.Row="2"
+      <Border Grid.Row="1"
               Grid.Column="0"
               Padding="12"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
@@ -94,49 +88,73 @@
         <StackPanel Spacing="8">
           <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
 
-          <Grid ColumnDefinitions="Auto,*"
-                RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                ColumnSpacing="12"
-                RowSpacing="6">
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" FontWeight="Bold" />
-            <Border Grid.Row="0"
-                    Grid.Column="1"
-                    Background="{Binding InvoiceStatusBackground}"
-                    Padding="6,3"
-                    CornerRadius="4"
-                    HorizontalAlignment="Left">
-              <TextBlock Text="{Binding InvoiceStatusText}" />
-            </Border>
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Status ändern:" FontWeight="Bold" />
-            <ComboBox Grid.Row="1"
-                      Grid.Column="1"
-                      Width="150"
-                      HorizontalAlignment="Left"
-                      ItemsSource="{Binding EditableStatusOptions}"
-                      SelectedItem="{Binding SelectedEditableInvoiceStatus, Mode=TwoWay}"
-                      IsEnabled="{Binding IsInvoiceStatusEditable}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Rechnungsnr.:" FontWeight="Bold" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding InvoiceNumber}" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Fällig am:" FontWeight="Bold" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding InvoiceDueDate}" />
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Gesamt:" FontWeight="Bold" />
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding InvoiceTotalAmount}" />
-          </Grid>
+          <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="Status:" FontWeight="Bold" VerticalAlignment="Center" />
+                <Border Background="{Binding InvoiceStatusBackground}"
+                        Padding="6,3"
+                        CornerRadius="4"
+                        VerticalAlignment="Center">
+                  <TextBlock Text="{Binding InvoiceStatusText}" />
+                </Border>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="Rechnungsnr.:" FontWeight="Bold" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding InvoiceNumber}" VerticalAlignment="Center" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="Status ändern:" FontWeight="Bold" VerticalAlignment="Center" />
+                <ComboBox Width="150"
+                          ItemsSource="{Binding EditableStatusOptions}"
+                          SelectedItem="{Binding SelectedEditableInvoiceStatus, Mode=TwoWay}"
+                          IsEnabled="{Binding IsInvoiceStatusEditable}" />
+              </StackPanel>
+            </StackPanel>
 
-          <TextBlock Text="Positionen" FontSize="15" FontWeight="Bold" Margin="0,8,0,0" />
-          <dataGrid:DataGrid ItemsSource="{Binding Positions}"
-                             AutoGenerateColumns="False"
-                             IsReadOnly="True"
-                             MinHeight="220"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <dataGrid:DataGrid.Columns>
-              <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
-              <dataGrid:DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*" />
-              <dataGrid:DataGridTextColumn Header="Ziffern" Binding="{Binding BillingNumbers}" Width="Auto" />
-              <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
-            </dataGrid:DataGrid.Columns>
-          </dataGrid:DataGrid>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="24">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="Fällig am:" FontWeight="Bold" />
+                <TextBlock Text="{Binding InvoiceDueDate}" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="Gesamt:" FontWeight="Bold" />
+                <TextBlock Text="{Binding InvoiceTotalAmount}" />
+              </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Spacing="8">
+              <TextBlock Text="Positionen" FontSize="15" FontWeight="Bold" Margin="0,8,0,0" />
+              <dataGrid:DataGrid ItemsSource="{Binding Positions}"
+                                 AutoGenerateColumns="False"
+                                 IsReadOnly="True"
+                                 MinHeight="220"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <dataGrid:DataGrid.Columns>
+                  <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
+                  <dataGrid:DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*" />
+                  <dataGrid:DataGridTextColumn Header="Ziffern" Binding="{Binding BillingNumbers}" Width="Auto" />
+                  <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
+                </dataGrid:DataGrid.Columns>
+              </dataGrid:DataGrid>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="1"
+              Grid.Column="1"
+              Padding="12"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+              BorderThickness="1"
+              CornerRadius="8"
+              VerticalAlignment="Top">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Patientendetails" FontSize="16" FontWeight="Bold" />
+          <TextBlock Text="{Binding PatientDetailsIdAndName, StringFormat='ID + Name: {0}'}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding PatientDateOfBirth, StringFormat='Geburtsdatum: {0}'}" />
+          <TextBlock Text="{Binding PatientInsuranceStatus, StringFormat='Typ: {0}'}" />
         </StackPanel>
       </Border>
     </Grid>
