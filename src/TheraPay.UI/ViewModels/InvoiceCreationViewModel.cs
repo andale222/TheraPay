@@ -18,6 +18,8 @@ public class InvoiceCreationViewModel : ViewModelBase
     private readonly ProjectSession _session;
     private readonly AppointmentService _appointmentService;
     private readonly BillingService _billingService;
+    private bool _draftConflictConfirmationRequired;
+    private string _draftConflictSelectionSignature = "";
     private DateTime? _issueDate = DateTime.Now.Date; // heute
     public DateTime? IssueDate
     {
@@ -46,6 +48,7 @@ public class InvoiceCreationViewModel : ViewModelBase
     public PatientPanelViewModel PatientsPanel { get; }
     public RelayCommand NavigateHomeViewCommand { get; }
     public RelayCommand NavigateInvoiceDraftCommand { get; }
+    public string DraftActionText => _draftConflictConfirmationRequired ? "Trotzdem Draft erstellen" : "Weiter zum Draft";
     private string _draftStatusMessage = "";
     public string DraftStatusMessage
     {
@@ -78,6 +81,7 @@ public class InvoiceCreationViewModel : ViewModelBase
 
     public void ReloadAppointments()
     {
+        ResetDraftConflictConfirmation();
         Appointments.Clear();
 
         var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
@@ -110,6 +114,7 @@ public class InvoiceCreationViewModel : ViewModelBase
         var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
         if (string.IsNullOrWhiteSpace(selectedPatientId))
         {
+            ResetDraftConflictConfirmation();
             DraftStatusMessage = "Bitte zuerst einen Patienten auswählen.";
             return;
         }
@@ -117,11 +122,25 @@ public class InvoiceCreationViewModel : ViewModelBase
         var selectedAppointmentIds = GetCheckedAppointmentIds();
         if (selectedAppointmentIds.Count == 0)
         {
+            ResetDraftConflictConfirmation();
             DraftStatusMessage = "Bitte mindestens einen Termin zum Abrechnen auswählen.";
             return;
         }
 
+        var selectedAppointmentSignature = BuildAppointmentSelectionSignature(selectedAppointmentIds);
+        var draftConflicts = FindDraftAppointmentConflicts(selectedAppointmentIds);
+        if (draftConflicts.Count > 0 &&
+            (!_draftConflictConfirmationRequired || _draftConflictSelectionSignature != selectedAppointmentSignature))
+        {
+            _draftConflictConfirmationRequired = true;
+            _draftConflictSelectionSignature = selectedAppointmentSignature;
+            OnPropertyChanged(nameof(DraftActionText));
+            DraftStatusMessage = BuildDraftConflictWarning(draftConflicts);
+            return;
+        }
+
         var result = CreateInvoiceDraft(selectedPatientId, selectedAppointmentIds);
+        ResetDraftConflictConfirmation();
         DraftStatusMessage = result.Ok
             ? string.IsNullOrWhiteSpace(result.Error) ? "Invoice-Draft wurde erstellt." : result.Error
             : (result.Error ?? "Invoice-Draft konnte nicht erstellt werden.");
@@ -146,6 +165,51 @@ public class InvoiceCreationViewModel : ViewModelBase
         }
 
         return selectedIds;
+    }
+
+    private void ResetDraftConflictConfirmation()
+    {
+        if (!_draftConflictConfirmationRequired && string.IsNullOrWhiteSpace(_draftConflictSelectionSignature))
+            return;
+
+        _draftConflictConfirmationRequired = false;
+        _draftConflictSelectionSignature = "";
+        OnPropertyChanged(nameof(DraftActionText));
+    }
+
+    private static string BuildAppointmentSelectionSignature(IEnumerable<Guid> appointmentIds)
+    {
+        return string.Join("|", appointmentIds.OrderBy(id => id).Select(id => id.ToString("D")));
+    }
+
+    private List<DraftAppointmentConflict> FindDraftAppointmentConflicts(List<Guid> appointmentIds)
+    {
+        var selectedAppointmentIds = appointmentIds
+            .Select(id => id.ToString("D"))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return _billingService
+            .ViewInvoices()
+            .Where(invoice => invoice.Status == InvoiceStatus.Draft)
+            .SelectMany(invoice => invoice.AppointmentDataList
+                .Where(appointment => selectedAppointmentIds.Contains(appointment.AppointmentId))
+                .Select(appointment => new DraftAppointmentConflict(
+                    invoice.Id,
+                    appointment.AppointmentId,
+                    appointment.Date)))
+            .ToList();
+    }
+
+    private static string BuildDraftConflictWarning(IReadOnlyList<DraftAppointmentConflict> conflicts)
+    {
+        var details = string.Join("; ", conflicts
+            .Take(3)
+            .Select(conflict => $"{conflict.AppointmentDate:dd.MM.yy HH:mm} in Draft {conflict.DraftId:D}"));
+        var additionalConflictsText = conflicts.Count > 3
+            ? $" (+{conflicts.Count - 3} weitere)"
+            : "";
+
+        return $"Achtung: Ausgewählte Termine sind bereits in anderen Drafts enthalten: {details}{additionalConflictsText}. Klicke erneut auf \"Trotzdem Draft erstellen\", wenn du trotzdem fortfahren möchtest.";
     }
 
     private Result CreateInvoiceDraft(string patientId, List<Guid> appointmentIds)
@@ -179,4 +243,6 @@ public class InvoiceCreationViewModel : ViewModelBase
         public bool IsSelected { get; set; } = true;
         public string BillingState { get; init; } = "";
     }
+
+    private sealed record DraftAppointmentConflict(Guid DraftId, string AppointmentId, DateTime AppointmentDate);
 }

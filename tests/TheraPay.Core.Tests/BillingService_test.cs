@@ -139,6 +139,45 @@ public class BillingService_test
     }
 
     [Fact]
+    public void GivenTwoDraftsForSameAppointment_WhenOneIsIssued_OtherDraftCannotBeIssued()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = new InMemoryAppointmentRepository();
+        IPatientRepository patientRepo = new InMemoryPatientRepository();
+        var patient = TestData.Patient1();
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
+        appointment.SetDuration(60);
+        appointmentRepo.Add(appointment);
+        patientRepo.Add(patient);
+
+        var practiceData = TestData.PracticeData1();
+        practiceData.InvoiceNumberState = InvoiceNumberState.Rehydrate(2026, 1200, 1);
+        var service = new BillingService(invoiceRepo, appointmentRepo, patientRepo);
+        var issueDate = new DateTime(2026, 3, 13);
+        var firstDraftResult = service.AddInvoiceForPatientAndAppointments(patient.ID, [appointment.Id], practiceData, issueDate);
+        var secondDraftResult = service.AddInvoiceForPatientAndAppointments(patient.ID, [appointment.Id], practiceData, issueDate);
+        Assert.True(firstDraftResult.Ok);
+        Assert.True(secondDraftResult.Ok);
+        var firstDraft = service.ViewInvoices()[0];
+        var secondDraft = service.ViewInvoices()[1];
+
+        // WHEN
+        var secondIssueResult = service.IssueInvoice(secondDraft, issueDate, practiceData);
+        var nextIssueNumberAfterSecondIssue = practiceData.InvoiceNumberState.NextIssueNumber;
+        var firstIssueResult = service.IssueInvoice(firstDraft, issueDate, practiceData);
+
+        // THEN
+        Assert.True(secondIssueResult.Ok);
+        Assert.False(firstIssueResult.Ok);
+        Assert.Contains("nicht mehr abrechenbar", firstIssueResult.Error);
+        Assert.Equal(InvoiceStatus.Draft, firstDraft.Status);
+        Assert.Equal("", firstDraft.InvoiceNumber);
+        Assert.Equal(nextIssueNumberAfterSecondIssue, practiceData.InvoiceNumberState.NextIssueNumber);
+        Assert.Equal(AppointmentStatus.Billed, appointment.Status);
+    }
+
+    [Fact]
     public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndAppointmentsWithMismatchingPatientId_InvoiceIsNotAddedToInvoiceRepository()
     {
         // GIVEN

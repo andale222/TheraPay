@@ -134,6 +134,40 @@ public class BillingService
         return _invoiceRepository.GetAll();
     }
 
+    private Result ValidateInvoiceAppointmentsAreBillable(Invoice invoice)
+    {
+        var unavailableAppointments = new List<string>();
+
+        foreach (var appointmentData in invoice.AppointmentDataList)
+        {
+            if (!Guid.TryParse(appointmentData.AppointmentId, out var appointmentId))
+            {
+                unavailableAppointments.Add($"{appointmentData.AppointmentId} (ungueltige Termin-ID)");
+                continue;
+            }
+
+            if (_appointmentRepository.GetIndexById(appointmentId) < 0)
+            {
+                unavailableAppointments.Add($"{appointmentData.AppointmentId} (nicht gefunden)");
+                continue;
+            }
+
+            var appointment = _appointmentRepository.GetById(appointmentId);
+            if (appointment.Status != AppointmentStatus.Open)
+            {
+                unavailableAppointments.Add($"{appointment.Date:dd.MM.yyyy HH:mm} ({appointment.Id:D}, Status: {appointment.Status})");
+            }
+        }
+
+        if (unavailableAppointments.Count == 0)
+            return new Result(true);
+
+        return new Result(
+            false,
+            "Rechnung kann nicht ausgestellt werden, weil folgende Termine nicht mehr abrechenbar sind: " +
+            string.Join("; ", unavailableAppointments));
+    }
+
     public Result IssueInvoice(Invoice invoice, DateTime issueDate, PracticeData practiceData)
     {
         /* This function should do the following:
@@ -145,6 +179,13 @@ public class BillingService
         */
         if (invoice == null)
             return new Result(false, "Invoice not found.");
+
+        if (invoice.Status != InvoiceStatus.Draft)
+            return new Result(false, "Issue is not editable anymore.");
+
+        var billableAppointmentsResult = ValidateInvoiceAppointmentsAreBillable(invoice);
+        if (!billableAppointmentsResult.Ok)
+            return billableAppointmentsResult;
 
         // first only preview next serial
         var invoiceNumber = practiceData.InvoiceNumberState.PreviewNextSerial(issueDate);

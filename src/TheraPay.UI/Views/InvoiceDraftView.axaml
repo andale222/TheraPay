@@ -175,18 +175,18 @@
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
         <TextBlock Text="{Binding IssueWarningText}" Foreground="#C94A1A" VerticalAlignment="Center" />
-        <Button Content="Zurück zur Auswahl"
+        <Button Content="Zurück"
                 Command="{Binding NavigateBackCommand}"
                 Background="#FF6B6B"
-                MinWidth="150" />
+                MinWidth="70" />
         <Button Content="Home"
                 Command="{Binding NavigateHomeWithoutSavingCommand}"
                 Background="#FF6B6B"
-                MinWidth="100" />
+                MinWidth="70" />
         <Button Content="Speichern"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"
-                MinWidth="170"
+                MinWidth="100"
                 IsEnabled="False" />
         <Button Content="Speichern und zu Home"
                 Command="{Binding SaveAndNavigateHomeCommand}"

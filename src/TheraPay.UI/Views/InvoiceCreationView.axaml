@@ -77,7 +77,7 @@
 
             <!-- Buttons -->
             <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                <Button Content="Weiter zum Draft" Command="{Binding NavigateInvoiceDraftCommand}" Background="#71CE82" MinWidth="150"/>
+                <Button Content="{Binding DraftActionText}" Command="{Binding NavigateInvoiceDraftCommand}" Background="#71CE82" MinWidth="190"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal" Margin="0,30,16,0" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right">
                 <Button Content="Zurück" Command="{Binding NavigateHomeViewCommand}" Background="#FF6B6B" MinWidth="100"/>
