@@ -51,6 +51,7 @@ public class InvoiceCreationViewModel_test
         session.SetPracticeData(practiceData);
         var patientService = new PatientService(patientRepository);
         var appointmentService = new AppointmentService(appointmentRepository);
+        var messageBox = new ConfirmingMessageBoxService();
         NavigationService? navigationService = null;
         var services = new ServiceCollection();
         services.AddTransient(_ => new InvoiceDraftViewModel(
@@ -59,7 +60,7 @@ public class InvoiceCreationViewModel_test
             new NoopInvoicePdfExporter(),
             session,
             navigationService!,
-            new ConfirmingMessageBoxService()));
+            messageBox));
         var serviceProvider = services.BuildServiceProvider();
         navigationService = new NavigationService(new NavigationStore(), serviceProvider);
         var patientsPanel = new PatientPanelViewModel(patientService, navigationService);
@@ -71,22 +72,16 @@ public class InvoiceCreationViewModel_test
             patientsPanel,
             patientRepository,
             session,
-            navigationService);
-
-        // WHEN
-        viewModel.NavigateInvoiceDraftCommand.Execute(null);
-
-        // THEN
-        Assert.Single(billingService.ViewInvoices());
-        Assert.Contains("bereits in anderen Drafts", viewModel.DraftStatusMessage);
-        Assert.Equal("Trotzdem Draft erstellen", viewModel.DraftActionText);
+            navigationService,
+            messageBox);
 
         // WHEN
         viewModel.NavigateInvoiceDraftCommand.Execute(null);
 
         // THEN
         Assert.Equal(2, billingService.ViewInvoices().Count);
-        Assert.Equal("Weiter zum Draft", viewModel.DraftActionText);
+        Assert.Equal(1, messageBox.ConfirmationCount);
+        Assert.Contains("bereits in anderen Drafts", messageBox.LastConfirmationMessage);
     }
 
     private sealed class NoopInvoicePdfExporter : IInvoicePdfExporter
@@ -99,6 +94,9 @@ public class InvoiceCreationViewModel_test
 
     private sealed class ConfirmingMessageBoxService : IMessageBoxService
     {
+        public int ConfirmationCount { get; private set; }
+        public string LastConfirmationMessage { get; private set; } = "";
+
         public Task ShowErrorAsync(string title, string message)
         {
             return Task.CompletedTask;
@@ -111,6 +109,8 @@ public class InvoiceCreationViewModel_test
 
         public Task<bool> ConfirmWarningAsync(string title, string message, string confirmText = "OK", string cancelText = "Abbrechen")
         {
+            ConfirmationCount++;
+            LastConfirmationMessage = message;
             return Task.FromResult(true);
         }
     }
