@@ -179,6 +179,10 @@
                 Command="{Binding NavigateBackCommand}"
                 Background="#FF6B6B"
                 MinWidth="150" />
+        <Button Content="Home"
+                Command="{Binding NavigateHomeWithoutSavingCommand}"
+                Background="#FF6B6B"
+                MinWidth="100" />
         <Button Content="Speichern"
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"

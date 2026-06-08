@@ -21,6 +21,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
     public ObservableCollection<InvoiceAppointmentRowVm> Appointments { get; } = new();
     public RelayCommand NavigateBackCommand { get; }
+    public RelayCommand NavigateHomeWithoutSavingCommand { get; }
     public RelayCommand SaveAndNavigateHomeCommand { get; }
     public RelayCommand IssueInvoiceCommand { get; }
 
@@ -294,6 +295,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _invoiceExporter = invoiceExporter;
 
         NavigateBackCommand = new RelayCommand(() => _nav.NavigateTo<InvoiceCreationViewModel>());
+        NavigateHomeWithoutSavingCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         SaveAndNavigateHomeCommand = new RelayCommand(SaveAndNavigateHome);
         IssueInvoiceCommand = new RelayCommand(IssueInvoiceWithWarning);
 
