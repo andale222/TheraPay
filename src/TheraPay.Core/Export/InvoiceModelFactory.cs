@@ -38,8 +38,8 @@ public class InvoiceModelFactory
             PatientName: invoice.PatientData.Name,
             TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
             Diagnosis: "F41.3",
-            PatientStreetNr: "Teststraße 342",
-            PatientCityCode: "12345 Teststadt",
+            PatientStreetNr: invoice.PatientData.StreetAndHouseNumber,
+            PatientCityCode: invoice.PatientData.PostalCodeAndCity,
             Lines: invoiceLines,
             TotalAmountEuro: invoice.TotalAmount);
         

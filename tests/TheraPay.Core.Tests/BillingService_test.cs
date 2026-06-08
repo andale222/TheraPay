@@ -1,4 +1,5 @@
 using TheraPay.Core;
+using TheraPay.Domain;
 
 namespace TheraPay.Core.Tests;
 
@@ -43,6 +44,40 @@ public class BillingService_test
         Assert.Equal(patientId, invoices[0].PatientData.Id);
         Assert.Single(invoices[0].AppointmentDataList);
         Assert.Equal(aptmtId.ToString("D"), invoices[0].AppointmentDataList[0].AppointmentId);
+    }
+
+    [Fact]
+    public void GivenPatientWithAddress_AddInvoiceForPatientAndAppointments_InvoiceContainsPatientAddress()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = new InMemoryAppointmentRepository();
+        IPatientRepository patientRepo = new InMemoryPatientRepository();
+        var patient = new Patient("Ada", "Lovelace", "AL1");
+        patient.SetAddress("Imaginary Road", "42B", "12345", "London", "UK", "near the analytical engine");
+        patientRepo.Add(patient);
+
+        var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
+        appointment.SetDuration(60);
+        appointmentRepo.Add(appointment);
+
+        BillingService service = new(invoiceRepo, appointmentRepo, patientRepo);
+
+        // WHEN
+        var result = service.AddInvoiceForPatientAndAppointments(
+            patient.ID,
+            [appointment.Id],
+            TestData.PracticeData1());
+
+        // THEN
+        Assert.True(result.Ok);
+        var invoice = Assert.Single(service.ViewInvoices());
+        Assert.Equal("Imaginary Road", invoice.PatientData.Street);
+        Assert.Equal("42B", invoice.PatientData.HouseNumber);
+        Assert.Equal("12345", invoice.PatientData.PostalCode);
+        Assert.Equal("London", invoice.PatientData.City);
+        Assert.Equal("UK", invoice.PatientData.Country);
+        Assert.Equal("near the analytical engine", invoice.PatientData.AddressAdditional);
     }
     [Fact]
     public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndAppointmentsWithMismatchingPatientId_InvoiceIsNotAddedToInvoiceRepository()

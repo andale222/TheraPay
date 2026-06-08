@@ -19,4 +19,11 @@ public sealed class NavigationService
         var vm = _sp.GetRequiredService<TViewModel>();
         _store.Navigate(vm);
     }
+
+    public void NavigateTo<TViewModel>(Action<TViewModel> configure) where TViewModel : class
+    {
+        var vm = _sp.GetRequiredService<TViewModel>();
+        configure(vm);
+        _store.Navigate(vm);
+    }
 }

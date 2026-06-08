@@ -1,6 +1,5 @@
-using TheraPay.Core;
-using TheraPay.Domain;
 using CsvHelper;
+using CsvHelper.Configuration;
 using System.Globalization;
 
 namespace TheraPay.Infrastructure.csv;
@@ -19,7 +18,7 @@ public abstract class CsvStore<TDomain, TRecord> where TDomain : class where TRe
         var records = data.Select(ToRecord).ToList();
 
         using var writer = new StreamWriter(_filePath);
-        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        using var csv = new CsvWriter(writer, CreateCsvConfiguration());
         
         csv.WriteRecords(records);
     }
@@ -30,7 +29,7 @@ public abstract class CsvStore<TDomain, TRecord> where TDomain : class where TRe
             return new List<TDomain>();
 
         using var reader = new StreamReader(_filePath);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        using var csv = new CsvReader(reader, CreateCsvConfiguration());
 
         var records = csv.GetRecords<TRecord>();
 
@@ -40,4 +39,9 @@ public abstract class CsvStore<TDomain, TRecord> where TDomain : class where TRe
     protected abstract TRecord ToRecord(TDomain objectToConvert);
 
     protected abstract TDomain ToDomain(TRecord record);
+
+    protected virtual CsvConfiguration CreateCsvConfiguration()
+    {
+        return new CsvConfiguration(CultureInfo.InvariantCulture);
+    }
 }

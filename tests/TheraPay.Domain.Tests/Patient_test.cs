@@ -21,4 +21,44 @@ public class Patient_test
         Assert.Equal(lastName, patient.LastName);
         Assert.Equal(id, patient.ID);
     }
+
+    [Fact]
+    public void GivenPatientAddress_SetAddress_AddressFieldsComeFromAddress()
+    {
+        // GIVEN
+        Patient patient = new Patient("A", "J", "L5R");
+
+        // WHEN
+        patient.SetAddress("Teststraße", "81A", "12345", "Teststadt", "Deutschland", "2. OG");
+
+        // THEN
+        Assert.NotNull(patient.Address);
+        Assert.Equal("Teststraße 81A", patient.Address.GetStreetNr());
+        Assert.Equal("12345", patient.Address.PostalCode);
+        Assert.Equal("Teststadt", patient.Address.City);
+        Assert.Equal("2. OG", patient.Address.Additional);
+    }
+
+    [Fact]
+    public void GivenPatient_CreatePatient_InsuranceStatusDefaultsToPrivat()
+    {
+        // WHEN
+        Patient patient = new Patient("A", "J", "L5R");
+
+        // THEN
+        Assert.Equal(PatientInsuranceStatus.Privat, patient.InsuranceStatus);
+    }
+
+    [Fact]
+    public void GivenPatient_SetInsuranceStatus_InsuranceStatusIsUpdated()
+    {
+        // GIVEN
+        Patient patient = new Patient("A", "J", "L5R");
+
+        // WHEN
+        patient.SetInsuranceStatus(PatientInsuranceStatus.GKV);
+
+        // THEN
+        Assert.Equal(PatientInsuranceStatus.GKV, patient.InsuranceStatus);
+    }
 }

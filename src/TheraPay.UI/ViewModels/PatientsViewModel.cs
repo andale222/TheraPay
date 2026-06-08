@@ -1,85 +1,261 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
 using TheraPay.UI.State;
+using System.ComponentModel.DataAnnotations;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TheraPay.UI.ViewModels;
 
+public partial class PatientFields : ObservableValidator
+{
+    public string PatientID { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.Icd10DiagnosisPattern,
+        ErrorMessage = "Ungültige ICD-10 Diagnose")]
+    private string icd10Diagnosis =  "";
+    public string Street { get; set; } =  "";
+    public string HouseNumber { get; set; } =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Address.PostalCodePattern,
+        ErrorMessage = "Postleitzahl muss aus 5 Ziffern bestehen")]
+    private string postalCode =  "";
+    public string Place { get; set; } =  "";
+    public string Country { get; set; } =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.EmailPattern,
+        ErrorMessage = "Ungültige E-Mail-Adresse")]
+    private string email =  "";
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [RegularExpression(Patient.PhoneNumberPattern,
+        ErrorMessage = "Ungültige Telefonnummer")]
+    private string phoneNumber =  "";
+    public string AdditionalInfo { get; set; } =  "";
+    public bool IsActive { get; set; } =  true;
+    public string InsuranceStatus { get; set; } =  "Privat";
+    public bool IsInactive
+    {
+        get => IsActive == false;
+        set
+        {
+            if (value)
+                IsActive = false;
+        }
+    }
+
+    public ObservableCollection<string> InsuranceStatusSelection { get; } = new()
+    {
+        "Privat", "GKV", "Selbstzahler", "Kostenerstattung"
+    };
+
+    public static PatientFields FromPatient(Patient patient)
+    {
+        return new PatientFields
+        {
+            PatientID = patient.ID,
+            FirstName = patient.FirstName,
+            LastName = patient.LastName,
+            Icd10Diagnosis = patient.ICD10Diagnosis,
+            Street = patient.Address?.Street ?? "",
+            HouseNumber = patient.Address?.HouseNumber ?? "",
+            PostalCode = patient.Address?.PostalCode ?? "",
+            Place = patient.Address?.City ?? "",
+            Country = patient.Address?.Country ?? "",
+            Email = patient.Email,
+            PhoneNumber = patient.PhoneNumber,
+            AdditionalInfo = patient.Address?.Additional ?? "",
+            IsActive = patient.IsActive,
+            InsuranceStatus = patient.InsuranceStatus.ToString()
+        };
+    }
+}
 public class PatientsViewModel : ViewModelBase
 {
-    private readonly IPatientRepository _store;
+    private readonly PatientService _patientService;
     private readonly ProjectSession _session;
+    private string? _editingPatientId;
     public RelayCommand NavigateHomeViewCommand  { get; }
     public RelayCommand AddPatientCommand  { get; }
     public RelayCommand CheckDataCommand  { get; }
 
     public ObservableCollection<Patient> Patients { get; } = new();
+    public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
+    public bool IsEditMode => _editingPatientId is not null;
+    public bool IsPatientIdEditable => IsEditMode == false;
+    public string PatientFormTitle => IsEditMode ? "Patient bearbeiten" : "Patient hinzufügen";
+    public string SavePatientButtonText => IsEditMode ? "Änderungen speichern" : "Hinzufügen";
 
-    private string _firstName = "";
-    public string FirstName
+    private string _checkDataMessage = "";
+    public string CheckDataMessage
     {
-        get => _firstName;
-        set { _firstName = value; OnPropertyChanged(); }
-    }
-
-    private string _lastName = "";
-    public string LastName
-    {
-        get => _lastName;
-        set { _lastName = value; OnPropertyChanged(); }
-    }
-    private string _patientID = "";
-    public string PatientID
-{
-    get => _patientID;
-    set
-    {
-        if (_patientID != value)
+        get => _checkDataMessage;
+        private set
         {
-            _patientID = value;
+            if (_checkDataMessage == value)
+                return;
+
+            _checkDataMessage = value;
             OnPropertyChanged();
         }
     }
-}
 
-    public PatientsViewModel(PatientService patientService, IPatientRepository store, ProjectSession session, NavigationService nav)
+    private PatientFields _patientFields = new();
+    public PatientFields PatientFields
     {
-        _store = store;
+        get => _patientFields;
+        private set
+        {
+            _patientFields = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public PatientsViewModel(PatientService patientService, ProjectSession session, NavigationService nav)
+    {
+        _patientService = patientService;
         _session = session;
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
-        AddPatientCommand = new RelayCommand(AddPatient);
+        AddPatientCommand = new RelayCommand(SavePatient);
         CheckDataCommand = new RelayCommand(CheckData);
         Reload();
     }
 
+    public void LoadPatientForEdit(string patientId)
+    {
+        Patient? patient = _patientService.FindPatientById(patientId);
+        if (patient is null)
+        {
+            _editingPatientId = null;
+            PatientFields = new PatientFields();
+            CheckDataMessage = $"Patient mit ID '{patientId}' wurde nicht gefunden.";
+            NotifyEditModeChanged();
+            return;
+        }
+
+        _editingPatientId = patient.ID;
+        PatientFields = PatientFields.FromPatient(patient);
+        CheckDataMessage = "";
+        NotifyEditModeChanged();
+    }
+
+    private void SavePatient()
+    {
+        if (IsEditMode)
+            UpdatePatient();
+        else
+            AddPatient();
+    }
+
     private void AddPatient()
     {
-        var p = new Patient(FirstName.Trim(), LastName.Trim(),PatientID);
-        var addResult = _store.Add(p);
+        var addResult = _patientService.AddPatient(
+            PatientFields.FirstName,
+            PatientFields.LastName,
+            PatientFields.PatientID,
+            PatientFields.Street,
+            PatientFields.HouseNumber,
+            PatientFields.PostalCode,
+            PatientFields.Place,
+            PatientFields.Country,
+            PatientFields.AdditionalInfo,
+            PatientFields.Email,
+            PatientFields.PhoneNumber,
+            PatientFields.Icd10Diagnosis,
+            PatientFields.InsuranceStatus,
+            PatientFields.IsActive);
+
         if (addResult.Ok)
         {
             _session.MarkUnsavedChanges();
+            PatientFields = new PatientFields();
+            CheckDataMessage = "Patientendaten wurden hinzugefügt.";
+        }
+        else
+        {
+            CheckDataMessage = addResult.Error ?? "Patientendaten konnten nicht hinzugefügt werden.";
         }
 
-        FirstName = "";
-        LastName = "";
-        PatientID = "";
         Reload();
 
-        NavigateHomeViewCommand.Execute(null);
+        if (addResult.Ok)
+            NavigateHomeViewCommand.Execute(null);
+    }
+
+    private void UpdatePatient()
+    {
+        string patientId = _editingPatientId ?? PatientFields.PatientID;
+        var updateResult = _patientService.UpdatePatient(
+            patientId,
+            PatientFields.FirstName,
+            PatientFields.LastName,
+            PatientFields.Street,
+            PatientFields.HouseNumber,
+            PatientFields.PostalCode,
+            PatientFields.Place,
+            PatientFields.Country,
+            PatientFields.AdditionalInfo,
+            PatientFields.Email,
+            PatientFields.PhoneNumber,
+            PatientFields.Icd10Diagnosis,
+            PatientFields.InsuranceStatus,
+            PatientFields.IsActive);
+
+        if (updateResult.Ok)
+        {
+            _session.MarkUnsavedChanges();
+            CheckDataMessage = "Patientendaten wurden aktualisiert.";
+        }
+        else
+        {
+            CheckDataMessage = updateResult.Error ?? "Patientendaten konnten nicht aktualisiert werden.";
+        }
+
+        Reload();
+
+        if (updateResult.Ok)
+            NavigateHomeViewCommand.Execute(null);
     }
 
     private void CheckData()
     {
-        // TODO: Implement data checking logic here
+        Result result = _patientService.CheckPatientData(
+                PatientFields.PatientID,
+                PatientFields.Email,
+                PatientFields.PhoneNumber,
+                PatientFields.PostalCode,
+                PatientFields.Icd10Diagnosis);
+
+        CheckDataMessage = result.Ok
+            ? IsEditMode ? "Patientendaten können aktualisiert werden." : "Patientendaten können hinzugefügt werden."
+            : result.Error ?? "Patientendaten sind nicht vollständig gültig.";
     }
 
     private void Reload()
     {
         Patients.Clear();
-        foreach (var p in _store.GetAll().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
+        foreach (var p in _patientService.ViewPatients().OrderBy(x => x.LastName).ThenBy(x => x.FirstName))
             Patients.Add(p);
+    }
+
+    private void NotifyEditModeChanged()
+    {
+        OnPropertyChanged(nameof(IsEditMode));
+        OnPropertyChanged(nameof(IsPatientIdEditable));
+        OnPropertyChanged(nameof(PatientFormTitle));
+        OnPropertyChanged(nameof(SavePatientButtonText));
     }
 }

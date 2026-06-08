@@ -9,6 +9,57 @@
     <Application.Styles>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <FluentTheme />
+
+        <Style Selector="DataValidationErrors">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <DockPanel LastChildFill="True">
+
+                        <ContentControl DockPanel.Dock="Right"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        ContentTemplate="{TemplateBinding ErrorTemplate}"
+                                        DataContext="{TemplateBinding Owner}"
+                                        Content="{Binding (DataValidationErrors.Errors)}"
+                                        IsVisible="{Binding (DataValidationErrors.HasErrors)}" />
+
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          CornerRadius="{TemplateBinding CornerRadius}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Padding="{TemplateBinding Padding}" />
+                    </DockPanel>
+                </ControlTemplate>
+            </Setter>
+
+            <Setter Property="ErrorTemplate">
+                <DataTemplate>
+                    <TextBlock Text="!"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="DarkOrange"
+                               VerticalAlignment="Center"
+                               Cursor="Help"
+                               ToolTip.ShowDelay="0">
+
+                        <ToolTip.Tip>
+                            <ItemsControl ItemsSource="{Binding}"
+                                          FontSize="12"
+                                          MaxWidth="300" />
+                        </ToolTip.Tip>
+
+                    </TextBlock>
+                </DataTemplate>
+            </Setter>
+        </Style>
+
+    <Style Selector="TextBox.codeInput:error">
+        <Setter Property="Background" Value="Orange"/>
+        <Setter Property="BorderBrush" Value="DarkOrange"/>
+    </Style>
     </Application.Styles>
 
      <Application.DataTemplates>
