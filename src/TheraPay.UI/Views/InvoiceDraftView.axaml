@@ -163,9 +163,9 @@
             <CheckBox Content="Unterschriftbereich einfügen"
                       IsChecked="{Binding IncludeSignatureSection}" 
                       IsEnabled="False"/>
-            <CheckBox Content="QR-Code fuer Rechnungsdetails erzeugen"
+            <CheckBox Content="SEPA-Zahlungs-QR-Code erzeugen"
                       IsChecked="{Binding IncludeQrCode}" 
-                      IsEnabled="False"/>
+                      IsEnabled="True"/>
             </StackPanel>
           </StackPanel>
         </Border>

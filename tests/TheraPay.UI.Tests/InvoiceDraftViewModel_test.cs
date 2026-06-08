@@ -72,6 +72,8 @@ public class InvoiceDraftViewModel_test
             Assert.StartsWith(exportDirectory, exporter.LastFilePath);
             Assert.EndsWith(".pdf", exporter.LastFilePath);
             Assert.Equal($"Invoice_{billingService.ViewInvoices()[0].InvoiceNumber}.pdf", Path.GetFileName(exporter.LastFilePath));
+            var exportedInvoice = Assert.IsType<InvoicePdfModel>(exporter.LastInvoice);
+            Assert.True(exportedInvoice.IncludePaymentQrCode);
         }
         finally
         {
@@ -85,10 +87,12 @@ public class InvoiceDraftViewModel_test
     private sealed class CapturingInvoicePdfExporter : IInvoicePdfExporter
     {
         public string? LastFilePath { get; private set; }
+        public InvoicePdfModel? LastInvoice { get; private set; }
 
         public bool InternalExport(InvoicePdfModel invoice, string filePath)
         {
             LastFilePath = filePath;
+            LastInvoice = invoice;
             return true;
         }
     }

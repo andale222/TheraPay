@@ -1,9 +1,9 @@
-﻿using System.Configuration.Assemblies;
-using System.Globalization;
+﻿using System.Globalization;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
+using QRCoder;
 using TheraPay.Core;
 using TheraPay.Core.Export;
 
@@ -12,6 +12,8 @@ namespace TheraPay.Infrastructure.Export.Pdf;
 public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
 {
     private static readonly CultureInfo De = CultureInfo.GetCultureInfo("de-DE");
+    private const double PaymentQrCodeSizeCentimeters = 4;
+    private const int PaymentQrCodeQuietZoneModules = 0;
 
     public bool InternalExport(InvoicePdfModel model, string filePath)
     {
@@ -48,7 +50,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
 
     private static void DefineStyles(Document document)
     {
-        var normal = document.Styles["Normal"];
+        var normal = document.Styles["Normal"]!;
         normal.Font.Name = "TheraSans";
         normal.Font.Size = 11;
 
@@ -56,13 +58,13 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         // footer.Font.Name = "TheraSans";
         // footer.Font.Size = 8;
 
-        var heading = document.Styles["Heading1"];
+        var heading = document.Styles["Heading1"]!;
         heading.Font.Name = "TheraSans";
         heading.Font.Size = 13;
         heading.Font.Bold = true;
         heading.ParagraphFormat.SpaceAfter = Unit.FromCentimeter(0.5);
 
-        var style = document.Styles[StyleNames.Footer];
+        var style = document.Styles[StyleNames.Footer]!;
         style.ParagraphFormat.ClearAll();
         style.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(0), TabAlignment.Left);
         style.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(7), TabAlignment.Left);
@@ -82,7 +84,7 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         secondPar.Format.Font.Bold = true;
         secondPar.Format.Font.Size = 10;
 
-        var thirdPar = section.AddParagraph($"Tel.: {model.PracticeTelephone} - E-Mail: {model.PracticeEmail}");
+        var thirdPar = section.AddParagraph($"Tel.: {model.PracticeTelephone} · E-Mail: {model.PracticeEmail}");
         thirdPar.Format.Alignment = ParagraphAlignment.Center;
         thirdPar.Format.Font.Size = 10;
 
@@ -145,9 +147,9 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         practiceDetails.Format.Font.Size = 7;
         practiceDetails.Format.Font.Underline = Underline.Single;
         practiceDetails.AddText(model.PracticeName);
-        practiceDetails.AddText("-");
+        practiceDetails.AddText(" · ");
         practiceDetails.AddText(model.PracticeStreetNr);
-        practiceDetails.AddText("-");
+        practiceDetails.AddText(" · ");
         practiceDetails.AddText(model.PracticeCityCode);
         practiceDetails.AddLineBreak();
         practiceDetails.AddLineBreak();
@@ -245,9 +247,48 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
 
     private static void BuildTotal(Section section, InvoicePdfModel model)
     {
-        var paymentDetails = section.AddParagraph();
+        using var qrCodeData = TryCreatePaymentQrCodeData(model);
+
+        if (qrCodeData is null)
+        {
+            var paymentDetailsParagraph = section.AddParagraph();
+            paymentDetailsParagraph.Format.KeepTogether = true;
+            AddPaymentDetails(paymentDetailsParagraph, model);
+            paymentDetailsParagraph.AddLineBreak();
+            paymentDetailsParagraph.AddLineBreak();
+            AddSignature(section, model);
+            return;
+        }
+
+        var paymentTable = section.AddTable();
+        paymentTable.Borders.Width = 0;
+        paymentTable.Rows.LeftIndent = 0;
+        paymentTable.AddColumn(Unit.FromCentimeter(12.2));
+        paymentTable.AddColumn(Unit.FromCentimeter(4.6));
+
+        var row = paymentTable.AddRow();
+        row.TopPadding = Unit.FromCentimeter(0.1);
+        row.BottomPadding = Unit.FromCentimeter(0.3);
+        row.Cells[0].VerticalAlignment = VerticalAlignment.Top;
+        row.Cells[1].VerticalAlignment = VerticalAlignment.Top;
+
+        var paymentDetails = row.Cells[0].AddParagraph();
         paymentDetails.Format.KeepTogether = true;
-        // total.Format.Alignment = ParagraphAlignment.Right;
+        AddPaymentDetails(paymentDetails, model);
+
+        // var qrCode = row.Cells[1].AddParagraph();
+        // qrCode.Format.KeepTogether = true;
+        // qrCode.Format.Alignment = ParagraphAlignment.Right;
+        // qrCode.AddFormattedText("SEPA-Überweisung", TextFormat.Bold);
+        // qrCode.AddLineBreak();
+        AddQrCodeTable(row.Cells[1], qrCodeData);
+
+        section.AddParagraph().Format.SpaceAfter = Unit.FromCentimeter(0.2);
+        AddSignature(section, model);
+    }
+
+    private static void AddPaymentDetails(Paragraph paymentDetails, InvoicePdfModel model)
+    {
         paymentDetails.AddFormattedText($"Bitte überweisen Sie den Gesamtbetrag innerhalb von {model.PaymentTermInDays} Tagen auf folgendes Konto: ", TextFormat.Bold);
         paymentDetails.AddLineBreak();
         paymentDetails.AddText($"IBAN: {model.Iban}");
@@ -256,10 +297,11 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         paymentDetails.AddLineBreak();
         paymentDetails.AddText($"Bank: {model.BankName}");
         paymentDetails.AddLineBreak();
-        paymentDetails.AddText($"Betreff: {model.InvoiceNumber}");
-        paymentDetails.AddLineBreak();
-        paymentDetails.AddLineBreak();
+        paymentDetails.AddText($"Betreff: Rechnung {model.InvoiceNumber}");
+    }
 
+    private static void AddSignature(Section section, InvoicePdfModel model)
+    {
         var signature = section.AddParagraph();
         signature.Format.KeepTogether = true;
         signature.AddText("Mit freundlichen Grüßen");
@@ -270,4 +312,97 @@ public sealed class MigraDocInvoicePdfExporter : IInvoicePdfExporter
         signature.AddLineBreak();
         signature.AddText($"{model.PractitionerTitle} {model.PractitionerName}");
     }
+
+    private static QRCodeData? TryCreatePaymentQrCodeData(InvoicePdfModel model)
+    {
+        if (!model.IncludePaymentQrCode ||
+            model.TotalAmountEuro <= 0m ||
+            string.IsNullOrWhiteSpace(model.Iban) ||
+            string.IsNullOrWhiteSpace(model.PracticeName))
+        {
+            return null;
+        }
+
+        try
+        {
+            var payload = new PayloadGenerator.Girocode(
+                iban: NormalizeIban(model.Iban),
+                bic: NormalizeBic(model.Bic),
+                name: LimitLength(model.PractitionerName, 70),
+                amount: model.TotalAmountEuro,
+                remittanceInformation: LimitLength($"Rechnung {model.InvoiceNumber}", 140));
+
+            return QRCodeGenerator.GenerateQrCode(payload);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static void AddQrCodeTable(Cell targetCell, QRCodeData qrCodeData)
+    {
+        var matrix = qrCodeData.ModuleMatrix;
+        var matrixSize = matrix.Count;
+        var moduleCount = matrixSize + PaymentQrCodeQuietZoneModules * 2;
+        var moduleSize = Unit.FromCentimeter(PaymentQrCodeSizeCentimeters / moduleCount);
+        var table = targetCell.Elements.AddTable();
+
+        table.Borders.Width = 0;
+        table.Rows.LeftIndent = Unit.FromCentimeter(0.6);
+
+        for (var columnIndex = 0; columnIndex < moduleCount; columnIndex++)
+        {
+            table.AddColumn(moduleSize);
+        }
+
+        for (var rowIndex = 0; rowIndex < moduleCount; rowIndex++)
+        {
+            var row = table.AddRow();
+            row.Height = moduleSize;
+            row.HeightRule = RowHeightRule.Exactly;
+            row.TopPadding = Unit.FromPoint(0);
+            row.BottomPadding = Unit.FromPoint(0);
+
+            for (var columnIndex = 0; columnIndex < moduleCount; columnIndex++)
+            {
+                var cell = row.Cells[columnIndex];
+                cell.Shading.Color = IsDarkQrModule(matrix, rowIndex, columnIndex)
+                    ? Colors.Black
+                    : Colors.White;
+            }
+        }
+    }
+
+    private static bool IsDarkQrModule(IReadOnlyList<System.Collections.BitArray> matrix, int rowIndex, int columnIndex)
+    {
+        var matrixRowIndex = rowIndex - PaymentQrCodeQuietZoneModules;
+        var matrixColumnIndex = columnIndex - PaymentQrCodeQuietZoneModules;
+
+        if (matrixRowIndex < 0 ||
+            matrixColumnIndex < 0 ||
+            matrixRowIndex >= matrix.Count ||
+            matrixColumnIndex >= matrix[matrixRowIndex].Count)
+        {
+            return false;
+        }
+
+        return matrix[matrixRowIndex][matrixColumnIndex];
+    }
+
+    private static string NormalizeIban(string iban)
+    {
+        return string.Concat(iban.Where(c => !char.IsWhiteSpace(c))).ToUpperInvariant();
+    }
+
+    private static string NormalizeBic(string? bic)
+    {
+        return string.Concat((bic ?? "").Where(c => !char.IsWhiteSpace(c))).ToUpperInvariant();
+    }
+
+    private static string LimitLength(string value, int maxLength)
+    {
+        return value.Length <= maxLength ? value : value[..maxLength];
+    }
+
 }
