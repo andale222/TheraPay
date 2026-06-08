@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.Infrastructure.csv;
@@ -10,16 +11,26 @@ public sealed class ProjectPersistenceService
 {
     private readonly IPatientRepository _patientRepository;
     private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IInvoiceRepository _invoiceRepository;
     private readonly ProjectSession _session;
 
-    public ProjectPersistenceService(IPatientRepository patientRepository, IAppointmentRepository appointmentRepository, ProjectSession session)
+    public ProjectPersistenceService(
+        IPatientRepository patientRepository,
+        IAppointmentRepository appointmentRepository,
+        IInvoiceRepository invoiceRepository,
+        ProjectSession session)
     {
         _patientRepository = patientRepository;
         _appointmentRepository = appointmentRepository;
+        _invoiceRepository = invoiceRepository;
         _session = session;
     }
 
-    public Result LoadProject(string patientListPath, string appointmentListPath, string practiceDataPath)
+    public Result LoadProject(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath = "")
     {
         if (string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -40,10 +51,12 @@ public sealed class ProjectPersistenceService
         {
             _session.SetPatientListPath(patientListPath);
             _session.SetAppointmentListPath(appointmentListPath);
+            _session.SetInvoiceListPath(ResolveInvoiceListPath(invoiceListPath, patientListPath, appointmentListPath, practiceDataPath));
             _session.SetPracticeDataPath(practiceDataPath);
             _patientRepository.Clear();
             _appointmentRepository.Clear();
-            CreatePersistence().LoadInto(_patientRepository, _appointmentRepository);
+            _invoiceRepository.Clear();
+            CreatePersistence().LoadInto(_patientRepository, _appointmentRepository, _invoiceRepository);
             _session.SetPracticeData(CreatePracticeDataStore().Load());
             _session.MarkSaved();
             return new Result(true);
@@ -54,10 +67,15 @@ public sealed class ProjectPersistenceService
         }
     }
 
-    public void StartEmptyProject(string patientListPath, string appointmentListPath, string practiceDataPath)
+    public void StartEmptyProject(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath = "")
     {
         _patientRepository.Clear();
         _appointmentRepository.Clear();
+        _invoiceRepository.Clear();
 
         if (!string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -69,6 +87,8 @@ public sealed class ProjectPersistenceService
             _session.SetAppointmentListPath(appointmentListPath);
         }
 
+        _session.SetInvoiceListPath(ResolveInvoiceListPath(invoiceListPath, patientListPath, appointmentListPath, practiceDataPath));
+
         if (!string.IsNullOrWhiteSpace(practiceDataPath))
         {
             _session.SetPracticeDataPath(practiceDataPath);
@@ -79,14 +99,14 @@ public sealed class ProjectPersistenceService
 
     public Result SaveProject()
     {
-        if (!_session.HasPatientListPath || !_session.HasAppointmentListPath || !_session.HasPracticeDataPath)
+        if (!_session.HasPatientListPath || !_session.HasAppointmentListPath || !_session.HasInvoiceListPath || !_session.HasPracticeDataPath)
         {
             return new Result(false, "Kein Speicherpfad gesetzt. Bitte zuerst ein Projekt laden oder im Startscreen einen Projektpfad angeben.");
         }
 
         try
         {
-            CreatePersistence().SaveFrom(_patientRepository, _appointmentRepository);
+            CreatePersistence().SaveFrom(_patientRepository, _appointmentRepository, _invoiceRepository);
             CreatePracticeDataStore().Save(_session.PracticeData);
             _session.MarkSaved();
             return new Result(true);
@@ -100,10 +120,34 @@ public sealed class ProjectPersistenceService
     private IDataPersistence CreatePersistence()
     {
         return new CsvDataPersistence(new CsvPatientStore(_session.PatientListPath), 
-        new CsvAppointmentStore(_session.AppointmentListPath));
+        new CsvAppointmentStore(_session.AppointmentListPath),
+        new CsvInvoiceStore(_session.InvoiceListPath));
     }
     private IPracticeDataStore CreatePracticeDataStore()
     {
         return new CsvPracticeDataStore(_session.PracticeDataPath);
+    }
+
+    private static string ResolveInvoiceListPath(
+        string invoiceListPath,
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath)
+    {
+        if (!string.IsNullOrWhiteSpace(invoiceListPath))
+            return invoiceListPath;
+
+        string? projectDirectory = GetDirectory(patientListPath)
+            ?? GetDirectory(appointmentListPath)
+            ?? GetDirectory(practiceDataPath);
+
+        return string.IsNullOrWhiteSpace(projectDirectory)
+            ? "invoices.csv"
+            : Path.Combine(projectDirectory, "invoices.csv");
+    }
+
+    private static string? GetDirectory(string path)
+    {
+        return string.IsNullOrWhiteSpace(path) ? null : Path.GetDirectoryName(path);
     }
 }

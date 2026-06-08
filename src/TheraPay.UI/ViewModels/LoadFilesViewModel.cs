@@ -35,6 +35,18 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
+    private string _invoiceListPath = "";
+    public string InvoiceListPath
+    {
+        get => _invoiceListPath;
+        set
+        {
+            if (_invoiceListPath == value) return;
+            _invoiceListPath = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string _practiceDataPath = "";
     public string PracticeDataPath
     {
@@ -70,7 +82,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void LoadProject()
     {
-        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath, PracticeDataPath);
+        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
@@ -83,7 +95,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void StartEmptyProject()
     {
-        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath, PracticeDataPath);
+        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
     }

@@ -19,8 +19,14 @@ public class Invoice
     public string Subject { get; private set; } = DefaultSubject;
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
+        : this(Guid.NewGuid(), patientData, appointmentDataList, practiceDataRecord)
     {
-        Id = Guid.NewGuid();
+    }
+
+    private Invoice(Guid id, InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentException("Id cannot be empty.", nameof(id));
         if (patientData == null)
             throw new ArgumentNullException(nameof(patientData));
         if (appointmentDataList == null)
@@ -31,11 +37,37 @@ public class Invoice
         {
             throw new ArgumentException("Data inconsistency detected: multiple patient Ids or matching appointment Ids detected.");
         }
+        Id = id;
         PatientData = patientData;
         PracticeDataRecord = practiceDataRecord;
         _appointmentDataList = appointmentDataList.ToList();
         Status = InvoiceStatus.Draft;
         UpdateTotalAmount();
+    }
+
+    public static Invoice Rehydrate(
+        Guid id,
+        InvoicePatientData patientData,
+        List<InvoiceAppointmentData> appointmentDataList,
+        PracticeDataRecord practiceDataRecord,
+        InvoiceStatus status,
+        DateTime issueDate,
+        DateTime dueDate,
+        string invoiceNumber,
+        string additionalText,
+        string subject)
+    {
+        var invoice = new Invoice(id, patientData, appointmentDataList, practiceDataRecord)
+        {
+            Status = status,
+            IssueDate = issueDate,
+            DueDate = dueDate,
+            InvoiceNumber = invoiceNumber ?? "",
+            AdditionalText = additionalText ?? "",
+            Subject = string.IsNullOrWhiteSpace(subject) ? DefaultSubject : subject.Trim()
+        };
+        invoice.UpdateTotalAmount();
+        return invoice;
     }
 
     private bool CheckDataValidity(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)

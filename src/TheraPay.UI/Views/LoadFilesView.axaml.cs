@@ -54,6 +54,7 @@ public partial class LoadFilesView : UserControl
 
         vm.PatientListPath = Path.Combine(folderPath, "patients.csv");
         vm.AppointmentListPath = Path.Combine(folderPath, "appointments.csv");
+        vm.InvoiceListPath = Path.Combine(folderPath, "invoices.csv");
         vm.PracticeDataPath = Path.Combine(folderPath, "practice.csv");
         vm.StatusMessage = "Projektordner übernommen.";
     }
