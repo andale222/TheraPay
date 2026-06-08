@@ -142,7 +142,7 @@ public class Invoice
 }
 
 
-public enum InvoiceStatus { Draft, Issued, Overdue, Cancelled };
+public enum InvoiceStatus { Draft, Issued, Overdue, Payed, Cancelled };
 
 public sealed record InvoicePatientData
 {

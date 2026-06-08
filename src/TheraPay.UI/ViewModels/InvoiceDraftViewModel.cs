@@ -334,7 +334,40 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         StatusMessage = message;
     }
 
+    public void LoadDraft(Guid invoiceId)
+    {
+        var draft = _billingService
+            .ViewInvoices()
+            .FirstOrDefault(x => x.Id == invoiceId && x.Status == InvoiceStatus.Draft);
+
+        if (draft is null)
+        {
+            ClearDraftSelection();
+            StatusMessage = $"Draft mit ID '{invoiceId:D}' wurde nicht gefunden.";
+            return;
+        }
+
+        LoadDraftInvoice(draft);
+    }
+
     private void LoadLatestDraft()
+    {
+        var latestDraft = _billingService
+            .ViewInvoices()
+            .Where(x => x.Status == InvoiceStatus.Draft)
+            .LastOrDefault();
+
+        if (latestDraft is null)
+        {
+            ClearDraftSelection();
+            StatusMessage = "Kein Invoice-Draft gefunden.";
+            return;
+        }
+
+        LoadDraftInvoice(latestDraft);
+    }
+
+    private void ClearDraftSelection()
     {
         Appointments.Clear();
         StatusMessage = "";
@@ -343,18 +376,11 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _issueConfirmationRequired = false;
         OnPropertyChanged(nameof(IssueActionText));
         OnPropertyChanged(nameof(IssueWarningText));
+    }
 
-        var latestDraft = _billingService
-            .ViewInvoices()
-            .Where(x => x.Status == InvoiceStatus.Draft)
-            .LastOrDefault();
-
-        if (latestDraft is null)
-        {
-            StatusMessage = "Kein Invoice-Draft gefunden.";
-            return;
-        }
-
+    private void LoadDraftInvoice(Invoice latestDraft)
+    {
+        ClearDraftSelection();
         _currentDraft = latestDraft;
         DraftId = latestDraft.Id.ToString("D");
         var issueDate = latestDraft.IssueDate == default ? DateTime.Today : latestDraft.IssueDate;

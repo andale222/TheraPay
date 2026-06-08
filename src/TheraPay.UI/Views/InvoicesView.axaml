@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TheraPay.UI.ViewModels"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             x:Class="TheraPay.UI.Views.InvoicesView"
+             x:DataType="vm:InvoicesViewModel">
+
+  <ScrollViewer>
+    <Grid Margin="16"
+          ColumnDefinitions="2*,1*"
+          RowDefinitions="Auto,Auto,*"
+          ColumnSpacing="16"
+          RowSpacing="12">
+
+      <StackPanel Grid.Row="0" Grid.Column="0" Spacing="8">
+        <TextBlock Text="Rechnungen" FontSize="20" FontWeight="Bold" />
+
+        <Grid ColumnDefinitions="*,180" ColumnSpacing="8">
+          <TextBox Grid.Column="0"
+                   Watermark="Filter: Rechnung, Patient, Status"
+                   Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" />
+          <ComboBox Grid.Column="1"
+                    ItemsSource="{Binding StatusFilters}"
+                    SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay}" />
+        </Grid>
+
+        <dataGrid:DataGrid ItemsSource="{Binding Invoices}"
+                           SelectedItem="{Binding SelectedInvoice, Mode=TwoWay}"
+                           AutoGenerateColumns="False"
+                           IsReadOnly="True"
+                           MinHeight="280"
+                           MaxHeight="360"
+                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <dataGrid:DataGrid.Columns>
+            <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="InvoiceID" Binding="{Binding InvoiceId}" Width="*" />
+            <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding Patient}" Width="*" />
+            <dataGrid:DataGridTextColumn Header="Gesamtbetrag" Binding="{Binding TotalAmount}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+          </dataGrid:DataGrid.Columns>
+        </dataGrid:DataGrid>
+      </StackPanel>
+
+      <Border Grid.Row="0"
+              Grid.Column="1"
+              Padding="12"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+              BorderThickness="1"
+              CornerRadius="8">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Patientendetails" FontSize="16" FontWeight="Bold" />
+          <TextBlock Text="{Binding PatientDetailsIdAndName, StringFormat='ID + Name: {0}'}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding PatientDateOfBirth, StringFormat='Geburtsdatum: {0}'}" />
+          <TextBlock Text="{Binding PatientInsuranceStatus, StringFormat='Typ: {0}'}" />
+        </StackPanel>
+      </Border>
+
+      <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="8">
+        <Button Content="Draft bearbeiten"
+                Command="{Binding EditDraftCommand}"
+                MinWidth="150"
+                Background="#71CE82" />
+        <Button Content="Rechnung erneut drucken"
+                Command="{Binding PrintInvoiceCommand}"
+                MinWidth="190"
+                Background="#F2B134" />
+        <Button Content="Zurück"
+                Command="{Binding NavigateHomeViewCommand}"
+                MinWidth="100"
+                Background="#FF6B6B" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="1"
+                 Grid.Column="1"
+                 Text="{Binding StatusMessage}"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Center" />
+
+      <Border Grid.Row="2"
+              Grid.Column="0"
+              Padding="12"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+              BorderThickness="1"
+              CornerRadius="8">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
+
+          <Grid ColumnDefinitions="Auto,*"
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                ColumnSpacing="12"
+                RowSpacing="6">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" FontWeight="Bold" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding InvoiceStatusText}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Rechnungsnr.:" FontWeight="Bold" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding InvoiceNumber}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fällig am:" FontWeight="Bold" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding InvoiceDueDate}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Gesamt:" FontWeight="Bold" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding InvoiceTotalAmount}" />
+          </Grid>
+
+          <TextBlock Text="Positionen" FontSize="15" FontWeight="Bold" Margin="0,8,0,0" />
+          <dataGrid:DataGrid ItemsSource="{Binding Positions}"
+                             AutoGenerateColumns="False"
+                             IsReadOnly="True"
+                             MinHeight="220"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <dataGrid:DataGrid.Columns>
+              <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*" />
+              <dataGrid:DataGridTextColumn Header="Ziffern" Binding="{Binding BillingNumbers}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
+            </dataGrid:DataGrid.Columns>
+          </dataGrid:DataGrid>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>
