@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Avalonia.Media;
 using TheraPay.Core;
 using TheraPay.Core.Export;
 using TheraPay.Domain;
@@ -27,6 +28,9 @@ public class InvoicesViewModel_test
         Assert.NotNull(viewModel.SelectedInvoice);
         Assert.Equal("Draft", viewModel.SelectedInvoice!.Status);
         Assert.Contains("AL1", viewModel.SelectedInvoice.Patient);
+        Assert.Contains("Payed", viewModel.StatusFilters);
+        Assert.Equal(Brush.Parse("#D8F5D0").ToString(), viewModel.SelectedInvoice.StatusBackground.ToString());
+        Assert.Equal(Brush.Parse("#D8F5D0").ToString(), viewModel.InvoiceStatusBackground.ToString());
         Assert.Equal("AL1 - Ada Lovelace", viewModel.PatientDetailsIdAndName);
         Assert.Equal("10.12.1985", viewModel.PatientDateOfBirth);
         Assert.Equal("GKV", viewModel.PatientInsuranceStatus);
@@ -61,6 +65,8 @@ public class InvoicesViewModel_test
             // THEN
             Assert.False(viewModel.EditDraftCommand.CanExecute(null));
             Assert.True(viewModel.PrintInvoiceCommand.CanExecute(null));
+            Assert.Equal(Brush.Parse("#FFE7A3").ToString(), viewModel.SelectedInvoice!.StatusBackground.ToString());
+            Assert.Equal(Brush.Parse("#FFE7A3").ToString(), viewModel.InvoiceStatusBackground.ToString());
             Assert.NotNull(setup.Exporter.LastFilePath);
             Assert.EndsWith($"Invoice_{invoice.InvoiceNumber}.pdf", setup.Exporter.LastFilePath);
             Assert.IsType<InvoicePdfModel>(setup.Exporter.LastInvoice);

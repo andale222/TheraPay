@@ -32,6 +32,14 @@
                            MaxHeight="360"
                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
                            ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <dataGrid:DataGrid.Styles>
+            <Style Selector="DataGridRow">
+              <Setter Property="Background" Value="{ReflectionBinding StatusBackground}" />
+            </Style>
+            <Style Selector="DataGridCell">
+              <Setter Property="Background" Value="{ReflectionBinding StatusBackground}" />
+            </Style>
+          </dataGrid:DataGrid.Styles>
           <dataGrid:DataGrid.Columns>
             <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
             <dataGrid:DataGridTextColumn Header="InvoiceID" Binding="{Binding InvoiceId}" Width="*" />
@@ -91,7 +99,14 @@
                 ColumnSpacing="12"
                 RowSpacing="6">
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" FontWeight="Bold" />
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding InvoiceStatusText}" />
+            <Border Grid.Row="0"
+                    Grid.Column="1"
+                    Background="{Binding InvoiceStatusBackground}"
+                    Padding="6,3"
+                    CornerRadius="4"
+                    HorizontalAlignment="Left">
+              <TextBlock Text="{Binding InvoiceStatusText}" />
+            </Border>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Rechnungsnr.:" FontWeight="Bold" />
             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding InvoiceNumber}" />
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Fällig am:" FontWeight="Bold" />

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using Avalonia.Media;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
@@ -15,6 +16,11 @@ namespace TheraPay.UI.ViewModels;
 public sealed class InvoicesViewModel : ViewModelBase
 {
     private static readonly CultureInfo GermanCulture = CultureInfo.GetCultureInfo("de-DE");
+    private static readonly IBrush DraftBackground = Brush.Parse("#D8F5D0");
+    private static readonly IBrush IssuedBackground = Brush.Parse("#FFE7A3");
+    private static readonly IBrush OverdueBackground = Brush.Parse("#FFC6B3");
+    private static readonly IBrush PayedBackground = Brush.Parse("#D7ECFF");
+    private static readonly IBrush CancelledBackground = Brush.Parse("#E3E3E3");
 
     private readonly BillingService _billingService;
     private readonly IPatientRepository _patientRepository;
@@ -32,6 +38,7 @@ public sealed class InvoicesViewModel : ViewModelBase
         nameof(InvoiceStatus.Draft),
         nameof(InvoiceStatus.Issued),
         nameof(InvoiceStatus.Overdue),
+        nameof(InvoiceStatus.Payed),
         nameof(InvoiceStatus.Cancelled)
     ];
 
@@ -138,6 +145,18 @@ public sealed class InvoicesViewModel : ViewModelBase
         {
             if (_invoiceStatus == value) return;
             _invoiceStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private IBrush _invoiceStatusBackground = Brushes.Transparent;
+    public IBrush InvoiceStatusBackground
+    {
+        get => _invoiceStatusBackground;
+        private set
+        {
+            if (_invoiceStatusBackground == value) return;
+            _invoiceStatusBackground = value;
             OnPropertyChanged();
         }
     }
@@ -255,7 +274,8 @@ public sealed class InvoicesViewModel : ViewModelBase
             InvoiceId = invoice.Id.ToString("D"),
             Patient = $"{invoice.PatientData.Id} - {invoice.PatientData.Name}",
             TotalAmount = FormatCurrency(invoice.TotalAmount),
-            Status = invoice.Status.ToString()
+            Status = invoice.Status.ToString(),
+            StatusBackground = GetStatusBackground(invoice.Status)
         };
     }
 
@@ -272,6 +292,7 @@ public sealed class InvoicesViewModel : ViewModelBase
         var invoice = SelectedInvoice.Invoice;
         PatientDetailsIdAndName = $"{invoice.PatientData.Id} - {invoice.PatientData.Name}";
         InvoiceStatusText = invoice.Status.ToString();
+        InvoiceStatusBackground = GetStatusBackground(invoice.Status);
         InvoiceDueDate = FormatDate(invoice.DueDate);
         InvoiceTotalAmount = FormatCurrency(invoice.TotalAmount);
         InvoiceNumber = string.IsNullOrWhiteSpace(invoice.InvoiceNumber) ? "-" : invoice.InvoiceNumber;
@@ -311,6 +332,7 @@ public sealed class InvoicesViewModel : ViewModelBase
         PatientDateOfBirth = "-";
         PatientInsuranceStatus = "-";
         InvoiceStatusText = "-";
+        InvoiceStatusBackground = Brushes.Transparent;
         InvoiceDueDate = "-";
         InvoiceTotalAmount = "-";
         InvoiceNumber = "-";
@@ -404,6 +426,19 @@ public sealed class InvoicesViewModel : ViewModelBase
         return string.Join(", ", billingNumbers.Select(x => x.NumberIdentifier).Distinct());
     }
 
+    private static IBrush GetStatusBackground(InvoiceStatus status)
+    {
+        return status switch
+        {
+            InvoiceStatus.Draft => DraftBackground,
+            InvoiceStatus.Issued => IssuedBackground,
+            InvoiceStatus.Overdue => OverdueBackground,
+            InvoiceStatus.Payed => PayedBackground,
+            InvoiceStatus.Cancelled => CancelledBackground,
+            _ => Brushes.Transparent
+        };
+    }
+
     private static string FormatCurrency(decimal value)
     {
         return value.ToString("C", GermanCulture);
@@ -427,6 +462,7 @@ public sealed class InvoicesViewModel : ViewModelBase
         public string Patient { get; init; } = "";
         public string TotalAmount { get; init; } = "";
         public string Status { get; init; } = "";
+        public IBrush StatusBackground { get; init; } = Brushes.Transparent;
     }
 
     public sealed class InvoicePositionRowVm
