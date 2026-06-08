@@ -130,6 +130,36 @@ public class Invoice
         return new Result(true);
     }
 
+    public Result RefreshOverdueStatus(DateTime referenceDate)
+    {
+        if (Status == InvoiceStatus.Issued && IsOverdue(referenceDate))
+        {
+            Status = InvoiceStatus.Overdue;
+        }
+
+        return new Result(true);
+    }
+
+    public Result SetPostIssueStatus(InvoiceStatus requestedStatus, DateTime referenceDate)
+    {
+        if (Status == InvoiceStatus.Draft)
+            return new Result(false, "Draft invoices cannot be marked as issued, payed or cancelled.");
+
+        if (requestedStatus is not (InvoiceStatus.Issued or InvoiceStatus.Payed or InvoiceStatus.Cancelled))
+            return new Result(false, "Invoice status can only be set to Issued, Payed or Cancelled.");
+
+        Status = requestedStatus == InvoiceStatus.Issued && IsOverdue(referenceDate)
+            ? InvoiceStatus.Overdue
+            : requestedStatus;
+
+        return new Result(true);
+    }
+
+    private bool IsOverdue(DateTime referenceDate)
+    {
+        return DueDate != default && DueDate.Date < referenceDate.Date;
+    }
+
     // private string GenerateInvoiceNumber(DateTime issueDate)
     // {
     //     // Locking the state object ensures unique numbers in one process.

@@ -95,7 +95,7 @@
           <TextBlock Text="Rechnungsdetails" FontSize="16" FontWeight="Bold" />
 
           <Grid ColumnDefinitions="Auto,*"
-                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                 ColumnSpacing="12"
                 RowSpacing="6">
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" FontWeight="Bold" />
@@ -107,12 +107,20 @@
                     HorizontalAlignment="Left">
               <TextBlock Text="{Binding InvoiceStatusText}" />
             </Border>
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Rechnungsnr.:" FontWeight="Bold" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding InvoiceNumber}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fällig am:" FontWeight="Bold" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding InvoiceDueDate}" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Gesamt:" FontWeight="Bold" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding InvoiceTotalAmount}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Status ändern:" FontWeight="Bold" />
+            <ComboBox Grid.Row="1"
+                      Grid.Column="1"
+                      Width="150"
+                      HorizontalAlignment="Left"
+                      ItemsSource="{Binding EditableStatusOptions}"
+                      SelectedItem="{Binding SelectedEditableInvoiceStatus, Mode=TwoWay}"
+                      IsEnabled="{Binding IsInvoiceStatusEditable}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Rechnungsnr.:" FontWeight="Bold" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding InvoiceNumber}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Fällig am:" FontWeight="Bold" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding InvoiceDueDate}" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Gesamt:" FontWeight="Bold" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding InvoiceTotalAmount}" />
           </Grid>
 
           <TextBlock Text="Positionen" FontSize="15" FontWeight="Bold" Margin="0,8,0,0" />

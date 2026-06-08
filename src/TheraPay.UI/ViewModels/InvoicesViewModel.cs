@@ -32,6 +32,12 @@ public sealed class InvoicesViewModel : ViewModelBase
 
     public ObservableCollection<InvoiceRowVm> Invoices { get; } = new();
     public ObservableCollection<InvoicePositionRowVm> Positions { get; } = new();
+    public IReadOnlyList<string> EditableStatusOptions { get; } =
+    [
+        nameof(InvoiceStatus.Issued),
+        nameof(InvoiceStatus.Payed),
+        nameof(InvoiceStatus.Cancelled)
+    ];
     public IReadOnlyList<string> StatusFilters { get; } =
     [
         "Alle",
@@ -47,6 +53,7 @@ public sealed class InvoicesViewModel : ViewModelBase
     public ICommand PrintInvoiceCommand => _printInvoiceCommand;
 
     private readonly List<Invoice> _allInvoices = new();
+    private bool _isUpdatingStatusSelection;
 
     private string _filterText = "";
     public string FilterText
@@ -149,6 +156,33 @@ public sealed class InvoicesViewModel : ViewModelBase
         }
     }
 
+    private string _selectedEditableInvoiceStatus = "";
+    public string SelectedEditableInvoiceStatus
+    {
+        get => _selectedEditableInvoiceStatus;
+        set
+        {
+            if (_selectedEditableInvoiceStatus == value) return;
+            _selectedEditableInvoiceStatus = value;
+            OnPropertyChanged();
+
+            if (!_isUpdatingStatusSelection)
+                ApplySelectedInvoiceStatus(value);
+        }
+    }
+
+    private bool _isInvoiceStatusEditable;
+    public bool IsInvoiceStatusEditable
+    {
+        get => _isInvoiceStatusEditable;
+        private set
+        {
+            if (_isInvoiceStatusEditable == value) return;
+            _isInvoiceStatusEditable = value;
+            OnPropertyChanged();
+        }
+    }
+
     private IBrush _invoiceStatusBackground = Brushes.Transparent;
     public IBrush InvoiceStatusBackground
     {
@@ -221,7 +255,22 @@ public sealed class InvoicesViewModel : ViewModelBase
     {
         _allInvoices.Clear();
         _allInvoices.AddRange(_billingService.ViewInvoices());
+        RefreshAutomaticOverdueStatuses();
         ReloadInvoices();
+    }
+
+    private void RefreshAutomaticOverdueStatuses()
+    {
+        var hasStatusChanges = false;
+        foreach (var invoice in _allInvoices)
+        {
+            var previousStatus = invoice.Status;
+            invoice.RefreshOverdueStatus(DateTime.Today);
+            hasStatusChanges |= previousStatus != invoice.Status;
+        }
+
+        if (hasStatusChanges)
+            _session.MarkUnsavedChanges();
     }
 
     private void ReloadInvoices()
@@ -293,6 +342,8 @@ public sealed class InvoicesViewModel : ViewModelBase
         PatientDetailsIdAndName = $"{invoice.PatientData.Id} - {invoice.PatientData.Name}";
         InvoiceStatusText = invoice.Status.ToString();
         InvoiceStatusBackground = GetStatusBackground(invoice.Status);
+        IsInvoiceStatusEditable = invoice.Status != InvoiceStatus.Draft;
+        SetEditableStatusSelection(invoice.Status);
         InvoiceDueDate = FormatDate(invoice.DueDate);
         InvoiceTotalAmount = FormatCurrency(invoice.TotalAmount);
         InvoiceNumber = string.IsNullOrWhiteSpace(invoice.InvoiceNumber) ? "-" : invoice.InvoiceNumber;
@@ -333,6 +384,8 @@ public sealed class InvoicesViewModel : ViewModelBase
         PatientInsuranceStatus = "-";
         InvoiceStatusText = "-";
         InvoiceStatusBackground = Brushes.Transparent;
+        IsInvoiceStatusEditable = false;
+        SetEditableStatusSelection(null);
         InvoiceDueDate = "-";
         InvoiceTotalAmount = "-";
         InvoiceNumber = "-";
@@ -361,6 +414,58 @@ public sealed class InvoicesViewModel : ViewModelBase
     private bool CanPrintSelectedInvoice()
     {
         return SelectedInvoice is not null && SelectedInvoice.Invoice.Status != InvoiceStatus.Draft;
+    }
+
+    private void ApplySelectedInvoiceStatus(string requestedStatusText)
+    {
+        if (SelectedInvoice is null)
+            return;
+
+        var invoice = SelectedInvoice.Invoice;
+        if (invoice.Status == InvoiceStatus.Draft)
+        {
+            StatusMessage = "Draft-Rechnungen können keinen Zahlungsstatus bekommen.";
+            SetEditableStatusSelection(invoice.Status);
+            return;
+        }
+
+        if (!Enum.TryParse<InvoiceStatus>(requestedStatusText, out var requestedStatus))
+        {
+            StatusMessage = "Unbekannter Rechnungsstatus.";
+            SetEditableStatusSelection(invoice.Status);
+            return;
+        }
+
+        var previousStatus = invoice.Status;
+        var result = invoice.SetPostIssueStatus(requestedStatus, DateTime.Today);
+        if (!result.Ok)
+        {
+            StatusMessage = result.Error ?? "Rechnungsstatus konnte nicht geändert werden.";
+            SetEditableStatusSelection(invoice.Status);
+            return;
+        }
+
+        if (previousStatus != invoice.Status)
+            _session.MarkUnsavedChanges();
+
+        StatusMessage = invoice.Status == InvoiceStatus.Overdue && requestedStatus == InvoiceStatus.Issued
+            ? "Rechnung ist überfällig und bleibt deshalb auf Overdue."
+            : $"Rechnungsstatus wurde auf {invoice.Status} gesetzt.";
+
+        ReloadInvoices();
+    }
+
+    private void SetEditableStatusSelection(InvoiceStatus? status)
+    {
+        _isUpdatingStatusSelection = true;
+        SelectedEditableInvoiceStatus = status switch
+        {
+            InvoiceStatus.Issued or InvoiceStatus.Overdue => nameof(InvoiceStatus.Issued),
+            InvoiceStatus.Payed => nameof(InvoiceStatus.Payed),
+            InvoiceStatus.Cancelled => nameof(InvoiceStatus.Cancelled),
+            _ => ""
+        };
+        _isUpdatingStatusSelection = false;
     }
 
     private void PrintSelectedInvoice()

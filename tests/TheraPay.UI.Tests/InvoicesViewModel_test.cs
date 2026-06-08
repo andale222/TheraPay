@@ -37,6 +37,8 @@ public class InvoicesViewModel_test
         Assert.Equal("16.02.2026", viewModel.InvoiceDueDate);
         Assert.Single(viewModel.Positions);
         Assert.Equal("870", viewModel.Positions[0].BillingNumbers);
+        Assert.False(viewModel.IsInvoiceStatusEditable);
+        Assert.Equal("", viewModel.SelectedEditableInvoiceStatus);
         Assert.True(viewModel.EditDraftCommand.CanExecute(null));
         Assert.False(viewModel.PrintInvoiceCommand.CanExecute(null));
     }
@@ -47,7 +49,7 @@ public class InvoicesViewModel_test
         // GIVEN
         var setup = CreateSetup();
         var invoice = setup.BillingService.ViewInvoices()[0];
-        var issueResult = setup.BillingService.IssueInvoice(invoice, new DateTime(2026, 2, 2), setup.PracticeData);
+        var issueResult = setup.BillingService.IssueInvoice(invoice, DateTime.Today, setup.PracticeData);
         Assert.True(issueResult.Ok);
 
         var viewModel = new InvoicesViewModel(
@@ -65,6 +67,8 @@ public class InvoicesViewModel_test
             // THEN
             Assert.False(viewModel.EditDraftCommand.CanExecute(null));
             Assert.True(viewModel.PrintInvoiceCommand.CanExecute(null));
+            Assert.True(viewModel.IsInvoiceStatusEditable);
+            Assert.Equal(nameof(InvoiceStatus.Issued), viewModel.SelectedEditableInvoiceStatus);
             Assert.Equal(Brush.Parse("#FFE7A3").ToString(), viewModel.SelectedInvoice!.StatusBackground.ToString());
             Assert.Equal(Brush.Parse("#FFE7A3").ToString(), viewModel.InvoiceStatusBackground.ToString());
             Assert.NotNull(setup.Exporter.LastFilePath);
@@ -78,6 +82,49 @@ public class InvoicesViewModel_test
                 Directory.Delete(setup.ExportDirectory, true);
             }
         }
+    }
+
+    [Fact]
+    public void GivenIssuedOverdueInvoice_OverviewNormalizesStatusAndAllowsPayedToggle()
+    {
+        // GIVEN
+        var setup = CreateSetup();
+        var invoice = setup.BillingService.ViewInvoices()[0];
+        var issueDate = DateTime.Today.AddDays(-30);
+        var issueResult = setup.BillingService.IssueInvoice(invoice, issueDate, setup.PracticeData);
+        Assert.True(issueResult.Ok);
+        setup.Session.MarkSaved();
+
+        var viewModel = new InvoicesViewModel(
+            setup.BillingService,
+            setup.PatientRepository,
+            setup.Exporter,
+            setup.Session,
+            setup.NavigationService);
+
+        // THEN
+        Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
+        Assert.Equal("Overdue", viewModel.SelectedInvoice!.Status);
+        Assert.Equal(nameof(InvoiceStatus.Issued), viewModel.SelectedEditableInvoiceStatus);
+        Assert.Equal(Brush.Parse("#FFC6B3").ToString(), viewModel.SelectedInvoice.StatusBackground.ToString());
+        Assert.True(setup.Session.HasUnsavedChanges);
+
+        // WHEN
+        viewModel.SelectedEditableInvoiceStatus = nameof(InvoiceStatus.Payed);
+
+        // THEN
+        Assert.Equal(InvoiceStatus.Payed, invoice.Status);
+        Assert.Equal("Payed", viewModel.SelectedInvoice!.Status);
+        Assert.Equal(Brush.Parse("#D7ECFF").ToString(), viewModel.InvoiceStatusBackground.ToString());
+
+        // WHEN
+        viewModel.SelectedEditableInvoiceStatus = nameof(InvoiceStatus.Issued);
+
+        // THEN
+        Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
+        Assert.Equal("Overdue", viewModel.SelectedInvoice!.Status);
+        Assert.Equal(nameof(InvoiceStatus.Issued), viewModel.SelectedEditableInvoiceStatus);
+        Assert.Equal(Brush.Parse("#FFC6B3").ToString(), viewModel.InvoiceStatusBackground.ToString());
     }
 
     private static TestSetup CreateSetup()
