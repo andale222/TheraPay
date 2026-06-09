@@ -1,6 +1,7 @@
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
 using TheraPay.Infrastructure.csv;
+using TheraPay.Domain;
 
 namespace TheraPay.UI.ViewModels;
 
@@ -11,6 +12,8 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     public RelayCommand LoadCommand { get; }
     public RelayCommand StartEmptyProjectCommand { get; }
+    public RelayCommand EncryptPlaintextDatabasesCommand { get; }
+    public RelayCommand DecryptEncryptedDatabasesCommand { get; }
 
     private string _patientListPath = "";
     public string PatientListPath
@@ -84,6 +87,30 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
+    private string _conversionOutputDirectory = "";
+    public string ConversionOutputDirectory
+    {
+        get => _conversionOutputDirectory;
+        set
+        {
+            if (_conversionOutputDirectory == value) return;
+            _conversionOutputDirectory = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _conversionPassword = "";
+    public string ConversionPassword
+    {
+        get => _conversionPassword;
+        set
+        {
+            if (_conversionPassword == value) return;
+            _conversionPassword = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string _statusMessage = "";
     public string StatusMessage
     {
@@ -100,9 +127,12 @@ public sealed class LoadFilesViewModel : ViewModelBase
     {
         _nav = nav;
         _projectPersistence = projectPersistence;
+        _useEncryption = true;
 
         LoadCommand = new RelayCommand(LoadProject);
         StartEmptyProjectCommand = new RelayCommand(StartEmptyProject);
+        EncryptPlaintextDatabasesCommand = new RelayCommand(EncryptPlaintextDatabases);
+        DecryptEncryptedDatabasesCommand = new RelayCommand(DecryptEncryptedDatabases);
     }
 
     private void LoadProject()
@@ -164,5 +194,34 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
         fileEncryption = new AesGcmCsvFileEncryption(EncryptionPassword);
         return true;
+    }
+
+    private void EncryptPlaintextDatabases()
+    {
+        SetConversionStatus(_projectPersistence.EncryptProjectFiles(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            ConversionOutputDirectory,
+            ConversionPassword), "Plaintext-Datenbanken wurden verschluesselt gespeichert.");
+    }
+
+    private void DecryptEncryptedDatabases()
+    {
+        SetConversionStatus(_projectPersistence.DecryptProjectFiles(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            ConversionOutputDirectory,
+            ConversionPassword), "Verschluesselte Datenbanken wurden als Plaintext gespeichert.");
+    }
+
+    private void SetConversionStatus(Result result, string successMessage)
+    {
+        StatusMessage = result.Ok
+            ? successMessage
+            : result.Error ?? "Konvertierung fehlgeschlagen.";
     }
 }
