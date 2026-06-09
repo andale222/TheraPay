@@ -50,6 +50,7 @@ public class CsvPatientStore_test
         Assert.Equal("3", patients[2].ID);
         Assert.Equal("Third", patients[2].FirstName);
         Assert.Equal("Three", patients[2].LastName);
+        Assert.All(patients, patient => Assert.True(patient.IsActive));
     }
 
     [Fact]
@@ -83,6 +84,7 @@ public class CsvPatientStore_test
         thirdPatient.SetSalutation("Divers");
         thirdPatient.SetDateOfBirth(new DateOnly(1985, 9, 30));
         thirdPatient.SetInsuranceStatus(PatientInsuranceStatus.Selbstzahler);
+        thirdPatient.IsActive = false;
         var patients = new List<Patient>
         {
             new Patient("Firstt", "One", "1"),
@@ -111,11 +113,36 @@ public class CsvPatientStore_test
         Assert.Equal(patients[2].LastName, loadedPatients[2].LastName);
         Assert.Equal(patients[2].DateOfBirth, loadedPatients[2].DateOfBirth);
         Assert.Equal(patients[2].InsuranceStatus, loadedPatients[2].InsuranceStatus);
+        Assert.False(loadedPatients[2].IsActive);
 
         string savedCsv = File.ReadAllText(filePath);
         Assert.Contains("Salutation", savedCsv);
         Assert.Contains("DateOfBirth", savedCsv);
+        Assert.Contains("IsActive", savedCsv);
         Assert.Contains("1991-04-12", savedCsv);
+        Assert.Contains("False", savedCsv);
+
+        File.Delete(filePath);
+        Assert.False(File.Exists(filePath));
+    }
+
+    [Fact]
+    public void GivenCsvWithIsActive_LoadAll_RestoresInactivePatients()
+    {
+        // Given
+        var filePath = TestPaths.DataFile("testLoadActivePatients.csv");
+        File.WriteAllText(
+            filePath,
+            "Id,FirstName,LastName,IsActive\nACTIVE,Ada,Active,True\nINACTIVE,Ida,Inactive,False\n");
+        var csvPatientStore = new CsvPatientStore(filePath);
+
+        // When
+        var patients = csvPatientStore.LoadAll();
+
+        // Then
+        Assert.Equal(2, patients.Count);
+        Assert.True(patients[0].IsActive);
+        Assert.False(patients[1].IsActive);
 
         File.Delete(filePath);
         Assert.False(File.Exists(filePath));
