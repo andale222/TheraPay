@@ -63,6 +63,12 @@
                   MinWidth="220"
                   HorizontalAlignment="Stretch"
                   Background="#71CE82" />
+          <Button Content="Draft Löschen"
+                  Command="{Binding DeleteDraftCommand}"
+                  MinWidth="220"
+                  HorizontalAlignment="Stretch"
+                  Background="#D9534F"
+                  Foreground="White" />
           <Button Content="Rechnung erneut drucken"
                   Command="{Binding PrintInvoiceCommand}"
                   MinWidth="220"

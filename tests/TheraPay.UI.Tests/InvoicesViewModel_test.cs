@@ -4,6 +4,7 @@ using TheraPay.Core;
 using TheraPay.Core.Export;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 using TheraPay.UI.ViewModels;
 
@@ -21,7 +22,8 @@ public class InvoicesViewModel_test
             setup.PatientRepository,
             setup.Exporter,
             setup.Session,
-            setup.NavigationService);
+            setup.NavigationService,
+            setup.MessageBox);
 
         // THEN
         Assert.Single(viewModel.Invoices);
@@ -57,7 +59,8 @@ public class InvoicesViewModel_test
             setup.PatientRepository,
             setup.Exporter,
             setup.Session,
-            setup.NavigationService);
+            setup.NavigationService,
+            setup.MessageBox);
 
         try
         {
@@ -100,7 +103,8 @@ public class InvoicesViewModel_test
             setup.PatientRepository,
             setup.Exporter,
             setup.Session,
-            setup.NavigationService);
+            setup.NavigationService,
+            setup.MessageBox);
 
         // THEN
         Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
@@ -125,6 +129,76 @@ public class InvoicesViewModel_test
         Assert.Equal("Overdue", viewModel.SelectedInvoice!.Status);
         Assert.Equal(nameof(InvoiceStatus.Issued), viewModel.SelectedEditableInvoiceStatus);
         Assert.Equal(Brush.Parse("#FFC6B3").ToString(), viewModel.InvoiceStatusBackground.ToString());
+    }
+
+    [Fact]
+    public void GivenDraftInvoiceForDeletedPatient_OverviewDoesNotAllowEditingButAllowsDeleting()
+    {
+        // GIVEN
+        var setup = CreateSetup();
+        setup.PatientRepository.GetById("AL1").IsDeleted = true;
+
+        var viewModel = new InvoicesViewModel(
+            setup.BillingService,
+            setup.PatientRepository,
+            setup.Exporter,
+            setup.Session,
+            setup.NavigationService,
+            setup.MessageBox);
+
+        // THEN
+        Assert.False(viewModel.EditDraftCommand.CanExecute(null));
+        Assert.True(viewModel.DeleteDraftCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task GivenSelectedDraft_DeleteSelectedDraftAsync_WhenConfirmed_RemovesDraftAndMarksSession()
+    {
+        // GIVEN
+        var setup = CreateSetup();
+        setup.Session.MarkSaved();
+        var viewModel = new InvoicesViewModel(
+            setup.BillingService,
+            setup.PatientRepository,
+            setup.Exporter,
+            setup.Session,
+            setup.NavigationService,
+            setup.MessageBox);
+
+        // WHEN
+        await viewModel.DeleteSelectedDraftAsync();
+
+        // THEN
+        Assert.Empty(setup.BillingService.ViewInvoices());
+        Assert.Null(viewModel.SelectedInvoice);
+        Assert.False(viewModel.DeleteDraftCommand.CanExecute(null));
+        Assert.True(setup.Session.HasUnsavedChanges);
+        Assert.Equal(1, setup.MessageBox.ConfirmationCount);
+        Assert.Contains("Draft wurde gelöscht", viewModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task GivenSelectedDraft_DeleteSelectedDraftAsync_WhenCancelled_KeepsDraft()
+    {
+        // GIVEN
+        var setup = CreateSetup();
+        setup.MessageBox.ConfirmationResult = false;
+        setup.Session.MarkSaved();
+        var viewModel = new InvoicesViewModel(
+            setup.BillingService,
+            setup.PatientRepository,
+            setup.Exporter,
+            setup.Session,
+            setup.NavigationService,
+            setup.MessageBox);
+
+        // WHEN
+        await viewModel.DeleteSelectedDraftAsync();
+
+        // THEN
+        Assert.Single(setup.BillingService.ViewInvoices());
+        Assert.False(setup.Session.HasUnsavedChanges);
+        Assert.Equal(1, setup.MessageBox.ConfirmationCount);
     }
 
     private static TestSetup CreateSetup()
@@ -176,6 +250,7 @@ public class InvoicesViewModel_test
             new CapturingInvoicePdfExporter(),
             session,
             new NavigationService(new NavigationStore(), new ServiceCollection().BuildServiceProvider()),
+            new ConfirmingMessageBoxService(),
             practiceData,
             exportDirectory);
     }
@@ -186,6 +261,7 @@ public class InvoicesViewModel_test
         CapturingInvoicePdfExporter Exporter,
         ProjectSession Session,
         NavigationService NavigationService,
+        ConfirmingMessageBoxService MessageBox,
         PracticeData PracticeData,
         string ExportDirectory);
 
@@ -199,6 +275,28 @@ public class InvoicesViewModel_test
             LastFilePath = filePath;
             LastInvoice = invoice;
             return true;
+        }
+    }
+
+    private sealed class ConfirmingMessageBoxService : IMessageBoxService
+    {
+        public bool ConfirmationResult { get; set; } = true;
+        public int ConfirmationCount { get; private set; }
+
+        public Task ShowErrorAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ShowWarningAsync(string title, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> ConfirmWarningAsync(string title, string message, string confirmText = "OK", string cancelText = "Abbrechen")
+        {
+            ConfirmationCount++;
+            return Task.FromResult(ConfirmationResult);
         }
     }
 }

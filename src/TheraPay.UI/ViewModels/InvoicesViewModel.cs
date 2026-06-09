@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 
 namespace TheraPay.UI.ViewModels;
@@ -27,7 +29,9 @@ public sealed class InvoicesViewModel : ViewModelBase
     private readonly IInvoicePdfExporter _invoiceExporter;
     private readonly ProjectSession _session;
     private readonly NavigationService _nav;
+    private readonly IMessageBoxService _messageBox;
     private readonly RelayCommand _editDraftCommand;
+    private readonly RelayCommand _deleteDraftCommand;
     private readonly RelayCommand _printInvoiceCommand;
 
     public ObservableCollection<InvoiceRowVm> Invoices { get; } = new();
@@ -50,6 +54,7 @@ public sealed class InvoicesViewModel : ViewModelBase
 
     public ICommand NavigateHomeViewCommand { get; }
     public ICommand EditDraftCommand => _editDraftCommand;
+    public ICommand DeleteDraftCommand => _deleteDraftCommand;
     public ICommand PrintInvoiceCommand => _printInvoiceCommand;
 
     private readonly List<Invoice> _allInvoices = new();
@@ -92,6 +97,7 @@ public sealed class InvoicesViewModel : ViewModelBase
             OnPropertyChanged();
             RefreshSelectedInvoiceDetails();
             _editDraftCommand.RaiseCanExecuteChanged();
+            _deleteDraftCommand.RaiseCanExecuteChanged();
             _printInvoiceCommand.RaiseCanExecuteChanged();
         }
     }
@@ -236,16 +242,19 @@ public sealed class InvoicesViewModel : ViewModelBase
         IPatientRepository patientRepository,
         IInvoicePdfExporter invoiceExporter,
         ProjectSession session,
-        NavigationService nav)
+        NavigationService nav,
+        IMessageBoxService messageBox)
     {
         _billingService = billingService;
         _patientRepository = patientRepository;
         _invoiceExporter = invoiceExporter;
         _session = session;
         _nav = nav;
+        _messageBox = messageBox;
 
         NavigateHomeViewCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         _editDraftCommand = new RelayCommand(EditSelectedDraft, CanEditSelectedDraft);
+        _deleteDraftCommand = new RelayCommand(async () => await DeleteSelectedDraftAsync(), CanDeleteSelectedDraft);
         _printInvoiceCommand = new RelayCommand(PrintSelectedInvoice, CanPrintSelectedInvoice);
 
         LoadAllInvoices();
@@ -391,12 +400,14 @@ public sealed class InvoicesViewModel : ViewModelBase
         InvoiceNumber = "-";
         Positions.Clear();
         _editDraftCommand.RaiseCanExecuteChanged();
+        _deleteDraftCommand.RaiseCanExecuteChanged();
         _printInvoiceCommand.RaiseCanExecuteChanged();
     }
 
     private bool CanEditSelectedDraft()
     {
-        return SelectedInvoice?.Invoice.Status == InvoiceStatus.Draft;
+        return SelectedInvoice?.Invoice is { Status: InvoiceStatus.Draft } invoice &&
+               !IsPatientDeletedOrMissing(invoice.PatientData.Id);
     }
 
     private void EditSelectedDraft()
@@ -407,8 +418,60 @@ public sealed class InvoicesViewModel : ViewModelBase
             return;
         }
 
+        if (IsPatientDeletedOrMissing(SelectedInvoice.Invoice.PatientData.Id))
+        {
+            StatusMessage = "Draft kann nicht bearbeitet werden, weil der Patient gelöscht wurde.";
+            return;
+        }
+
         var invoiceId = SelectedInvoice.Invoice.Id;
         _nav.NavigateTo<InvoiceDraftViewModel>(vm => vm.LoadDraft(invoiceId));
+    }
+
+    private bool CanDeleteSelectedDraft()
+    {
+        return SelectedInvoice?.Invoice.Status == InvoiceStatus.Draft;
+    }
+
+    public async Task DeleteSelectedDraftAsync()
+    {
+        if (SelectedInvoice is null || SelectedInvoice.Invoice.Status != InvoiceStatus.Draft)
+        {
+            StatusMessage = "Nur Draft-Rechnungen können gelöscht werden.";
+            return;
+        }
+
+        var confirmed = await _messageBox.ConfirmWarningAsync(
+            "Draft löschen",
+            "Achtung, der Invoice-Draft wird gelöscht! Diese Aktion ist nicht widerrufbar, wollen Sie fortfahren?",
+            "Draft löschen",
+            "Abbrechen");
+        if (!confirmed)
+            return;
+
+        var invoiceId = SelectedInvoice.Invoice.Id;
+        var result = _billingService.DeleteDraftInvoice(invoiceId);
+        if (!result.Ok)
+        {
+            StatusMessage = result.Error ?? "Draft konnte nicht gelöscht werden.";
+            return;
+        }
+
+        _session.MarkUnsavedChanges();
+        StatusMessage = "Draft wurde gelöscht.";
+        LoadAllInvoices();
+    }
+
+    private bool IsPatientDeletedOrMissing(string patientId)
+    {
+        try
+        {
+            return _patientRepository.GetById(patientId).IsDeleted;
+        }
+        catch
+        {
+            return true;
+        }
     }
 
     private bool CanPrintSelectedInvoice()
