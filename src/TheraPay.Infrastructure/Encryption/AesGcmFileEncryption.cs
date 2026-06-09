@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace TheraPay.Infrastructure.csv;
+namespace TheraPay.Infrastructure.Encryption;
 
-public sealed class AesGcmCsvFileEncryption : ICsvFileEncryption
+public sealed class AesGcmFileEncryption : IFileEncryption
 {
     private static readonly byte[] MagicBytes = Encoding.ASCII.GetBytes("TPCSVGCM");
     private const byte Version = 1;
@@ -12,15 +12,15 @@ public sealed class AesGcmCsvFileEncryption : ICsvFileEncryption
     private const int MaxTagSizeInBytes = 16;
 
     private readonly string _password;
-    private readonly AesGcmCsvFileEncryptionOptions _options;
+    private readonly AesGcmFileEncryptionOptions _options;
 
-    public AesGcmCsvFileEncryption(string password, AesGcmCsvFileEncryptionOptions? options = null)
+    public AesGcmFileEncryption(string password, AesGcmFileEncryptionOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("A password is required for AES-GCM CSV encryption.", nameof(password));
+            throw new ArgumentException("A password is required for AES-GCM file encryption.", nameof(password));
 
         _password = password;
-        _options = options ?? new AesGcmCsvFileEncryptionOptions();
+        _options = options ?? new AesGcmFileEncryptionOptions();
         ValidateOptions(_options);
     }
 
@@ -31,15 +31,15 @@ public sealed class AesGcmCsvFileEncryption : ICsvFileEncryption
 
         var magic = reader.ReadBytes(MagicBytes.Length);
         if (!magic.SequenceEqual(MagicBytes))
-            throw new InvalidDataException("The file is not a TheraPay AES-GCM CSV file.");
+            throw new InvalidDataException("The file is not a TheraPay AES-GCM encrypted file.");
 
         byte version = reader.ReadByte();
         if (version != Version)
-            throw new InvalidDataException($"Unsupported encrypted CSV version: {version}.");
+            throw new InvalidDataException($"Unsupported encrypted file version: {version}.");
 
         int iterations = reader.ReadInt32();
         if (iterations <= 0)
-            throw new InvalidDataException("Encrypted CSV file contains an invalid PBKDF2 iteration count.");
+            throw new InvalidDataException("Encrypted file contains an invalid PBKDF2 iteration count.");
 
         byte[] salt = ReadLengthPrefixedBytes(reader, "salt");
         byte[] nonce = ReadLengthPrefixedBytes(reader, "nonce");
@@ -129,11 +129,11 @@ public sealed class AesGcmCsvFileEncryption : ICsvFileEncryption
     {
         int length = reader.ReadInt32();
         if (length is <= 0 or > MaxHeaderFieldLength)
-            throw new InvalidDataException($"Encrypted CSV file contains an invalid {fieldName} length.");
+            throw new InvalidDataException($"Encrypted file contains an invalid {fieldName} length.");
 
         byte[] bytes = reader.ReadBytes(length);
         if (bytes.Length != length)
-            throw new EndOfStreamException($"Encrypted CSV file ended while reading {fieldName}.");
+            throw new EndOfStreamException($"Encrypted file ended while reading {fieldName}.");
 
         return bytes;
     }
@@ -154,7 +154,7 @@ public sealed class AesGcmCsvFileEncryption : ICsvFileEncryption
             _options.KeySizeInBytes);
     }
 
-    private static void ValidateOptions(AesGcmCsvFileEncryptionOptions options)
+    private static void ValidateOptions(AesGcmFileEncryptionOptions options)
     {
         if (options.Pbkdf2Iterations <= 0)
             throw new ArgumentOutOfRangeException(nameof(options), "PBKDF2 iterations must be greater than zero.");

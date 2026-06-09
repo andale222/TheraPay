@@ -1,12 +1,13 @@
 using System.Security.Cryptography;
 using System.Text;
 using TheraPay.Domain;
+using TheraPay.Infrastructure.Encryption;
 
 namespace TheraPay.Infrastructure.csv.Tests;
 
-public class CsvFileEncryption_test
+public class CsvStoreFileEncryption_test
 {
-    private static readonly AesGcmCsvFileEncryptionOptions FastEncryptionOptions = new()
+    private static readonly AesGcmFileEncryptionOptions FastEncryptionOptions = new()
     {
         Pbkdf2Iterations = 10
     };
@@ -134,7 +135,7 @@ public class CsvFileEncryption_test
     {
         var filePath = TempFile("patients.enc");
         var encryption = CreateEncryption();
-        var wrongEncryption = new AesGcmCsvFileEncryption("wrong-password", FastEncryptionOptions);
+        var wrongEncryption = new AesGcmFileEncryption("wrong-password", FastEncryptionOptions);
 
         try
         {
@@ -150,13 +151,13 @@ public class CsvFileEncryption_test
     }
 
     [Fact]
-    public void GivenMockEncryption_SaveAll_WritesPlaintextCsv()
+    public void GivenDummyEncryption_SaveAll_WritesPlaintextCsv()
     {
         var filePath = TempFile("patients.csv");
 
         try
         {
-            var store = new CsvPatientStore(filePath, MockCsvFileEncryption.Instance);
+            var store = new CsvPatientStore(filePath, DummyFileEncryption.Instance);
 
             store.SaveAll(new[] { new Patient("Plain", "Patient", "plain-1") });
             var persistedText = File.ReadAllText(filePath);
@@ -170,9 +171,9 @@ public class CsvFileEncryption_test
         }
     }
 
-    private static AesGcmCsvFileEncryption CreateEncryption()
+    private static AesGcmFileEncryption CreateEncryption()
     {
-        return new AesGcmCsvFileEncryption("correct horse battery staple", FastEncryptionOptions);
+        return new AesGcmFileEncryption("correct horse battery staple", FastEncryptionOptions);
     }
 
     private static string TempFile(string suffix)

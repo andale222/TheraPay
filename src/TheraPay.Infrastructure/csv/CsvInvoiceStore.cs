@@ -3,12 +3,13 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using TheraPay.Domain;
+using TheraPay.Infrastructure.Encryption;
 
 namespace TheraPay.Infrastructure.csv;
 
 public class CsvInvoiceStore : CsvStore<Invoice, InvoiceCsvRecord>
 {
-    public CsvInvoiceStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+    public CsvInvoiceStore(string filePath, IFileEncryption? fileEncryption = null)
         : base(filePath, fileEncryption)
     {
     }

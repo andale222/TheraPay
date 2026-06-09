@@ -1,6 +1,6 @@
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
-using TheraPay.Infrastructure.csv;
+using TheraPay.Infrastructure.Encryption;
 using TheraPay.Domain;
 
 namespace TheraPay.UI.ViewModels;
@@ -191,7 +191,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
         _nav.NavigateTo<HomeViewModel>();
     }
 
-    private bool TryCreateFileEncryption(out ICsvFileEncryption? fileEncryption)
+    private bool TryCreateFileEncryption(out IFileEncryption? fileEncryption)
     {
         fileEncryption = null;
 
@@ -206,7 +206,7 @@ public sealed class LoadFilesViewModel : ViewModelBase
             return false;
         }
 
-        fileEncryption = new AesGcmCsvFileEncryption(EncryptionPassword);
+        fileEncryption = new AesGcmFileEncryption(EncryptionPassword);
         return true;
     }
 

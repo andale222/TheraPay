@@ -5,12 +5,13 @@ using CsvHelper.Configuration;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TheraPay.Infrastructure.Encryption;
 
 namespace TheraPay.Infrastructure.csv;
 
 public class CsvAppointmentStore : CsvStore<Appointment, AppointmentCsvRecord>
 {
-    public CsvAppointmentStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+    public CsvAppointmentStore(string filePath, IFileEncryption? fileEncryption = null)
         : base(filePath, fileEncryption)
     {
     }

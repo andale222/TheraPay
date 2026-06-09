@@ -1,12 +1,13 @@
 using TheraPay.Domain;
 using CsvHelper.Configuration;
 using System.Globalization;
+using TheraPay.Infrastructure.Encryption;
 
 namespace TheraPay.Infrastructure.csv;
 
 public class CsvPatientStore : CsvStore<Patient, PatientCsvRecord>
 {
-    public CsvPatientStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+    public CsvPatientStore(string filePath, IFileEncryption? fileEncryption = null)
         : base(filePath, fileEncryption)
     {
     }

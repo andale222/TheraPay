@@ -1,6 +1,6 @@
-namespace TheraPay.Infrastructure.csv;
+namespace TheraPay.Infrastructure.Encryption;
 
-public sealed class AesGcmCsvFileEncryptionOptions
+public sealed class AesGcmFileEncryptionOptions
 {
     public int Pbkdf2Iterations { get; init; } = 210_000;
 

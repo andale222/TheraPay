@@ -4,6 +4,7 @@ using System.IO;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.Infrastructure.csv;
+using TheraPay.Infrastructure.Encryption;
 using TheraPay.UI.State;
 
 namespace TheraPay.UI.Services;
@@ -16,7 +17,7 @@ public sealed class ProjectPersistenceService
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly ProjectSession _session;
-    private ICsvFileEncryption _fileEncryption = MockCsvFileEncryption.Instance;
+    private IFileEncryption _fileEncryption = DummyFileEncryption.Instance;
 
     public ProjectPersistenceService(
         IPatientRepository patientRepository,
@@ -35,7 +36,7 @@ public sealed class ProjectPersistenceService
         string appointmentListPath,
         string practiceDataPath,
         string invoiceListPath = "",
-        ICsvFileEncryption? fileEncryption = null)
+        IFileEncryption? fileEncryption = null)
     {
         if (string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -54,7 +55,7 @@ public sealed class ProjectPersistenceService
 
         try
         {
-            _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
+            _fileEncryption = fileEncryption ?? DummyFileEncryption.Instance;
             _session.SetPatientListPath(patientListPath);
             _session.SetAppointmentListPath(appointmentListPath);
             _session.SetInvoiceListPath(ResolveInvoiceListPath(invoiceListPath, patientListPath, appointmentListPath, practiceDataPath));
@@ -78,9 +79,9 @@ public sealed class ProjectPersistenceService
         string appointmentListPath,
         string practiceDataPath,
         string invoiceListPath = "",
-        ICsvFileEncryption? fileEncryption = null)
+        IFileEncryption? fileEncryption = null)
     {
-        _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
+        _fileEncryption = fileEncryption ?? DummyFileEncryption.Instance;
         _patientRepository.Clear();
         _appointmentRepository.Clear();
         _invoiceRepository.Clear();
@@ -206,7 +207,7 @@ public sealed class ProjectPersistenceService
     private static bool TryCreateConversionEncryption(
         string outputDirectory,
         string password,
-        out AesGcmCsvFileEncryption encryption,
+        out AesGcmFileEncryption encryption,
         out string error)
     {
         encryption = null!;
@@ -224,7 +225,7 @@ public sealed class ProjectPersistenceService
             return false;
         }
 
-        encryption = new AesGcmCsvFileEncryption(password);
+        encryption = new AesGcmFileEncryption(password);
         return true;
     }
 

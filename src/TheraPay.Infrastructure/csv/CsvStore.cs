@@ -3,18 +3,19 @@ using CsvHelper.Configuration;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using TheraPay.Infrastructure.Encryption;
 
 namespace TheraPay.Infrastructure.csv;
 
 public abstract class CsvStore<TDomain, TRecord> where TDomain : class where TRecord : class
 {
     private readonly string _filePath;
-    private readonly ICsvFileEncryption _fileEncryption;
+    private readonly IFileEncryption _fileEncryption;
 
-    public CsvStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+    public CsvStore(string filePath, IFileEncryption? fileEncryption = null)
     {
         _filePath = filePath;
-        _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
+        _fileEncryption = fileEncryption ?? DummyFileEncryption.Instance;
     }
 
     public void SaveAll(IEnumerable<TDomain> data)

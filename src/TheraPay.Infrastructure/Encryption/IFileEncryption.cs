@@ -1,6 +1,6 @@
-namespace TheraPay.Infrastructure.csv;
+namespace TheraPay.Infrastructure.Encryption;
 
-public interface ICsvFileEncryption
+public interface IFileEncryption
 {
     byte[] ReadPlaintext(string filePath);
 

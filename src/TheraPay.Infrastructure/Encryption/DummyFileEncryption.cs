@@ -1,10 +1,10 @@
-namespace TheraPay.Infrastructure.csv;
+namespace TheraPay.Infrastructure.Encryption;
 
-public sealed class MockCsvFileEncryption : ICsvFileEncryption
+public sealed class DummyFileEncryption : IFileEncryption
 {
-    public static MockCsvFileEncryption Instance { get; } = new();
+    public static DummyFileEncryption Instance { get; } = new();
 
-    private MockCsvFileEncryption()
+    private DummyFileEncryption()
     {
     }
 

@@ -26,6 +26,7 @@
     <ProjectReference Include="..\TheraPay.Core\TheraPay.Core.csproj" />
     <ProjectReference Include="..\TheraPay.Domain\TheraPay.Domain.csproj" />
     <ProjectReference Include="..\TheraPay.Infrastructure\csv\csv.csproj" />
+    <ProjectReference Include="..\TheraPay.Infrastructure\Encryption\Encryption.csproj" />
     <ProjectReference Include="..\TheraPay.Infrastructure\Export\Export.csproj" />
   </ItemGroup>
 
