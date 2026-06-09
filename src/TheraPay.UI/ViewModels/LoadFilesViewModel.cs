@@ -87,6 +87,20 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
+    private bool _isDatabaseConversionEnabled;
+    public bool IsDatabaseConversionEnabled
+    {
+        get => _isDatabaseConversionEnabled;
+        set
+        {
+            if (_isDatabaseConversionEnabled == value) return;
+            _isDatabaseConversionEnabled = value;
+            OnPropertyChanged();
+            EncryptPlaintextDatabasesCommand.RaiseCanExecuteChanged();
+            DecryptEncryptedDatabasesCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     private string _conversionOutputDirectory = "";
     public string ConversionOutputDirectory
     {
@@ -131,8 +145,8 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
         LoadCommand = new RelayCommand(LoadProject);
         StartEmptyProjectCommand = new RelayCommand(StartEmptyProject);
-        EncryptPlaintextDatabasesCommand = new RelayCommand(EncryptPlaintextDatabases);
-        DecryptEncryptedDatabasesCommand = new RelayCommand(DecryptEncryptedDatabases);
+        EncryptPlaintextDatabasesCommand = new RelayCommand(EncryptPlaintextDatabases, () => IsDatabaseConversionEnabled);
+        DecryptEncryptedDatabasesCommand = new RelayCommand(DecryptEncryptedDatabases, () => IsDatabaseConversionEnabled);
     }
 
     private void LoadProject()
@@ -198,6 +212,12 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void EncryptPlaintextDatabases()
     {
+        if (!IsDatabaseConversionEnabled)
+        {
+            StatusMessage = "Bitte aktiviere die Datenbank-Konvertierung zuerst.";
+            return;
+        }
+
         SetConversionStatus(_projectPersistence.EncryptProjectFiles(
             PatientListPath,
             AppointmentListPath,
@@ -209,6 +229,12 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void DecryptEncryptedDatabases()
     {
+        if (!IsDatabaseConversionEnabled)
+        {
+            StatusMessage = "Bitte aktiviere die Datenbank-Konvertierung zuerst.";
+            return;
+        }
+
         SetConversionStatus(_projectPersistence.DecryptProjectFiles(
             PatientListPath,
             AppointmentListPath,
