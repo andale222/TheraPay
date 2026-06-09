@@ -1,5 +1,6 @@
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
+using TheraPay.Infrastructure.csv;
 
 namespace TheraPay.UI.ViewModels;
 
@@ -59,6 +60,30 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
+    private bool _useEncryption;
+    public bool UseEncryption
+    {
+        get => _useEncryption;
+        set
+        {
+            if (_useEncryption == value) return;
+            _useEncryption = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _encryptionPassword = "";
+    public string EncryptionPassword
+    {
+        get => _encryptionPassword;
+        set
+        {
+            if (_encryptionPassword == value) return;
+            _encryptionPassword = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string _statusMessage = "";
     public string StatusMessage
     {
@@ -82,7 +107,18 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void LoadProject()
     {
-        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
+        if (!TryCreateFileEncryption(out var fileEncryption))
+        {
+            return;
+        }
+
+        var result = _projectPersistence.LoadProject(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            fileEncryption);
+
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
@@ -95,8 +131,38 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void StartEmptyProject()
     {
-        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
+        if (!TryCreateFileEncryption(out var fileEncryption))
+        {
+            return;
+        }
+
+        _projectPersistence.StartEmptyProject(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            fileEncryption);
+
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
+    }
+
+    private bool TryCreateFileEncryption(out ICsvFileEncryption? fileEncryption)
+    {
+        fileEncryption = null;
+
+        if (!UseEncryption)
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(EncryptionPassword))
+        {
+            StatusMessage = "Bitte gib ein Passwort fuer die verschluesselten CSV-Dateien ein.";
+            return false;
+        }
+
+        fileEncryption = new AesGcmCsvFileEncryption(EncryptionPassword);
+        return true;
     }
 }

@@ -33,6 +33,15 @@
         <TextBox Text="{Binding PracticeDataPath}" Watermark="/pfad/zur/practice.csv" />
       </StackPanel>
 
+      <StackPanel Spacing="6">
+        <CheckBox Content="AES-GCM Verschlüsselung verwenden"
+                  IsChecked="{Binding UseEncryption}" />
+        <TextBox Text="{Binding EncryptionPassword}"
+                 PasswordChar="*"
+                 IsEnabled="{Binding UseEncryption}"
+                 Watermark="Passwort" />
+      </StackPanel>
+
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
         <Button Content="Laden" MinWidth="120" Command="{Binding LoadCommand}" />
         <Button Content="Neue Praxis starten" MinWidth="180" Command="{Binding StartEmptyProjectCommand}" />

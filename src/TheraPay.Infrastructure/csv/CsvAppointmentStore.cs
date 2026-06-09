@@ -8,8 +8,13 @@ using System.Text.Json.Serialization;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvAppointmentStore(string filePath) : CsvStore<Appointment, AppointmentCsvRecord>(filePath)
+public class CsvAppointmentStore : CsvStore<Appointment, AppointmentCsvRecord>
 {
+    public CsvAppointmentStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+        : base(filePath, fileEncryption)
+    {
+    }
+
     private static readonly JsonSerializerOptions BillingNumberJsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,

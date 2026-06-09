@@ -6,8 +6,13 @@ using TheraPay.Domain;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvInvoiceStore(string filePath) : CsvStore<Invoice, InvoiceCsvRecord>(filePath)
+public class CsvInvoiceStore : CsvStore<Invoice, InvoiceCsvRecord>
 {
+    public CsvInvoiceStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+        : base(filePath, fileEncryption)
+    {
+    }
+
     private static readonly JsonSerializerOptions InvoiceJsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,

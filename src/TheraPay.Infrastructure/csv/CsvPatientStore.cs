@@ -4,8 +4,13 @@ using System.Globalization;
 
 namespace TheraPay.Infrastructure.csv;
 
-public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvRecord>(filePath)
+public class CsvPatientStore : CsvStore<Patient, PatientCsvRecord>
 {
+    public CsvPatientStore(string filePath, ICsvFileEncryption? fileEncryption = null)
+        : base(filePath, fileEncryption)
+    {
+    }
+
     protected override CsvConfiguration CreateCsvConfiguration()
     {
         return new CsvConfiguration(CultureInfo.InvariantCulture)

@@ -2,26 +2,42 @@ using TheraPay.Core;
 using TheraPay.Domain;
 using CsvHelper;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace TheraPay.Infrastructure.csv;
 
 public class CsvPracticeDataStore : IPracticeDataStore
 {
     private readonly string _filePath;
+    private readonly ICsvFileEncryption _fileEncryption;
 
-    public CsvPracticeDataStore(string filePath)
+    public CsvPracticeDataStore(string filePath, ICsvFileEncryption? fileEncryption = null)
     {
         _filePath = filePath;
+        _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
     }
 
     public void Save(PracticeData data)
     { 
         var record = ToRecord(data);
 
-        using var writer = new StreamWriter(_filePath);
-        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        
-        csv.WriteRecords(new[] { record });
+        using var buffer = new MemoryStream();
+        using (var writer = new StreamWriter(buffer, new UTF8Encoding(false), leaveOpen: true))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.WriteRecords(new[] { record });
+        }
+
+        byte[] plaintext = buffer.ToArray();
+        try
+        {
+            _fileEncryption.WritePlaintext(_filePath, plaintext);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 
     public PracticeData Load()
@@ -29,7 +45,9 @@ public class CsvPracticeDataStore : IPracticeDataStore
         if (!File.Exists(_filePath))
             return new PracticeData();
 
-        using var reader = new StreamReader(_filePath);
+        byte[] plaintext = _fileEncryption.ReadPlaintext(_filePath);
+        using var buffer = new MemoryStream(plaintext, writable: false);
+        using var reader = new StreamReader(buffer, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
         var records = csv.GetRecords<CsvPracticeDataRecord>();

@@ -13,6 +13,7 @@ public sealed class ProjectPersistenceService
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly ProjectSession _session;
+    private ICsvFileEncryption _fileEncryption = MockCsvFileEncryption.Instance;
 
     public ProjectPersistenceService(
         IPatientRepository patientRepository,
@@ -30,7 +31,8 @@ public sealed class ProjectPersistenceService
         string patientListPath,
         string appointmentListPath,
         string practiceDataPath,
-        string invoiceListPath = "")
+        string invoiceListPath = "",
+        ICsvFileEncryption? fileEncryption = null)
     {
         if (string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -49,6 +51,7 @@ public sealed class ProjectPersistenceService
 
         try
         {
+            _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
             _session.SetPatientListPath(patientListPath);
             _session.SetAppointmentListPath(appointmentListPath);
             _session.SetInvoiceListPath(ResolveInvoiceListPath(invoiceListPath, patientListPath, appointmentListPath, practiceDataPath));
@@ -57,7 +60,7 @@ public sealed class ProjectPersistenceService
             _appointmentRepository.Clear();
             _invoiceRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository, _appointmentRepository, _invoiceRepository);
-            _session.SetPracticeData(CreatePracticeDataStore().Load());
+            _session.SetPracticeData(CreatePracticeDataStore().Load() ?? new PracticeData());
             _session.MarkSaved();
             return new Result(true);
         }
@@ -71,8 +74,10 @@ public sealed class ProjectPersistenceService
         string patientListPath,
         string appointmentListPath,
         string practiceDataPath,
-        string invoiceListPath = "")
+        string invoiceListPath = "",
+        ICsvFileEncryption? fileEncryption = null)
     {
+        _fileEncryption = fileEncryption ?? MockCsvFileEncryption.Instance;
         _patientRepository.Clear();
         _appointmentRepository.Clear();
         _invoiceRepository.Clear();
@@ -119,13 +124,15 @@ public sealed class ProjectPersistenceService
 
     private IDataPersistence CreatePersistence()
     {
-        return new CsvDataPersistence(new CsvPatientStore(_session.PatientListPath), 
-        new CsvAppointmentStore(_session.AppointmentListPath),
-        new CsvInvoiceStore(_session.InvoiceListPath));
+        return new CsvDataPersistence(
+            new CsvPatientStore(_session.PatientListPath, _fileEncryption),
+            new CsvAppointmentStore(_session.AppointmentListPath, _fileEncryption),
+            new CsvInvoiceStore(_session.InvoiceListPath, _fileEncryption));
     }
+
     private IPracticeDataStore CreatePracticeDataStore()
     {
-        return new CsvPracticeDataStore(_session.PracticeDataPath);
+        return new CsvPracticeDataStore(_session.PracticeDataPath, _fileEncryption);
     }
 
     private static string ResolveInvoiceListPath(
