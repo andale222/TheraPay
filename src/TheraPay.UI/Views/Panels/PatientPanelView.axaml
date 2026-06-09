@@ -21,7 +21,7 @@
               ColumnSpacing="16">
 
           <!-- Filter -->
-          <StackPanel Spacing="8" Margin="8" Grid.Column="0" Grid.Row="0">
+          <StackPanel Spacing="8" Margin="2" Grid.Column="0" Grid.Row="0">
           <TextBlock Text="Patienten:" FontSize="18" FontWeight="Bold"/>
             <RadioButton GroupName="PatientenFilter" Content="alle"
                          IsVisible="{Binding ShowActivityFilter}"
@@ -56,7 +56,7 @@
           </dataGrid:DataGrid>
 
           <!-- Aktionen -->
-          <StackPanel Spacing="8" Margin="8" Grid.Column="0" Grid.Row="1">
+          <StackPanel Spacing="8" Margin="2" Grid.Column="0" Grid.Row="1">
             <Button Content="Bearbeiten/&#x0a;Ansehen" Command="{Binding EditCommand}" />
             <Button Content="Löschen" Command="{Binding DeleteCommand}" />
           </StackPanel>
