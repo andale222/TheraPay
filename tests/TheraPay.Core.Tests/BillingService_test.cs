@@ -178,6 +178,54 @@ public class BillingService_test
     }
 
     [Fact]
+    public void GivenDraftInvoice_DeleteDraftInvoice_RemovesDraft()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        var service = new BillingService(invoiceRepo, appointmentRepo, patientRepo);
+        var patientId = TestData.Patient1().ID;
+        var appointmentId = appointmentRepo.GetByIndex(0).Id;
+        var addResult = service.AddInvoiceForPatientAndAppointments(patientId, [appointmentId], TestData.PracticeData1());
+        Assert.True(addResult.Ok);
+        var draft = Assert.Single(service.ViewInvoices());
+
+        // WHEN
+        var deleteResult = service.DeleteDraftInvoice(draft.Id);
+
+        // THEN
+        Assert.True(deleteResult.Ok);
+        Assert.Empty(service.ViewInvoices());
+    }
+
+    [Fact]
+    public void GivenIssuedInvoice_DeleteDraftInvoice_DoesNotRemoveInvoice()
+    {
+        // GIVEN
+        IInvoiceRepository invoiceRepo = new InMemoryInvoiceRepository();
+        IAppointmentRepository appointmentRepo = TestData.getInMemoryInMemoryAppointmentRepositoryWithTwoAppointments();
+        IPatientRepository patientRepo = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        var service = new BillingService(invoiceRepo, appointmentRepo, patientRepo);
+        var practiceData = TestData.PracticeData1();
+        var patientId = TestData.Patient1().ID;
+        var appointmentId = appointmentRepo.GetByIndex(0).Id;
+        var addResult = service.AddInvoiceForPatientAndAppointments(patientId, [appointmentId], practiceData);
+        Assert.True(addResult.Ok);
+        var invoice = Assert.Single(service.ViewInvoices());
+        var issueResult = service.IssueInvoice(invoice, DateTime.Today, practiceData);
+        Assert.True(issueResult.Ok);
+
+        // WHEN
+        var deleteResult = service.DeleteDraftInvoice(invoice.Id);
+
+        // THEN
+        Assert.False(deleteResult.Ok);
+        Assert.Single(service.ViewInvoices());
+        Assert.Equal(InvoiceStatus.Issued, invoice.Status);
+    }
+
+    [Fact]
     public void GivenAppointmentsAndPatients_AddInvoiceForPatientAndAppointmentsWithMismatchingPatientId_InvoiceIsNotAddedToInvoiceRepository()
     {
         // GIVEN

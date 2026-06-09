@@ -11,7 +11,7 @@
 
     <Grid ColumnDefinitions="Auto,*" Margin="16" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="16">
 
-    <StackPanel Orientation="Horizontal" Grid.Row= "0" Grid.Column="0" Spacing="8">
+    <StackPanel Orientation="Horizontal" Grid.Row= "0" Grid.Column="0" Spacing="8" IsEnabled="{Binding IsPatientDataEditable}">
       <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="0" Spacing="8">
        <TextBlock Text="Anrede" FontSize="15"/>
        <ComboBox Width="110"
@@ -40,7 +40,7 @@
       </StackPanel>
     </StackPanel>
 
-    <StackPanel Orientation="Horizontal" Grid.Row= "1" Grid.Column="0" Spacing="8">
+    <StackPanel Orientation="Horizontal" Grid.Row= "1" Grid.Column="0" Spacing="8" IsEnabled="{Binding IsPatientDataEditable}">
       <StackPanel Orientation="Vertical" Grid.Row= "1" Grid.Column="0" Spacing="8">
        <TextBlock Text="Straße" FontSize="15"/>
        <TextBox Width="160" Watermark="Straße" Text="{Binding PatientFields.Street, Mode=TwoWay}"/>
@@ -63,7 +63,7 @@
       </StackPanel>
     </StackPanel>
 
-    <StackPanel Orientation="Horizontal" Grid.Row= "2" Grid.Column="0" Spacing="8">
+    <StackPanel Orientation="Horizontal" Grid.Row= "2" Grid.Column="0" Spacing="8" IsEnabled="{Binding IsPatientDataEditable}">
       <StackPanel Orientation="Vertical" Grid.Row= "2" Grid.Column="0" Spacing="8">
        <TextBlock Text="E-Mail" FontSize="15"/>
        <TextBox Classes="codeInput" Width="160" Watermark="E-Mail" Text="{Binding PatientFields.Email, Mode=TwoWay}"/>
@@ -86,7 +86,7 @@
 
 
 
-    <StackPanel Orientation="Horizontal" Grid.Row= "3" Grid.Column="0" Spacing="8">
+    <StackPanel Orientation="Horizontal" Grid.Row= "3" Grid.Column="0" Spacing="8" IsEnabled="{Binding IsPatientDataEditable}">
       <StackPanel Orientation="Vertical" Grid.Row= "3" Grid.Column="0" Spacing="8">
        <TextBlock Text="Adresszusatz" FontSize="15"/>
        <TextBox Width="500" Height="150" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Adresszusatz" Text="{Binding PatientFields.AdditionalInfo, Mode=TwoWay}"/>
@@ -94,20 +94,21 @@
     </StackPanel>
 
 
-    <StackPanel Orientation="Vertical" Spacing="8" Margin="8" Grid.Column="0" Grid.Row= "4" >
+    <StackPanel Orientation="Vertical" Spacing="8" Margin="8" Grid.Column="0" Grid.Row= "4" IsEnabled="{Binding IsPatientDataEditable}">
       <TextBlock Text="Status:" FontSize="15"/>
       <RadioButton GroupName="PatientenStatus" Content="aktiv" IsChecked="{Binding PatientFields.IsActive, Mode=TwoWay}"/>
       <RadioButton GroupName="PatientenStatus" Content="inaktiv" IsChecked="{Binding PatientFields.IsInactive, Mode=TwoWay}"/>
     </StackPanel>
     <StackPanel Orientation="Vertical" Grid.Row= "4" Grid.Column="1" Spacing="8">
-      <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right"/>
-      <Button Content="{Binding SavePatientButtonText}" Command="{Binding AddPatientCommand}" Background="#71CE82" HorizontalAlignment="Right"/>
+      <Button Content="Daten prüfen" Command="{Binding CheckDataCommand}" Background="#FAAC2D" HorizontalAlignment="Right" IsEnabled="{Binding IsPatientDataEditable}"/>
+      <Button Content="{Binding SavePatientButtonText}" Command="{Binding AddPatientCommand}" Background="#71CE82" HorizontalAlignment="Right" IsEnabled="{Binding IsPatientDataEditable}"/>
       <TextBlock Text="{Binding CheckDataMessage}" TextWrapping="Wrap" MaxWidth="260" HorizontalAlignment="Right" Foreground="Red" FontWeight="Bold"/>
     </StackPanel>
 
 
     <StackPanel Orientation="Vertical" Grid.Row= "0" Grid.Column="1" Spacing="8">
       <Button Content="Zurück" Command="{Binding NavigateHomeViewCommand}" Background="#AA3A3A" HorizontalAlignment="Right"/>
+      <CheckBox Content="Bearbeiten" IsChecked="{Binding IsPatientDataEditable}" HorizontalAlignment="Right"/>
     </StackPanel>
   
     </Grid>

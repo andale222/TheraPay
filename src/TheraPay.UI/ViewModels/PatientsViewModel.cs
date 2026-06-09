@@ -101,9 +101,24 @@ public class PatientsViewModel : ViewModelBase
     public ObservableCollection<Patient> Patients { get; } = new();
     public IReadOnlyList<PatientInsuranceStatus> InsuranceStatuses { get; } = Enum.GetValues<PatientInsuranceStatus>();
     public bool IsEditMode => _editingPatientId is not null;
-    public bool IsPatientIdEditable => IsEditMode == false;
+    public bool IsPatientIdEditable => IsEditMode == false && IsPatientDataEditable;
     public string PatientFormTitle => IsEditMode ? "Patient bearbeiten" : "Patient hinzufügen";
     public string SavePatientButtonText => IsEditMode ? "Änderungen speichern" : "Hinzufügen";
+
+    private bool _isPatientDataEditable = true;
+    public bool IsPatientDataEditable
+    {
+        get => _isPatientDataEditable;
+        set
+        {
+            if (_isPatientDataEditable == value)
+                return;
+
+            _isPatientDataEditable = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsPatientIdEditable));
+        }
+    }
 
     private string _checkDataMessage = "";
     public string CheckDataMessage
@@ -147,6 +162,7 @@ public class PatientsViewModel : ViewModelBase
         {
             _editingPatientId = null;
             PatientFields = new PatientFields();
+            IsPatientDataEditable = true;
             CheckDataMessage = $"Patient mit ID '{patientId}' wurde nicht gefunden.";
             NotifyEditModeChanged();
             return;
@@ -154,6 +170,7 @@ public class PatientsViewModel : ViewModelBase
 
         _editingPatientId = patient.ID;
         PatientFields = PatientFields.FromPatient(patient);
+        IsPatientDataEditable = false;
         CheckDataMessage = "";
         NotifyEditModeChanged();
     }

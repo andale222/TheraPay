@@ -18,5 +18,6 @@ public sealed class PatientCsvRecord
     public string Email { get; set; } = "";
     public string AdditionalInfo { get; set; } = "";
     public string PhoneNumber { get; set; } = "";
+    public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
 }
