@@ -139,6 +139,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         _appointmentService = appointmentService;
         CalendarPanel = calendarPanel;
         PatientsPanel = patientsPanel;
+        PatientsPanel.ShowOnlyActivePatients = true;
 
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         SaveAppointmentCommand = new RelayCommand(SaveAppointment);

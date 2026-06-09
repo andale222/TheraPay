@@ -24,10 +24,13 @@
           <StackPanel Spacing="8" Margin="8" Grid.Column="0">
           <TextBlock Text="Patienten:" FontSize="18" FontWeight="Bold"/>
             <RadioButton GroupName="PatientenFilter" Content="alle"
+                         IsVisible="{Binding ShowActivityFilter}"
                          IsChecked="{Binding FilterAll, Mode=TwoWay}" />
             <RadioButton GroupName="PatientenFilter" Content="aktiv"
+                         IsVisible="{Binding ShowActivityFilter}"
                          IsChecked="{Binding FilterActive, Mode=TwoWay}" />
-            <RadioButton GroupName="PatientenFilter" Content="archiviert"
+            <RadioButton GroupName="PatientenFilter" Content="inaktiv"
+                         IsVisible="{Binding ShowActivityFilter}"
                          IsChecked="{Binding FilterArchived, Mode=TwoWay}" />
           </StackPanel>
 
@@ -53,8 +56,7 @@
 
           <!-- Aktionen -->
           <StackPanel Spacing="8" Margin="8" Grid.Column="2">
-            <Button Content="Bearbeiten/Ansehen" Command="{Binding EditCommand}" />
-            <Button Content="(In)aktivieren" Command="{Binding ToggleActiveCommand}" />
+            <Button Content="Bearbeiten/&#x0a;Ansehen" Command="{Binding EditCommand}" />
             <Button Content="Löschen" Command="{Binding DeleteCommand}" />
           </StackPanel>
 

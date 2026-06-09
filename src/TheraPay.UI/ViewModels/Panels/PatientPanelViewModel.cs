@@ -17,6 +17,32 @@ public sealed class PatientPanelViewModel : ViewModelBase
 
     public ObservableCollection<PatientRowVm> Patients { get; } = new();
 
+    private bool _showOnlyActivePatients;
+    public bool ShowOnlyActivePatients
+    {
+        get => _showOnlyActivePatients;
+        set
+        {
+            if (_showOnlyActivePatients == value) return;
+            _showOnlyActivePatients = value;
+            if (value)
+            {
+                _filterAll = false;
+                _filterActive = true;
+                _filterArchived = false;
+                OnPropertyChanged(nameof(FilterAll));
+                OnPropertyChanged(nameof(FilterActive));
+                OnPropertyChanged(nameof(FilterArchived));
+            }
+
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowActivityFilter));
+            Reload();
+        }
+    }
+
+    public bool ShowActivityFilter => ShowOnlyActivePatients == false;
+
     private PatientRowVm? _selectedPatient;
     public PatientRowVm? SelectedPatient
     {
@@ -28,18 +54,18 @@ public sealed class PatientPanelViewModel : ViewModelBase
             OnPropertyChanged();
 
             _editCommand.RaiseCanExecuteChanged();
-            _toggleActiveCommand.RaiseCanExecuteChanged();
             _deleteCommand.RaiseCanExecuteChanged();
         }
     }
 
     // Filter (für MVP reicht es, wenn die Umschaltung schon funktioniert)
-    private bool _filterAll = true;
+    private bool _filterAll;
     public bool FilterAll
     {
         get => _filterAll;
         set
         {
+            if (ShowOnlyActivePatients && value) return;
             if (_filterAll == value) return;
             _filterAll = value;
             if (value) { _filterActive = false; _filterArchived = false; OnPropertyChanged(nameof(FilterActive)); OnPropertyChanged(nameof(FilterArchived)); }
@@ -48,12 +74,13 @@ public sealed class PatientPanelViewModel : ViewModelBase
         }
     }
 
-    private bool _filterActive;
+    private bool _filterActive = true;
     public bool FilterActive
     {
         get => _filterActive;
         set
         {
+            if (ShowOnlyActivePatients && value == false) return;
             if (_filterActive == value) return;
             _filterActive = value;
             if (value) { _filterAll = false; _filterArchived = false; OnPropertyChanged(nameof(FilterAll)); OnPropertyChanged(nameof(FilterArchived)); }
@@ -68,6 +95,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
         get => _filterArchived;
         set
         {
+            if (ShowOnlyActivePatients && value) return;
             if (_filterArchived == value) return;
             _filterArchived = value;
             if (value) { _filterAll = false; _filterActive = false; OnPropertyChanged(nameof(FilterAll)); OnPropertyChanged(nameof(FilterActive)); }
@@ -77,11 +105,9 @@ public sealed class PatientPanelViewModel : ViewModelBase
     }
 
     private readonly RelayCommand _editCommand;
-    private readonly RelayCommand _toggleActiveCommand;
     private readonly RelayCommand _deleteCommand;
 
     public ICommand EditCommand => _editCommand;
-    public ICommand ToggleActiveCommand => _toggleActiveCommand;
     public ICommand DeleteCommand => _deleteCommand;
 
     public PatientPanelViewModel(PatientService patientService, NavigationService nav)
@@ -92,17 +118,6 @@ public sealed class PatientPanelViewModel : ViewModelBase
         _editCommand = new RelayCommand(
             execute: () => _nav.NavigateTo<PatientsViewModel>(vm => vm.LoadPatientForEdit(SelectedPatient!.Id)),
             canExecute: () => SelectedPatient is not null);
-
-        _toggleActiveCommand = new RelayCommand(
-            execute: () =>
-            {
-                // TODO: sobald du im Core eine Toggle/Archive-Funktion hast:
-                // _patients.ToggleActive(SelectedPatient!.Id);
-                // Reload();
-
-                _nav.NavigateTo<PatientsViewModel>(); // MVP: erst mal zur Patientenverwaltung springen
-            },
-            canExecute: () => false);
 
         _deleteCommand = new RelayCommand(
             execute: () =>
@@ -122,11 +137,12 @@ public sealed class PatientPanelViewModel : ViewModelBase
     {
         Patients.Clear();
 
-        var all = _patients.ViewPatients();
+        var all = _patients.ViewPatients().AsEnumerable();
 
-        // MVP: Filterlogik optional. Wenn du später IsArchived/IsActive hast, hier filtern.
-        // if (FilterActive) all = all.Where(p => p.IsActive).ToList();
-        // if (FilterArchived) all = all.Where(p => p.IsArchived).ToList();
+        if (ShowOnlyActivePatients || FilterActive)
+            all = all.Where(p => p.IsActive);
+        else if (FilterArchived)
+            all = all.Where(p => p.IsActive == false);
 
         foreach (var p in all)
         {
