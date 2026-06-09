@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using TheraPay.Domain;
 using TheraPay.Core;
 using TheraPay.UI.Navigation;
+using TheraPay.UI.Services;
 using TheraPay.UI.State;
 using TheraPay.UI.ViewModels.Panels;
 
@@ -18,6 +20,7 @@ public class InvoiceCreationViewModel : ViewModelBase
     private readonly ProjectSession _session;
     private readonly AppointmentService _appointmentService;
     private readonly BillingService _billingService;
+    private readonly IMessageBoxService _messageBox;
     private DateTime? _issueDate = DateTime.Now.Date; // heute
     public DateTime? IssueDate
     {
@@ -46,32 +49,30 @@ public class InvoiceCreationViewModel : ViewModelBase
     public PatientPanelViewModel PatientsPanel { get; }
     public RelayCommand NavigateHomeViewCommand { get; }
     public RelayCommand NavigateInvoiceDraftCommand { get; }
-    private string _draftStatusMessage = "";
-    public string DraftStatusMessage
-    {
-        get => _draftStatusMessage;
-        private set
-        {
-            if (_draftStatusMessage == value) return;
-            _draftStatusMessage = value;
-            OnPropertyChanged();
-        }
-    }
 
 
-    public InvoiceCreationViewModel(PatientService patientService, AppointmentService appointmentService, BillingService billingService, PatientPanelViewModel patientsPanel, IPatientRepository store, ProjectSession session, NavigationService nav)
+    public InvoiceCreationViewModel(
+        PatientService patientService,
+        AppointmentService appointmentService,
+        BillingService billingService,
+        PatientPanelViewModel patientsPanel,
+        IPatientRepository store,
+        ProjectSession session,
+        NavigationService nav,
+        IMessageBoxService messageBox)
     {
         _nav = nav;
         _store = store;
         _session = session;
         _appointmentService = appointmentService;
         _billingService = billingService;
+        _messageBox = messageBox;
         PatientsPanel = patientsPanel;
         PatientsPanel.PropertyChanged += OnPatientsPanelPropertyChanged;
 
         _paymentTermInDays = _session.PracticeData.DefaultPaymentTermDays;
         NavigateHomeViewCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
-        NavigateInvoiceDraftCommand = new RelayCommand(ContinueToDraft);
+        NavigateInvoiceDraftCommand = new RelayCommand(async () => await ContinueToDraftAsync());
 
         ReloadAppointments();
     }
@@ -105,32 +106,55 @@ public class InvoiceCreationViewModel : ViewModelBase
         }
     }
 
-    private void ContinueToDraft()
+    private async Task ContinueToDraftAsync()
     {
         var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
         if (string.IsNullOrWhiteSpace(selectedPatientId))
         {
-            DraftStatusMessage = "Bitte zuerst einen Patienten auswählen.";
+            await _messageBox.ShowWarningAsync(
+                "Invoice-Draft erstellen",
+                "Bitte zuerst einen Patienten auswählen.");
             return;
         }
 
         var selectedAppointmentIds = GetCheckedAppointmentIds();
         if (selectedAppointmentIds.Count == 0)
         {
-            DraftStatusMessage = "Bitte mindestens einen Termin zum Abrechnen auswählen.";
+            await _messageBox.ShowWarningAsync(
+                "Invoice-Draft erstellen",
+                "Bitte mindestens einen Termin zum Abrechnen auswählen.");
             return;
         }
 
-        var result = CreateInvoiceDraft(selectedPatientId, selectedAppointmentIds);
-        DraftStatusMessage = result.Ok
-            ? string.IsNullOrWhiteSpace(result.Error) ? "Invoice-Draft wurde erstellt." : result.Error
-            : (result.Error ?? "Invoice-Draft konnte nicht erstellt werden.");
-
-        if (result.Ok)
+        var draftConflicts = FindDraftAppointmentConflicts(selectedAppointmentIds);
+        if (draftConflicts.Count > 0)
         {
-            _session.MarkUnsavedChanges();
-            _nav.NavigateTo<InvoiceDraftViewModel>();
+            var confirmed = await _messageBox.ConfirmWarningAsync(
+                "Termin bereits in Draft",
+                BuildDraftConflictWarning(draftConflicts),
+                "Trotzdem erstellen",
+                "Abbrechen");
+            if (!confirmed)
+                return;
         }
+
+        var result = CreateInvoiceDraft(selectedPatientId, selectedAppointmentIds);
+
+        if (!result.Ok)
+        {
+            await _messageBox.ShowErrorAsync(
+                "Invoice-Draft konnte nicht erstellt werden",
+                result.Error ?? "Invoice-Draft konnte nicht erstellt werden.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            await _messageBox.ShowWarningAsync("Invoice-Draft erstellt", result.Error);
+        }
+
+        _session.MarkUnsavedChanges();
+        _nav.NavigateTo<InvoiceDraftViewModel>();
     }
 
     private List<Guid> GetCheckedAppointmentIds()
@@ -146,6 +170,36 @@ public class InvoiceCreationViewModel : ViewModelBase
         }
 
         return selectedIds;
+    }
+
+    private List<DraftAppointmentConflict> FindDraftAppointmentConflicts(List<Guid> appointmentIds)
+    {
+        var selectedAppointmentIds = appointmentIds
+            .Select(id => id.ToString("D"))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return _billingService
+            .ViewInvoices()
+            .Where(invoice => invoice.Status == InvoiceStatus.Draft)
+            .SelectMany(invoice => invoice.AppointmentDataList
+                .Where(appointment => selectedAppointmentIds.Contains(appointment.AppointmentId))
+                .Select(appointment => new DraftAppointmentConflict(
+                    invoice.Id,
+                    appointment.AppointmentId,
+                    appointment.Date)))
+            .ToList();
+    }
+
+    private static string BuildDraftConflictWarning(IReadOnlyList<DraftAppointmentConflict> conflicts)
+    {
+        var details = string.Join("; ", conflicts
+            .Take(3)
+            .Select(conflict => $"{conflict.AppointmentDate:dd.MM.yy HH:mm} in Draft {conflict.DraftId:D}"));
+        var additionalConflictsText = conflicts.Count > 3
+            ? $" (+{conflicts.Count - 3} weitere)"
+            : "";
+
+        return $"Achtung: Ausgewählte Termine sind bereits in anderen Drafts enthalten: {details}{additionalConflictsText}. Möchtest du trotzdem fortfahren?";
     }
 
     private Result CreateInvoiceDraft(string patientId, List<Guid> appointmentIds)
@@ -179,4 +233,6 @@ public class InvoiceCreationViewModel : ViewModelBase
         public bool IsSelected { get; set; } = true;
         public string BillingState { get; init; } = "";
     }
+
+    private sealed record DraftAppointmentConflict(Guid DraftId, string AppointmentId, DateTime AppointmentDate);
 }

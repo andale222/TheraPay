@@ -35,6 +35,7 @@
           <Button Content="Patient:in hinzufügen" Command="{Binding NavigatePatientsCommand}"/>
           <Button Content="Termin hinzufügen" Command="{Binding NavigateEditAppointmentCommand}" />
           <Button Content="Rechnungen erstellen" Command= "{Binding NavigateInvoiceCreationCommand}" />
+          <Button Content="Rechnungen ansehen" Command="{Binding NavigateInvoicesCommand}" />
         </StackPanel>
     </Border>
 </HeaderedContentControl>

@@ -5,6 +5,7 @@ public sealed class ProjectSession
 {
     private string _patientListPath = "";
     private string _appointmentListPath = "";
+    private string _invoiceListPath = "";
     private string _practiceDataPath = "";
     private PracticeData _practiceData = new PracticeData();
     private bool _hasUnsavedChanges;
@@ -12,9 +13,11 @@ public sealed class ProjectSession
     public PracticeData PracticeData => _practiceData;
     public string PatientListPath => _patientListPath;
     public string AppointmentListPath => _appointmentListPath;
+    public string InvoiceListPath => _invoiceListPath;
     public string PracticeDataPath => _practiceDataPath;
     public bool HasPatientListPath => !string.IsNullOrWhiteSpace(_patientListPath);
     public bool HasAppointmentListPath => !string.IsNullOrWhiteSpace(_appointmentListPath);
+    public bool HasInvoiceListPath => !string.IsNullOrWhiteSpace(_invoiceListPath);
     public bool HasPracticeDataPath => !string.IsNullOrWhiteSpace(_practiceDataPath);
     public bool HasUnsavedChanges => _hasUnsavedChanges;
 
@@ -26,6 +29,10 @@ public sealed class ProjectSession
     public void SetAppointmentListPath(string path)
     {
         _appointmentListPath = path.Trim();
+    }
+    public void SetInvoiceListPath(string path)
+    {
+        _invoiceListPath = path.Trim();
     }
     public void SetPracticeDataPath(string path)
     {

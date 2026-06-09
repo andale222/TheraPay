@@ -6,7 +6,7 @@
   <Border Padding="24">
     <StackPanel Spacing="14" MaxWidth="760">
       <TextBlock Text="Projekt laden" FontSize="24" FontWeight="Bold" />
-      <TextBlock Text="Bitte gib die Dateipfade ein. Terminliste und Praxisdaten sind aktuell noch nicht funktional angebunden." TextWrapping="Wrap" />
+      <TextBlock Text="Bitte gib die Dateipfade ein oder wähle einen Projektordner aus." TextWrapping="Wrap" />
 
       <Button Content="Projektordner öffnen"
               HorizontalAlignment="Left"
@@ -19,12 +19,17 @@
       </StackPanel>
 
       <StackPanel Spacing="6">
-        <TextBlock Text="Terminliste (noch nicht angebunden):" />
+        <TextBlock Text="Terminliste (CSV):" />
         <TextBox Text="{Binding AppointmentListPath}" Watermark="/pfad/zur/appointments.csv" />
       </StackPanel>
 
       <StackPanel Spacing="6">
-        <TextBlock Text="Praxisdaten (noch nicht angebunden):" />
+        <TextBlock Text="Rechnungsliste (CSV):" />
+        <TextBox Text="{Binding InvoiceListPath}" Watermark="/pfad/zur/invoices.csv" />
+      </StackPanel>
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Praxisdaten (CSV):" />
         <TextBox Text="{Binding PracticeDataPath}" Watermark="/pfad/zur/practice.csv" />
       </StackPanel>
 

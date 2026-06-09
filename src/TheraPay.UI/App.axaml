@@ -83,6 +83,10 @@
       <views:InvoiceDraftView/>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:InvoicesViewModel}">
+      <views:InvoicesView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:AppointmentEditViewModel}">
       <views:AppointmentEditView/>
     </DataTemplate>

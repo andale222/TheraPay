@@ -40,7 +40,6 @@
             <dataGrid:DataGridTextColumn Header="Status" Binding="{Binding BillingState}" IsReadOnly="True" Width="Auto" />
           </dataGrid:DataGrid.Columns>
         </dataGrid:DataGrid>
-        <TextBlock Text="{Binding DraftStatusMessage}" TextWrapping="Wrap" />
       </StackPanel>
     
     <panels:PatientPanelView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="1"

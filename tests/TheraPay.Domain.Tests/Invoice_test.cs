@@ -173,6 +173,72 @@ public class Invoice_test
     }
 
     [Fact]
+    public void GivenDraftInvoice_SetPostIssueStatus_ReturnsFalseAndKeepsDraft()
+    {
+        // GIVEN
+        var invoice = new Invoice(
+            CreatePatientData(),
+            CreateAppointmenttDataListWithTwoEntries(),
+            PracticeDataRecord.FromPracticeData(TestData.PracticeData1()));
+
+        // WHEN
+        var result = invoice.SetPostIssueStatus(InvoiceStatus.Payed, DateTime.Today);
+
+        // THEN
+        Assert.False(result.Ok);
+        Assert.Equal(InvoiceStatus.Draft, invoice.Status);
+    }
+
+    [Fact]
+    public void GivenIssuedInvoice_SetPostIssueStatusToPayed_StatusIsPayed()
+    {
+        // GIVEN
+        var practiceData = TestData.PracticeData1();
+        var issueDate = new DateTime(2026, 3, 13);
+        var invoice = new Invoice(
+            CreatePatientData(),
+            CreateAppointmenttDataListWithTwoEntries(),
+            PracticeDataRecord.FromPracticeData(practiceData));
+        var issueResult = invoice.Issue(
+            PracticeDataRecord.FromPracticeData(practiceData),
+            $"{issueDate:yyyyMM}-1201",
+            issueDate);
+        Assert.True(issueResult.Ok);
+
+        // WHEN
+        var result = invoice.SetPostIssueStatus(InvoiceStatus.Payed, issueDate.AddDays(1));
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(InvoiceStatus.Payed, invoice.Status);
+    }
+
+    [Fact]
+    public void GivenPastDueInvoice_SetPostIssueStatusToIssued_StatusIsOverdue()
+    {
+        // GIVEN
+        var practiceData = TestData.PracticeData1();
+        practiceData.DefaultPaymentTermDays = 1;
+        var issueDate = new DateTime(2026, 3, 13);
+        var invoice = new Invoice(
+            CreatePatientData(),
+            CreateAppointmenttDataListWithTwoEntries(),
+            PracticeDataRecord.FromPracticeData(practiceData));
+        var issueResult = invoice.Issue(
+            PracticeDataRecord.FromPracticeData(practiceData),
+            $"{issueDate:yyyyMM}-1201",
+            issueDate);
+        Assert.True(issueResult.Ok);
+
+        // WHEN
+        var result = invoice.SetPostIssueStatus(InvoiceStatus.Issued, issueDate.AddDays(2));
+
+        // THEN
+        Assert.True(result.Ok);
+        Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
+    }
+
+    [Fact]
     public void GivenInvalidInvoiceNumberFormat_IssueInvoice_ReturnsFalseAndKeepsDraft()
     {
         // GIVEN

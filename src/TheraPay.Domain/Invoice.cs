@@ -19,8 +19,14 @@ public class Invoice
     public string Subject { get; private set; } = DefaultSubject;
 
     public Invoice(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
+        : this(Guid.NewGuid(), patientData, appointmentDataList, practiceDataRecord)
     {
-        Id = Guid.NewGuid();
+    }
+
+    private Invoice(Guid id, InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList, PracticeDataRecord practiceDataRecord)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentException("Id cannot be empty.", nameof(id));
         if (patientData == null)
             throw new ArgumentNullException(nameof(patientData));
         if (appointmentDataList == null)
@@ -31,11 +37,37 @@ public class Invoice
         {
             throw new ArgumentException("Data inconsistency detected: multiple patient Ids or matching appointment Ids detected.");
         }
+        Id = id;
         PatientData = patientData;
         PracticeDataRecord = practiceDataRecord;
         _appointmentDataList = appointmentDataList.ToList();
         Status = InvoiceStatus.Draft;
         UpdateTotalAmount();
+    }
+
+    public static Invoice Rehydrate(
+        Guid id,
+        InvoicePatientData patientData,
+        List<InvoiceAppointmentData> appointmentDataList,
+        PracticeDataRecord practiceDataRecord,
+        InvoiceStatus status,
+        DateTime issueDate,
+        DateTime dueDate,
+        string invoiceNumber,
+        string additionalText,
+        string subject)
+    {
+        var invoice = new Invoice(id, patientData, appointmentDataList, practiceDataRecord)
+        {
+            Status = status,
+            IssueDate = issueDate,
+            DueDate = dueDate,
+            InvoiceNumber = invoiceNumber ?? "",
+            AdditionalText = additionalText ?? "",
+            Subject = string.IsNullOrWhiteSpace(subject) ? DefaultSubject : subject.Trim()
+        };
+        invoice.UpdateTotalAmount();
+        return invoice;
     }
 
     private bool CheckDataValidity(InvoicePatientData patientData, List<InvoiceAppointmentData> appointmentDataList)
@@ -130,6 +162,36 @@ public class Invoice
         return new Result(true);
     }
 
+    public Result RefreshOverdueStatus(DateTime referenceDate)
+    {
+        if (Status == InvoiceStatus.Issued && IsOverdue(referenceDate))
+        {
+            Status = InvoiceStatus.Overdue;
+        }
+
+        return new Result(true);
+    }
+
+    public Result SetPostIssueStatus(InvoiceStatus requestedStatus, DateTime referenceDate)
+    {
+        if (Status == InvoiceStatus.Draft)
+            return new Result(false, "Draft invoices cannot be marked as issued, payed or cancelled.");
+
+        if (requestedStatus is not (InvoiceStatus.Issued or InvoiceStatus.Payed or InvoiceStatus.Cancelled))
+            return new Result(false, "Invoice status can only be set to Issued, Payed or Cancelled.");
+
+        Status = requestedStatus == InvoiceStatus.Issued && IsOverdue(referenceDate)
+            ? InvoiceStatus.Overdue
+            : requestedStatus;
+
+        return new Result(true);
+    }
+
+    private bool IsOverdue(DateTime referenceDate)
+    {
+        return DueDate != default && DueDate.Date < referenceDate.Date;
+    }
+
     // private string GenerateInvoiceNumber(DateTime issueDate)
     // {
     //     // Locking the state object ensures unique numbers in one process.
@@ -142,7 +204,7 @@ public class Invoice
 }
 
 
-public enum InvoiceStatus { Draft, Issued, Overdue, Cancelled };
+public enum InvoiceStatus { Draft, Issued, Overdue, Payed, Cancelled };
 
 public sealed record InvoicePatientData
 {

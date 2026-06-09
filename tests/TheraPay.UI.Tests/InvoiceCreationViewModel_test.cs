@@ -6,23 +6,23 @@ using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
 using TheraPay.UI.State;
 using TheraPay.UI.ViewModels;
+using TheraPay.UI.ViewModels.Panels;
 
 namespace TheraPay.UI.Tests;
 
-public class InvoiceDraftViewModel_test
+public class InvoiceCreationViewModel_test
 {
     [Fact]
-    public void GivenPdfExportDirectory_IssueInvoice_ExportsPdfToSelectedDirectory()
+    public void GivenSelectedAppointmentAlreadyInDraft_ContinueToDraft_WarnsAndRequiresConfirmation()
     {
         // GIVEN
         var invoiceRepository = new InMemoryInvoiceRepository();
         var appointmentRepository = new InMemoryAppointmentRepository();
         var patientRepository = new InMemoryPatientRepository();
         var patient = new Patient("Ada", "Lovelace", "AL1");
-        patientRepository.Add(patient);
-
         var appointment = new Appointment(new DateTime(2026, 1, 1, 14, 0, 0), patient.ID);
         appointment.SetDuration(60);
+        patientRepository.Add(patient);
         appointmentRepository.Add(appointment);
 
         var practiceData = new PracticeData
@@ -39,63 +39,55 @@ public class InvoiceDraftViewModel_test
         };
 
         var billingService = new BillingService(invoiceRepository, appointmentRepository, patientRepository);
-        var addResult = billingService.AddInvoiceForPatientAndAppointments(
+        var existingDraftResult = billingService.AddInvoiceForPatientAndAppointments(
             patient.ID,
             [appointment.Id],
             practiceData,
             new DateTime(2026, 1, 5),
             14);
-        Assert.True(addResult.Ok);
+        Assert.True(existingDraftResult.Ok);
 
-        var exportDirectory = Path.Combine(Path.GetTempPath(), "therapay-pdf-export-test", Guid.NewGuid().ToString("N"));
         var session = new ProjectSession();
         session.SetPracticeData(practiceData);
-        var exporter = new CapturingInvoicePdfExporter();
+        var patientService = new PatientService(patientRepository);
+        var appointmentService = new AppointmentService(appointmentRepository);
         var messageBox = new ConfirmingMessageBoxService();
-        var navigationService = new NavigationService(new NavigationStore(), new ServiceCollection().BuildServiceProvider());
-        var viewModel = new InvoiceDraftViewModel(
+        NavigationService? navigationService = null;
+        var services = new ServiceCollection();
+        services.AddTransient(_ => new InvoiceDraftViewModel(
             billingService,
             patientRepository,
-            exporter,
+            new NoopInvoicePdfExporter(),
+            session,
+            navigationService!,
+            messageBox));
+        var serviceProvider = services.BuildServiceProvider();
+        navigationService = new NavigationService(new NavigationStore(), serviceProvider);
+        var patientsPanel = new PatientPanelViewModel(patientService, navigationService);
+        patientsPanel.SelectPatient(patient.ID);
+        var viewModel = new InvoiceCreationViewModel(
+            patientService,
+            appointmentService,
+            billingService,
+            patientsPanel,
+            patientRepository,
             session,
             navigationService,
-            messageBox)
-        {
-            PdfExportDirectory = exportDirectory
-        };
+            messageBox);
 
-        try
-        {
-            // WHEN
-            viewModel.IssueInvoiceCommand.Execute(null);
+        // WHEN
+        viewModel.NavigateInvoiceDraftCommand.Execute(null);
 
-            // THEN
-            Assert.Equal(1, messageBox.ConfirmationCount);
-            Assert.NotNull(exporter.LastFilePath);
-            Assert.StartsWith(exportDirectory, exporter.LastFilePath);
-            Assert.EndsWith(".pdf", exporter.LastFilePath);
-            Assert.Equal($"Invoice_{billingService.ViewInvoices()[0].InvoiceNumber}.pdf", Path.GetFileName(exporter.LastFilePath));
-            var exportedInvoice = Assert.IsType<InvoicePdfModel>(exporter.LastInvoice);
-            Assert.True(exportedInvoice.IncludePaymentQrCode);
-        }
-        finally
-        {
-            if (Directory.Exists(exportDirectory))
-            {
-                Directory.Delete(exportDirectory, true);
-            }
-        }
+        // THEN
+        Assert.Equal(2, billingService.ViewInvoices().Count);
+        Assert.Equal(1, messageBox.ConfirmationCount);
+        Assert.Contains("bereits in anderen Drafts", messageBox.LastConfirmationMessage);
     }
 
-    private sealed class CapturingInvoicePdfExporter : IInvoicePdfExporter
+    private sealed class NoopInvoicePdfExporter : IInvoicePdfExporter
     {
-        public string? LastFilePath { get; private set; }
-        public InvoicePdfModel? LastInvoice { get; private set; }
-
         public bool InternalExport(InvoicePdfModel invoice, string filePath)
         {
-            LastFilePath = filePath;
-            LastInvoice = invoice;
             return true;
         }
     }
@@ -103,6 +95,7 @@ public class InvoiceDraftViewModel_test
     private sealed class ConfirmingMessageBoxService : IMessageBoxService
     {
         public int ConfirmationCount { get; private set; }
+        public string LastConfirmationMessage { get; private set; } = "";
 
         public Task ShowErrorAsync(string title, string message)
         {
@@ -117,6 +110,7 @@ public class InvoiceDraftViewModel_test
         public Task<bool> ConfirmWarningAsync(string title, string message, string confirmText = "OK", string cancelText = "Abbrechen")
         {
             ConfirmationCount++;
+            LastConfirmationMessage = message;
             return Task.FromResult(true);
         }
     }
