@@ -2,18 +2,26 @@ using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using TheraPay.Domain;
 using TheraPay.Core;              // Patient, PatientService (ggf. Namespace anpassen)
 using TheraPay.UI.Navigation;     // NavigationService
+using TheraPay.UI.Services;
+using TheraPay.UI.State;
 using TheraPay.UI.ViewModels;
 
 namespace TheraPay.UI.ViewModels.Panels;
 
 public sealed class PatientPanelViewModel : ViewModelBase
 {
+    private const string DeletePatientWarning =
+        "Achtung, der Patient wird gelöscht! Diese Aktion ist nicht widerrufbar, wollen Sie fortfahren?\n" +
+        "Der Patient wird weiterhin gespeichert, aber nicht mehr angezeigt und nutzbar sein, das gilt auch für die ID.";
     private readonly PatientService _patients;
     private readonly NavigationService _nav;
+    private readonly IMessageBoxService? _messageBox;
+    private readonly ProjectSession? _session;
     private Func<Patient, bool>? _additionalPatientFilter;
 
     public ObservableCollection<PatientRowVm> Patients { get; } = new();
@@ -111,26 +119,49 @@ public sealed class PatientPanelViewModel : ViewModelBase
     public ICommand EditCommand => _editCommand;
     public ICommand DeleteCommand => _deleteCommand;
 
-    public PatientPanelViewModel(PatientService patientService, NavigationService nav)
+    public PatientPanelViewModel(
+        PatientService patientService,
+        NavigationService nav,
+        IMessageBoxService? messageBox = null,
+        ProjectSession? session = null)
     {
         _patients = patientService;
         _nav = nav;
+        _messageBox = messageBox;
+        _session = session;
 
         _editCommand = new RelayCommand(
             execute: () => _nav.NavigateTo<PatientsViewModel>(vm => vm.LoadPatientForEdit(SelectedPatient!.Id)),
             canExecute: () => SelectedPatient is not null);
 
         _deleteCommand = new RelayCommand(
-            execute: () =>
-            {
-                // TODO: SoftDelete im Core:
-                // _patients.SoftDelete(SelectedPatient!.Id);
-                // Reload();
+            execute: async () => await DeleteSelectedPatientAsync(),
+            canExecute: () => SelectedPatient is not null);
 
-                _nav.NavigateTo<PatientsViewModel>(); // MVP
-            },
-            canExecute: () => false);
+        Reload();
+    }
 
+    public async Task DeleteSelectedPatientAsync()
+    {
+        if (SelectedPatient is null || _messageBox is null)
+            return;
+
+        var confirmed = await _messageBox.ConfirmWarningAsync(
+            "Patient löschen",
+            DeletePatientWarning,
+            "Löschen",
+            "Abbrechen");
+        if (!confirmed)
+            return;
+
+        var result = _patients.SoftDeletePatient(SelectedPatient.Id);
+        if (!result.Ok)
+        {
+            await _messageBox.ShowErrorAsync("Patient konnte nicht gelöscht werden", result.Error ?? "Patient konnte nicht gelöscht werden.");
+            return;
+        }
+
+        _session?.MarkUnsavedChanges();
         Reload();
     }
 

@@ -17,6 +17,7 @@ public class Patient
     public string Salutation { get; private set; } = "";
     public DateOnly? DateOfBirth { get; private set; }
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
     public Address? Address { get; private set; }
     public PatientInsuranceStatus InsuranceStatus { get; private set; } = PatientInsuranceStatus.Privat;
     public string ICD10Diagnosis { get; private set; } = "";

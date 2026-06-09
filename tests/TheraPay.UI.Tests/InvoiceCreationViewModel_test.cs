@@ -43,21 +43,21 @@ public class InvoiceCreationViewModel_test
         var viewModel = CreateViewModel(invoiceRepository, appointmentRepository, patientRepository);
 
         // THEN
+        Assert.True(viewModel.ShowOnlyPatientsWithUnbilledAppointments);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOpenAppointment.ID);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == inactivePatientWithOpenAppointment.ID);
+        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOnlyBilledAppointment.ID);
+        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithoutAppointment.ID);
+
+        // WHEN
+        viewModel.ShowAllInvoicePatients = true;
+
+        // THEN
         Assert.True(viewModel.ShowAllInvoicePatients);
         Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOpenAppointment.ID);
         Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == inactivePatientWithOpenAppointment.ID);
         Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOnlyBilledAppointment.ID);
         Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithoutAppointment.ID);
-
-        // WHEN
-        viewModel.ShowOnlyPatientsWithUnbilledAppointments = true;
-
-        // THEN
-        Assert.False(viewModel.ShowAllInvoicePatients);
-        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOpenAppointment.ID);
-        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == inactivePatientWithOpenAppointment.ID);
-        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOnlyBilledAppointment.ID);
-        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithoutAppointment.ID);
     }
 
     [Fact]

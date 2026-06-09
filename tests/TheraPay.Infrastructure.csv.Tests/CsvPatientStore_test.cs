@@ -50,6 +50,7 @@ public class CsvPatientStore_test
         Assert.Equal("3", patients[2].ID);
         Assert.Equal("Third", patients[2].FirstName);
         Assert.Equal("Three", patients[2].LastName);
+        Assert.True(patients[2].IsDeleted);
         Assert.All(patients, patient => Assert.True(patient.IsActive));
     }
 
@@ -85,6 +86,7 @@ public class CsvPatientStore_test
         thirdPatient.SetDateOfBirth(new DateOnly(1985, 9, 30));
         thirdPatient.SetInsuranceStatus(PatientInsuranceStatus.Selbstzahler);
         thirdPatient.IsActive = false;
+        thirdPatient.IsDeleted = true;
         var patients = new List<Patient>
         {
             new Patient("Firstt", "One", "1"),
@@ -114,11 +116,13 @@ public class CsvPatientStore_test
         Assert.Equal(patients[2].DateOfBirth, loadedPatients[2].DateOfBirth);
         Assert.Equal(patients[2].InsuranceStatus, loadedPatients[2].InsuranceStatus);
         Assert.False(loadedPatients[2].IsActive);
+        Assert.True(loadedPatients[2].IsDeleted);
 
         string savedCsv = File.ReadAllText(filePath);
         Assert.Contains("Salutation", savedCsv);
         Assert.Contains("DateOfBirth", savedCsv);
         Assert.Contains("IsActive", savedCsv);
+        Assert.Contains("IsDeleted", savedCsv);
         Assert.Contains("1991-04-12", savedCsv);
         Assert.Contains("False", savedCsv);
 

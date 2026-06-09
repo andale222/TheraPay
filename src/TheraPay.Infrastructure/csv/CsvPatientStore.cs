@@ -36,6 +36,7 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
             PhoneNumber = patient.PhoneNumber,
             AdditionalInfo = patient.Address?.Additional ?? "",
             IsActive = patient.IsActive,
+            IsDeleted = patient.IsDeleted,
         };
     }
 
@@ -59,6 +60,7 @@ public class CsvPatientStore(string filePath) : CsvStore<Patient, PatientCsvReco
         if (TryParseInsuranceStatus(record.InsuranceStatus, out var insuranceStatus))
             patient.SetInsuranceStatus(insuranceStatus);
         patient.IsActive = record.IsActive;
+        patient.IsDeleted = record.IsDeleted;
 
         return patient;
     }

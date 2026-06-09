@@ -160,7 +160,11 @@ public class PatientService
     {
         string trimmedId = id.Trim();
         int index = _repository.GetIndexById(trimmedId);
-        return index >= 0 ? _repository.GetByIndex(index) : null;
+        if (index < 0)
+            return null;
+
+        Patient patient = _repository.GetByIndex(index);
+        return patient.IsDeleted ? null : patient;
     }
 
     public Result UpdatePatient(
@@ -207,6 +211,19 @@ public class PatientService
             isActive,
             salutation,
             dateOfBirth);
+    }
+
+    public Result SoftDeletePatient(string id)
+    {
+        string trimmedId = id.Trim();
+        int index = _repository.GetIndexById(trimmedId);
+        if (index < 0)
+            return new Result(false, $"Patienten-ID '{trimmedId}' wurde nicht gefunden.");
+
+        Patient patient = _repository.GetByIndex(index);
+        patient.IsDeleted = true;
+        patient.IsActive = false;
+        return new Result(true);
     }
 
     public void ModifyAddress(
@@ -394,6 +411,8 @@ public class PatientService
 
     public IReadOnlyList<Patient> ViewPatients()
     {
-        return _repository.GetAll();
+        return _repository.GetAll()
+            .Where(patient => patient.IsDeleted == false)
+            .ToList();
     }
 }
