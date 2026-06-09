@@ -14,6 +14,7 @@ public sealed class PatientPanelViewModel : ViewModelBase
 {
     private readonly PatientService _patients;
     private readonly NavigationService _nav;
+    private Func<Patient, bool>? _additionalPatientFilter;
 
     public ObservableCollection<PatientRowVm> Patients { get; } = new();
 
@@ -133,8 +134,15 @@ public sealed class PatientPanelViewModel : ViewModelBase
         Reload();
     }
 
+    public void SetAdditionalPatientFilter(Func<Patient, bool>? filter)
+    {
+        _additionalPatientFilter = filter;
+        Reload();
+    }
+
     private void Reload()
     {
+        string? selectedPatientId = SelectedPatient?.Id;
         Patients.Clear();
 
         var all = _patients.ViewPatients().AsEnumerable();
@@ -143,6 +151,9 @@ public sealed class PatientPanelViewModel : ViewModelBase
             all = all.Where(p => p.IsActive);
         else if (FilterArchived)
             all = all.Where(p => p.IsActive == false);
+
+        if (_additionalPatientFilter is not null)
+            all = all.Where(_additionalPatientFilter);
 
         foreach (var p in all)
         {
@@ -161,7 +172,8 @@ public sealed class PatientPanelViewModel : ViewModelBase
             });
         }
 
-        SelectedPatient = Patients.FirstOrDefault();
+        SelectedPatient = Patients.FirstOrDefault(patient => patient.Id == selectedPatientId)
+            ?? Patients.FirstOrDefault();
     }
 
     public void SelectPatient(string patientId)

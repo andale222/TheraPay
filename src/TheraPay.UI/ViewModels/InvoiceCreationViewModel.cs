@@ -50,6 +50,31 @@ public class InvoiceCreationViewModel : ViewModelBase
     public RelayCommand NavigateHomeViewCommand { get; }
     public RelayCommand NavigateInvoiceDraftCommand { get; }
 
+    private bool _showOnlyPatientsWithUnbilledAppointments;
+    public bool ShowOnlyPatientsWithUnbilledAppointments
+    {
+        get => _showOnlyPatientsWithUnbilledAppointments;
+        set
+        {
+            if (_showOnlyPatientsWithUnbilledAppointments == value)
+                return;
+
+            _showOnlyPatientsWithUnbilledAppointments = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowAllInvoicePatients));
+            ApplyPatientAppointmentFilter();
+        }
+    }
+
+    public bool ShowAllInvoicePatients
+    {
+        get => ShowOnlyPatientsWithUnbilledAppointments == false;
+        set
+        {
+            if (value)
+                ShowOnlyPatientsWithUnbilledAppointments = false;
+        }
+    }
 
     public InvoiceCreationViewModel(
         PatientService patientService,
@@ -68,13 +93,28 @@ public class InvoiceCreationViewModel : ViewModelBase
         _billingService = billingService;
         _messageBox = messageBox;
         PatientsPanel = patientsPanel;
+        PatientsPanel.FilterAll = true;
         PatientsPanel.PropertyChanged += OnPatientsPanelPropertyChanged;
+        ShowOnlyPatientsWithUnbilledAppointments = true;
 
         _paymentTermInDays = _session.PracticeData.DefaultPaymentTermDays;
         NavigateHomeViewCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         NavigateInvoiceDraftCommand = new RelayCommand(async () => await ContinueToDraftAsync());
 
         ReloadAppointments();
+    }
+
+    private void ApplyPatientAppointmentFilter()
+    {
+        PatientsPanel.SetAdditionalPatientFilter(
+            ShowOnlyPatientsWithUnbilledAppointments
+                ? PatientHasUnbilledAppointments
+                : null);
+    }
+
+    private bool PatientHasUnbilledAppointments(Patient patient)
+    {
+        return _appointmentService.GetNotBilledAppointmentsForPatient(patient.ID).Any();
     }
 
     public void ReloadAppointments()
