@@ -41,6 +41,8 @@ public class CsvPatientStore : CsvStore<Patient, PatientCsvRecord>
             Email = patient.Email,
             PhoneNumber = patient.PhoneNumber,
             AdditionalInfo = patient.Address?.Additional ?? "",
+            IsActive = patient.IsActive,
+            IsDeleted = patient.IsDeleted,
         };
     }
 
@@ -63,6 +65,8 @@ public class CsvPatientStore : CsvStore<Patient, PatientCsvRecord>
             patient.SetPhoneNumber(record.PhoneNumber);
         if (TryParseInsuranceStatus(record.InsuranceStatus, out var insuranceStatus))
             patient.SetInsuranceStatus(insuranceStatus);
+        patient.IsActive = record.IsActive;
+        patient.IsDeleted = record.IsDeleted;
 
         return patient;
     }

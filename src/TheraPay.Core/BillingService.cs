@@ -134,6 +134,18 @@ public class BillingService
         return _invoiceRepository.GetAll();
     }
 
+    public Result DeleteDraftInvoice(Guid invoiceId)
+    {
+        if (_invoiceRepository.GetIndexById(invoiceId) < 0)
+            return new Result(false, $"Invoice with ID {invoiceId:D} not found.");
+
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice.Status != InvoiceStatus.Draft)
+            return new Result(false, "Nur Draft-Rechnungen können gelöscht werden.");
+
+        return _invoiceRepository.RemoveById(invoiceId);
+    }
+
     private Result ValidateInvoiceAppointmentsAreBillable(Invoice invoice)
     {
         var unavailableAppointments = new List<string>();

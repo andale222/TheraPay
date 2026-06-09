@@ -239,4 +239,57 @@ public class PatientService_test
         Assert.False(result.Ok);
     }
 
+    [Fact]
+    public void GivenExistingPatient_SoftDeletePatient_HidesPatientButKeepsRepositoryEntryAndIdReserved()
+    {
+        // GIVEN
+        InMemoryPatientRepository repository = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        PatientService service = new PatientService(repository);
+        Patient patient = repository.GetById("L5R");
+
+        // WHEN
+        Result deleteResult = service.SoftDeletePatient(patient.ID);
+        Result addSameIdResult = service.AddPatient("New", "Patient", patient.ID);
+
+        // THEN
+        Assert.True(deleteResult.Ok);
+        Assert.True(patient.IsDeleted);
+        Assert.False(patient.IsActive);
+        Assert.Equal(2, repository.Count());
+        Assert.DoesNotContain(service.ViewPatients(), visiblePatient => visiblePatient.ID == patient.ID);
+        Assert.Null(service.FindPatientById(patient.ID));
+        Assert.False(addSameIdResult.Ok);
+    }
+
+    [Fact]
+    public void GivenDeletedPatient_UpdatePatient_ResultIsNotOk()
+    {
+        // GIVEN
+        InMemoryPatientRepository repository = TestData.getInMemoryPatientRepositoryWithTwoPatients();
+        PatientService service = new PatientService(repository);
+        Patient patient = repository.GetById("L5R");
+        service.SoftDeletePatient(patient.ID);
+
+        // WHEN
+        Result result = service.UpdatePatient(
+            patient.ID,
+            "Grace",
+            "Hopper",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Privat",
+            true);
+
+        // THEN
+        Assert.False(result.Ok);
+        Assert.True(patient.IsDeleted);
+    }
+
 }

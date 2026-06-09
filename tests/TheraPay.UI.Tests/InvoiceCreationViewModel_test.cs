@@ -13,6 +13,54 @@ namespace TheraPay.UI.Tests;
 public class InvoiceCreationViewModel_test
 {
     [Fact]
+    public void GivenPatientsWithDifferentAppointmentStates_FilterOnlyPatientsWithUnbilledAppointments_ShowsOnlyMatchingPatients()
+    {
+        // GIVEN
+        var invoiceRepository = new InMemoryInvoiceRepository();
+        var appointmentRepository = new InMemoryAppointmentRepository();
+        var patientRepository = new InMemoryPatientRepository();
+
+        var patientWithOpenAppointment = new Patient("Ada", "Open", "OPEN");
+        var inactivePatientWithOpenAppointment = new Patient("Ina", "InactiveOpen", "INACTIVE_OPEN")
+        {
+            IsActive = false
+        };
+        var patientWithOnlyBilledAppointment = new Patient("Bill", "Billed", "BILLED");
+        var patientWithoutAppointment = new Patient("Nora", "None", "NONE");
+        patientRepository.Add(patientWithOpenAppointment);
+        patientRepository.Add(inactivePatientWithOpenAppointment);
+        patientRepository.Add(patientWithOnlyBilledAppointment);
+        patientRepository.Add(patientWithoutAppointment);
+
+        var openAppointment = new Appointment(new DateTime(2026, 1, 1, 9, 0, 0), patientWithOpenAppointment.ID);
+        var inactiveOpenAppointment = new Appointment(new DateTime(2026, 1, 2, 9, 0, 0), inactivePatientWithOpenAppointment.ID);
+        var billedAppointment = new Appointment(new DateTime(2026, 1, 3, 9, 0, 0), patientWithOnlyBilledAppointment.ID);
+        billedAppointment.SetStatusToBilled();
+        appointmentRepository.Add(openAppointment);
+        appointmentRepository.Add(inactiveOpenAppointment);
+        appointmentRepository.Add(billedAppointment);
+
+        var viewModel = CreateViewModel(invoiceRepository, appointmentRepository, patientRepository);
+
+        // THEN
+        Assert.True(viewModel.ShowOnlyPatientsWithUnbilledAppointments);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOpenAppointment.ID);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == inactivePatientWithOpenAppointment.ID);
+        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOnlyBilledAppointment.ID);
+        Assert.DoesNotContain(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithoutAppointment.ID);
+
+        // WHEN
+        viewModel.ShowAllInvoicePatients = true;
+
+        // THEN
+        Assert.True(viewModel.ShowAllInvoicePatients);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOpenAppointment.ID);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == inactivePatientWithOpenAppointment.ID);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithOnlyBilledAppointment.ID);
+        Assert.Contains(viewModel.PatientsPanel.Patients, patient => patient.Id == patientWithoutAppointment.ID);
+    }
+
+    [Fact]
     public void GivenSelectedAppointmentAlreadyInDraft_ContinueToDraft_WarnsAndRequiresConfirmation()
     {
         // GIVEN
@@ -82,6 +130,31 @@ public class InvoiceCreationViewModel_test
         Assert.Equal(2, billingService.ViewInvoices().Count);
         Assert.Equal(1, messageBox.ConfirmationCount);
         Assert.Contains("bereits in anderen Drafts", messageBox.LastConfirmationMessage);
+    }
+
+    private static InvoiceCreationViewModel CreateViewModel(
+        InMemoryInvoiceRepository invoiceRepository,
+        InMemoryAppointmentRepository appointmentRepository,
+        InMemoryPatientRepository patientRepository)
+    {
+        var patientService = new PatientService(patientRepository);
+        var appointmentService = new AppointmentService(appointmentRepository);
+        var billingService = new BillingService(invoiceRepository, appointmentRepository, patientRepository);
+        var session = new ProjectSession();
+        session.SetPracticeData(new PracticeData { DefaultPaymentTermDays = 14 });
+        var messageBox = new ConfirmingMessageBoxService();
+        var navigationService = new NavigationService(new NavigationStore(), new ServiceCollection().BuildServiceProvider());
+        var patientsPanel = new PatientPanelViewModel(patientService, navigationService);
+
+        return new InvoiceCreationViewModel(
+            patientService,
+            appointmentService,
+            billingService,
+            patientsPanel,
+            patientRepository,
+            session,
+            navigationService,
+            messageBox);
     }
 
     private sealed class NoopInvoicePdfExporter : IInvoicePdfExporter
