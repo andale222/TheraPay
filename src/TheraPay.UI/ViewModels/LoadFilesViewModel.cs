@@ -1,5 +1,7 @@
 using TheraPay.UI.Navigation;
 using TheraPay.UI.Services;
+using TheraPay.Infrastructure.Encryption;
+using TheraPay.Domain;
 
 namespace TheraPay.UI.ViewModels;
 
@@ -10,6 +12,8 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     public RelayCommand LoadCommand { get; }
     public RelayCommand StartEmptyProjectCommand { get; }
+    public RelayCommand EncryptPlaintextDatabasesCommand { get; }
+    public RelayCommand DecryptEncryptedDatabasesCommand { get; }
 
     private string _patientListPath = "";
     public string PatientListPath
@@ -59,6 +63,68 @@ public sealed class LoadFilesViewModel : ViewModelBase
         }
     }
 
+    private bool _useEncryption;
+    public bool UseEncryption
+    {
+        get => _useEncryption;
+        set
+        {
+            if (_useEncryption == value) return;
+            _useEncryption = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _encryptionPassword = "";
+    public string EncryptionPassword
+    {
+        get => _encryptionPassword;
+        set
+        {
+            if (_encryptionPassword == value) return;
+            _encryptionPassword = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool _isDatabaseConversionEnabled;
+    public bool IsDatabaseConversionEnabled
+    {
+        get => _isDatabaseConversionEnabled;
+        set
+        {
+            if (_isDatabaseConversionEnabled == value) return;
+            _isDatabaseConversionEnabled = value;
+            OnPropertyChanged();
+            EncryptPlaintextDatabasesCommand.RaiseCanExecuteChanged();
+            DecryptEncryptedDatabasesCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private string _conversionOutputDirectory = "";
+    public string ConversionOutputDirectory
+    {
+        get => _conversionOutputDirectory;
+        set
+        {
+            if (_conversionOutputDirectory == value) return;
+            _conversionOutputDirectory = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _conversionPassword = "";
+    public string ConversionPassword
+    {
+        get => _conversionPassword;
+        set
+        {
+            if (_conversionPassword == value) return;
+            _conversionPassword = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string _statusMessage = "";
     public string StatusMessage
     {
@@ -75,14 +141,28 @@ public sealed class LoadFilesViewModel : ViewModelBase
     {
         _nav = nav;
         _projectPersistence = projectPersistence;
+        _useEncryption = true;
 
         LoadCommand = new RelayCommand(LoadProject);
         StartEmptyProjectCommand = new RelayCommand(StartEmptyProject);
+        EncryptPlaintextDatabasesCommand = new RelayCommand(EncryptPlaintextDatabases, () => IsDatabaseConversionEnabled);
+        DecryptEncryptedDatabasesCommand = new RelayCommand(DecryptEncryptedDatabases, () => IsDatabaseConversionEnabled);
     }
 
     private void LoadProject()
     {
-        var result = _projectPersistence.LoadProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
+        if (!TryCreateFileEncryption(out var fileEncryption))
+        {
+            return;
+        }
+
+        var result = _projectPersistence.LoadProject(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            fileEncryption);
+
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Laden fehlgeschlagen.";
@@ -95,8 +175,79 @@ public sealed class LoadFilesViewModel : ViewModelBase
 
     private void StartEmptyProject()
     {
-        _projectPersistence.StartEmptyProject(PatientListPath, AppointmentListPath, PracticeDataPath, InvoiceListPath);
+        if (!TryCreateFileEncryption(out var fileEncryption))
+        {
+            return;
+        }
+
+        _projectPersistence.StartEmptyProject(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            fileEncryption);
+
         StatusMessage = "";
         _nav.NavigateTo<HomeViewModel>();
+    }
+
+    private bool TryCreateFileEncryption(out IFileEncryption? fileEncryption)
+    {
+        fileEncryption = null;
+
+        if (!UseEncryption)
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(EncryptionPassword))
+        {
+            StatusMessage = "Bitte gib ein Passwort fuer die verschluesselten CSV-Dateien ein.";
+            return false;
+        }
+
+        fileEncryption = new AesGcmFileEncryption(EncryptionPassword);
+        return true;
+    }
+
+    private void EncryptPlaintextDatabases()
+    {
+        if (!IsDatabaseConversionEnabled)
+        {
+            StatusMessage = "Bitte aktiviere die Datenbank-Konvertierung zuerst.";
+            return;
+        }
+
+        SetConversionStatus(_projectPersistence.EncryptProjectFiles(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            ConversionOutputDirectory,
+            ConversionPassword), "Plaintext-Datenbanken wurden verschluesselt gespeichert.");
+    }
+
+    private void DecryptEncryptedDatabases()
+    {
+        if (!IsDatabaseConversionEnabled)
+        {
+            StatusMessage = "Bitte aktiviere die Datenbank-Konvertierung zuerst.";
+            return;
+        }
+
+        SetConversionStatus(_projectPersistence.DecryptProjectFiles(
+            PatientListPath,
+            AppointmentListPath,
+            PracticeDataPath,
+            InvoiceListPath,
+            ConversionOutputDirectory,
+            ConversionPassword), "Verschluesselte Datenbanken wurden als Plaintext gespeichert.");
+    }
+
+    private void SetConversionStatus(Result result, string successMessage)
+    {
+        StatusMessage = result.Ok
+            ? successMessage
+            : result.Error ?? "Konvertierung fehlgeschlagen.";
     }
 }

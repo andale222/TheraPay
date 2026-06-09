@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\TheraPay.Domain\TheraPay.Domain.csproj" />
     <ProjectReference Include="..\..\TheraPay.Core\TheraPay.Core.csproj" />
+    <ProjectReference Include="..\Encryption\Encryption.csproj" />
   </ItemGroup>
 
   <ItemGroup>

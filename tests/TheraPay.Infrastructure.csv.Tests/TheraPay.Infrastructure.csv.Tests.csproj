@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\TheraPay.Infrastructure\Encryption\Encryption.csproj" />
     <ProjectReference Include="..\..\src\TheraPay.Infrastructure\csv\csv.csproj" />
   </ItemGroup>
 

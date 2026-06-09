@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -25,20 +26,7 @@ public partial class LoadFilesView : UserControl
             return;
         }
 
-
-
-        var initialPath = AppContext.BaseDirectory;
-        IStorageFolder? start = null;
-        if (!string.IsNullOrWhiteSpace(initialPath) && Directory.Exists(initialPath))
-        {
-            start = await topLevel.StorageProvider.TryGetFolderFromPathAsync(initialPath);
-        }
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = "Projektordner auswählen",
-            AllowMultiple = false,
-            SuggestedStartLocation = start
-        });
+        var folders = await OpenFolderPicker(topLevel, "Projektordner auswählen");
 
         if (folders.Count == 0)
         {
@@ -57,5 +45,54 @@ public partial class LoadFilesView : UserControl
         vm.InvoiceListPath = Path.Combine(folderPath, "invoices.csv");
         vm.PracticeDataPath = Path.Combine(folderPath, "practice.csv");
         vm.StatusMessage = "Projektordner übernommen.";
+    }
+
+    private async void OpenConversionOutputFolderClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not LoadFilesViewModel vm)
+        {
+            return;
+        }
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel?.StorageProvider is null)
+        {
+            vm.StatusMessage = "Ordnerauswahl wird auf dieser Plattform nicht unterstützt.";
+            return;
+        }
+
+        var folders = await OpenFolderPicker(topLevel, "Zielordner auswählen");
+
+        if (folders.Count == 0)
+        {
+            return;
+        }
+
+        var folderPath = folders[0].TryGetLocalPath();
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            vm.StatusMessage = "Der ausgewählte Ordner hat keinen lokalen Dateipfad.";
+            return;
+        }
+
+        vm.ConversionOutputDirectory = folderPath;
+        vm.StatusMessage = "Zielordner übernommen.";
+    }
+
+    private static async System.Threading.Tasks.Task<IReadOnlyList<IStorageFolder>> OpenFolderPicker(TopLevel topLevel, string title)
+    {
+        var initialPath = AppContext.BaseDirectory;
+        IStorageFolder? start = null;
+        if (!string.IsNullOrWhiteSpace(initialPath) && Directory.Exists(initialPath))
+        {
+            start = await topLevel.StorageProvider.TryGetFolderFromPathAsync(initialPath);
+        }
+
+        return await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            SuggestedStartLocation = start
+        });
     }
 }

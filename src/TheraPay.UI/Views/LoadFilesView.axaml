@@ -4,41 +4,88 @@
              x:Class="TheraPay.UI.Views.LoadFilesView"
              x:DataType="vm:LoadFilesViewModel">
   <Border Padding="24">
-    <StackPanel Spacing="14" MaxWidth="760">
-      <TextBlock Text="Projekt laden" FontSize="24" FontWeight="Bold" />
-      <TextBlock Text="Bitte gib die Dateipfade ein oder wähle einen Projektordner aus." TextWrapping="Wrap" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <StackPanel Spacing="14" MaxWidth="760">
+        <TextBlock Text="Projekt laden" FontSize="24" FontWeight="Bold" />
+        <TextBlock Text="Bitte gib die Dateipfade ein oder wähle einen Projektordner aus." TextWrapping="Wrap" />
 
-      <Button Content="Projektordner öffnen"
-              HorizontalAlignment="Left"
-              MinWidth="180"
-              Click="OpenProjectFolderClick" />
 
-      <StackPanel Spacing="6">
-        <TextBlock Text="Patientenliste (CSV):" />
-        <TextBox Text="{Binding PatientListPath}" Watermark="/pfad/zur/patients.csv" />
+        <StackPanel Spacing="6" Orientation="Horizontal">
+        <Button Content="Projektordner öffnen"
+                HorizontalAlignment="Left"
+                MinWidth="180"
+                Click="OpenProjectFolderClick" />
+          <CheckBox Content="AES-GCM Verschlüsselung verwenden"
+                    IsChecked="{Binding UseEncryption}" />
+          <TextBox Text="{Binding EncryptionPassword}"
+                   PasswordChar="*"
+                   IsEnabled="{Binding UseEncryption}"
+                   MinWidth="200"
+                   Watermark="Passwort" 
+                   Background="LightSalmon" />
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Text="Patientenliste (CSV):" />
+          <TextBox Text="{Binding PatientListPath}" Watermark="/pfad/zur/patients.csv" />
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Text="Terminliste (CSV):" />
+          <TextBox Text="{Binding AppointmentListPath}" Watermark="/pfad/zur/appointments.csv" />
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Text="Rechnungsliste (CSV):" />
+          <TextBox Text="{Binding InvoiceListPath}" Watermark="/pfad/zur/invoices.csv" />
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Text="Praxisdaten (CSV):" />
+          <TextBox Text="{Binding PracticeDataPath}" Watermark="/pfad/zur/practice.csv" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
+          <Button Content="Laden" MinWidth="120" Command="{Binding LoadCommand}" />
+          <Button Content="Neue Praxis starten" MinWidth="180" Command="{Binding StartEmptyProjectCommand}" />
+        </StackPanel>
+
+        <Separator Margin="0,8,0,0" />
+
+        <CheckBox Content="Datenbanken konvertieren"
+                  IsChecked="{Binding IsDatabaseConversionEnabled}"
+                  FontSize="18"
+                  FontWeight="SemiBold" />
+
+        <StackPanel Spacing="14" IsVisible="{Binding IsDatabaseConversionEnabled}">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <TextBox Text="{Binding ConversionOutputDirectory}"
+                     Watermark="/pfad/zum/zielordner" />
+            <Button Content="Zielordner"
+                    Grid.Column="1"
+                    MinWidth="120"
+                    Click="OpenConversionOutputFolderClick" />
+          </Grid>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Konvertierungspasswort:" />
+            <TextBox Text="{Binding ConversionPassword}"
+                     PasswordChar="*"
+                     Watermark="Passwort" />
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Content="Verschlüsseln"
+                    MinWidth="180"
+                    Command="{Binding EncryptPlaintextDatabasesCommand}" />
+            <Button Content="Entschlüsseln"
+                    MinWidth="210"
+                    Command="{Binding DecryptEncryptedDatabasesCommand}" />
+          </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="{Binding StatusMessage}" Foreground="IndianRed" TextWrapping="Wrap" />
       </StackPanel>
-
-      <StackPanel Spacing="6">
-        <TextBlock Text="Terminliste (CSV):" />
-        <TextBox Text="{Binding AppointmentListPath}" Watermark="/pfad/zur/appointments.csv" />
-      </StackPanel>
-
-      <StackPanel Spacing="6">
-        <TextBlock Text="Rechnungsliste (CSV):" />
-        <TextBox Text="{Binding InvoiceListPath}" Watermark="/pfad/zur/invoices.csv" />
-      </StackPanel>
-
-      <StackPanel Spacing="6">
-        <TextBlock Text="Praxisdaten (CSV):" />
-        <TextBox Text="{Binding PracticeDataPath}" Watermark="/pfad/zur/practice.csv" />
-      </StackPanel>
-
-      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
-        <Button Content="Laden" MinWidth="120" Command="{Binding LoadCommand}" />
-        <Button Content="Neue Praxis starten" MinWidth="180" Command="{Binding StartEmptyProjectCommand}" />
-      </StackPanel>
-
-      <TextBlock Text="{Binding StatusMessage}" Foreground="IndianRed" TextWrapping="Wrap" />
-    </StackPanel>
+    </ScrollViewer>
   </Border>
 </UserControl>

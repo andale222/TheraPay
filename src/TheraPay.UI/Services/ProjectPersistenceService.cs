@@ -1,18 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using TheraPay.Core;
 using TheraPay.Domain;
 using TheraPay.Infrastructure.csv;
+using TheraPay.Infrastructure.Encryption;
 using TheraPay.UI.State;
 
 namespace TheraPay.UI.Services;
 
 public sealed class ProjectPersistenceService
 {
+    private const int RequiredDatabaseFileCount = 3;
+
     private readonly IPatientRepository _patientRepository;
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly ProjectSession _session;
+    private IFileEncryption _fileEncryption = DummyFileEncryption.Instance;
 
     public ProjectPersistenceService(
         IPatientRepository patientRepository,
@@ -30,7 +35,8 @@ public sealed class ProjectPersistenceService
         string patientListPath,
         string appointmentListPath,
         string practiceDataPath,
-        string invoiceListPath = "")
+        string invoiceListPath = "",
+        IFileEncryption? fileEncryption = null)
     {
         if (string.IsNullOrWhiteSpace(patientListPath))
         {
@@ -49,6 +55,7 @@ public sealed class ProjectPersistenceService
 
         try
         {
+            _fileEncryption = fileEncryption ?? DummyFileEncryption.Instance;
             _session.SetPatientListPath(patientListPath);
             _session.SetAppointmentListPath(appointmentListPath);
             _session.SetInvoiceListPath(ResolveInvoiceListPath(invoiceListPath, patientListPath, appointmentListPath, practiceDataPath));
@@ -57,7 +64,7 @@ public sealed class ProjectPersistenceService
             _appointmentRepository.Clear();
             _invoiceRepository.Clear();
             CreatePersistence().LoadInto(_patientRepository, _appointmentRepository, _invoiceRepository);
-            _session.SetPracticeData(CreatePracticeDataStore().Load());
+            _session.SetPracticeData(CreatePracticeDataStore().Load() ?? new PracticeData());
             _session.MarkSaved();
             return new Result(true);
         }
@@ -71,8 +78,10 @@ public sealed class ProjectPersistenceService
         string patientListPath,
         string appointmentListPath,
         string practiceDataPath,
-        string invoiceListPath = "")
+        string invoiceListPath = "",
+        IFileEncryption? fileEncryption = null)
     {
+        _fileEncryption = fileEncryption ?? DummyFileEncryption.Instance;
         _patientRepository.Clear();
         _appointmentRepository.Clear();
         _invoiceRepository.Clear();
@@ -117,15 +126,59 @@ public sealed class ProjectPersistenceService
         }
     }
 
+    public Result EncryptProjectFiles(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath,
+        string outputDirectory,
+        string password)
+    {
+        if (!TryCreateConversionEncryption(outputDirectory, password, out var encryption, out var error))
+            return new Result(false, error);
+
+        return ConvertProjectFiles(
+            patientListPath,
+            appointmentListPath,
+            practiceDataPath,
+            invoiceListPath,
+            outputDirectory,
+            source => encryption.EncryptFile(source.SourcePath, source.TargetPath),
+            "Verschluesselung");
+    }
+
+    public Result DecryptProjectFiles(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath,
+        string outputDirectory,
+        string password)
+    {
+        if (!TryCreateConversionEncryption(outputDirectory, password, out var encryption, out var error))
+            return new Result(false, error);
+
+        return ConvertProjectFiles(
+            patientListPath,
+            appointmentListPath,
+            practiceDataPath,
+            invoiceListPath,
+            outputDirectory,
+            source => encryption.DecryptFile(source.SourcePath, source.TargetPath),
+            "Entschluesselung");
+    }
+
     private IDataPersistence CreatePersistence()
     {
-        return new CsvDataPersistence(new CsvPatientStore(_session.PatientListPath), 
-        new CsvAppointmentStore(_session.AppointmentListPath),
-        new CsvInvoiceStore(_session.InvoiceListPath));
+        return new CsvDataPersistence(
+            new CsvPatientStore(_session.PatientListPath, _fileEncryption),
+            new CsvAppointmentStore(_session.AppointmentListPath, _fileEncryption),
+            new CsvInvoiceStore(_session.InvoiceListPath, _fileEncryption));
     }
+
     private IPracticeDataStore CreatePracticeDataStore()
     {
-        return new CsvPracticeDataStore(_session.PracticeDataPath);
+        return new CsvPracticeDataStore(_session.PracticeDataPath, _fileEncryption);
     }
 
     private static string ResolveInvoiceListPath(
@@ -150,4 +203,109 @@ public sealed class ProjectPersistenceService
     {
         return string.IsNullOrWhiteSpace(path) ? null : Path.GetDirectoryName(path);
     }
+
+    private static bool TryCreateConversionEncryption(
+        string outputDirectory,
+        string password,
+        out AesGcmFileEncryption encryption,
+        out string error)
+    {
+        encryption = null!;
+        error = "";
+
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            error = "Bitte gib einen Zielordner fuer die konvertierten Dateien an.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            error = "Bitte gib ein Passwort fuer die Konvertierung ein.";
+            return false;
+        }
+
+        encryption = new AesGcmFileEncryption(password);
+        return true;
+    }
+
+    private static Result ConvertProjectFiles(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath,
+        string outputDirectory,
+        Action<DatabaseFileConversion> convert,
+        string operationName)
+    {
+        try
+        {
+            var files = GetDatabaseFiles(
+                patientListPath,
+                appointmentListPath,
+                practiceDataPath,
+                invoiceListPath,
+                outputDirectory);
+
+            foreach (var file in files)
+            {
+                convert(file);
+            }
+
+            return new Result(true);
+        }
+        catch (Exception ex)
+        {
+            return new Result(false, $"{operationName} fehlgeschlagen: {ex.Message}");
+        }
+    }
+
+    private static List<DatabaseFileConversion> GetDatabaseFiles(
+        string patientListPath,
+        string appointmentListPath,
+        string practiceDataPath,
+        string invoiceListPath,
+        string outputDirectory)
+    {
+        Directory.CreateDirectory(outputDirectory);
+
+        var files = new List<DatabaseFileConversion>
+        {
+            CreateRequiredConversion(patientListPath, outputDirectory, "Patientenliste"),
+            CreateRequiredConversion(appointmentListPath, outputDirectory, "Terminliste"),
+            CreateRequiredConversion(practiceDataPath, outputDirectory, "Praxisdaten")
+        };
+
+        if (!string.IsNullOrWhiteSpace(invoiceListPath) && File.Exists(invoiceListPath))
+        {
+            files.Add(CreateConversion(invoiceListPath, outputDirectory));
+        }
+
+        if (files.Count < RequiredDatabaseFileCount)
+            throw new InvalidOperationException("Es wurden nicht alle Pflichtdateien fuer die Konvertierung gefunden.");
+
+        return files;
+    }
+
+    private static DatabaseFileConversion CreateRequiredConversion(string sourcePath, string outputDirectory, string label)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new InvalidOperationException($"{label}: Bitte gib einen Dateipfad an.");
+
+        if (!File.Exists(sourcePath))
+            throw new FileNotFoundException($"{label} wurde nicht gefunden.", sourcePath);
+
+        return CreateConversion(sourcePath, outputDirectory);
+    }
+
+    private static DatabaseFileConversion CreateConversion(string sourcePath, string outputDirectory)
+    {
+        string targetPath = Path.Combine(outputDirectory, Path.GetFileName(sourcePath));
+        if (Path.GetFullPath(sourcePath) == Path.GetFullPath(targetPath))
+            throw new InvalidOperationException("Der Zielordner darf nicht identisch mit dem Quellordner sein.");
+
+        return new DatabaseFileConversion(sourcePath, targetPath);
+    }
+
+    private sealed record DatabaseFileConversion(string SourcePath, string TargetPath);
 }
