@@ -115,6 +115,21 @@ public class Invoice
         return new Result(true);
     }
 
+    public Result SetPatientData(InvoicePatientData patientData)
+    {
+        if (!IsEditable())
+            return new Result(false, "Issue is not editable anymore.");
+
+        if (patientData == null)
+            return new Result(false, "Patient data cannot be null.");
+
+        if (patientData.Id != PatientData.Id)
+            return new Result(false, "Patient ID cannot be changed.");
+
+        PatientData = patientData;
+        return new Result(true);
+    }
+
     private static bool InvoiceNumberFormatIsOk(string invoiceNumber, DateTime issueDate)
     {
         if (string.IsNullOrWhiteSpace(invoiceNumber) || invoiceNumber.Length != 11)

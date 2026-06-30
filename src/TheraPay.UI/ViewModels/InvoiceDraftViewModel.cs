@@ -433,6 +433,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
 
     private void SaveAndNavigateHome()
     {
+        ApplyPatientDraftToDraft();
         ApplyInvoiceDraftDetails();
         ApplyPracticeDraftToSession();
         _session.MarkUnsavedChanges();
@@ -456,6 +457,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 return;
             }
 
+            ApplyPatientDraftToDraft();
             ApplyInvoiceDraftDetails();
             ApplyPracticeDraftToSession();
 
@@ -496,6 +498,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 return;
             }
 
+            ApplyPatientDraftToDraft();
             ApplyInvoiceDraftDetails();
             ApplyPracticeDraftToSession();
 
@@ -623,6 +626,27 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _session.PracticeData.Country = string.IsNullOrWhiteSpace(PracticeCountry) ? null : PracticeCountry;
         _session.PracticeData.AddressAdditional = string.IsNullOrWhiteSpace(PracticeAddressAdditional) ? null : PracticeAddressAdditional;
         _session.PracticeData.DefaultPaymentTermDays = PaymentTermInDays;
+    }
+
+    private void ApplyPatientDraftToDraft()
+    {
+        if (_currentDraft is null)
+        {
+            return;
+        }
+
+        var updatedPatientData = _currentDraft.PatientData with
+        {
+            Name = $"{PatientFirstName} {PatientLastName}".Trim(),
+            Street = PatientStreet,
+            HouseNumber = PatientHouseNumber,
+            PostalCode = PatientPostalCode,
+            City = PatientCity,
+            Country = string.IsNullOrWhiteSpace(PatientCountry) ? "" : PatientCountry,
+            AddressAdditional = string.IsNullOrWhiteSpace(PatientAddressAdditional) ? "" : PatientAddressAdditional
+        };
+
+        _currentDraft.SetPatientData(updatedPatientData);
     }
 
     private void MapPatientNameFromDraft(string fullName)
