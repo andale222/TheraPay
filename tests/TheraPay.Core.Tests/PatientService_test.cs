@@ -115,6 +115,19 @@ public class PatientService_test
     }
 
     [Fact]
+    public void GivenMultipleValidICD10Diagnoses_CheckPatientData_ResultIsOk()
+    {
+        // GIVEN
+        PatientService service = new PatientService(new InMemoryPatientRepository());
+
+        // WHEN
+        Result result = service.CheckPatientData("P1", "", "", "", "F12, E11.1;M79.2");
+
+        // THEN
+        Assert.True(result.Ok);
+    }
+
+    [Fact]
     public void GivenMissingPatientId_CheckPatientData_ResultIsNotOk()
     {
         // GIVEN

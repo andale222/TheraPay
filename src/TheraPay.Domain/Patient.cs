@@ -8,7 +8,7 @@ public class Patient
     public static readonly Regex PhoneNumberRegex = new(PhoneNumberPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
     public const string EmailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
     public static readonly Regex EmailRegex = new(EmailPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    public const string Icd10DiagnosisPattern = @"^[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?$";
+    public const string Icd10DiagnosisPattern = @"^(?:[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?)(?:\s*(?:,|;)\s*(?:[A-TV-Z][0-9][A-Z0-9](?:\.[A-Z0-9]{1,4})?))*$";
     public static readonly Regex Icd10DiagnosisRegex = new(Icd10DiagnosisPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
     public string LastName { get; private set; } = "";
