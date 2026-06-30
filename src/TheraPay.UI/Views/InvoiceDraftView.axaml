@@ -191,6 +191,10 @@
                 Command="{Binding SaveAndNavigateHomeCommand}"
                 Background="#71CE82"
                 MinWidth="170" />
+        <Button Content="Test-PDF erzeugen"
+                Command="{Binding ExportTestInvoiceCommand}"
+                Background="#4C9F70"
+                MinWidth="170" />
         <Button Content="{Binding IssueActionText}"
                 Command="{Binding IssueInvoiceCommand}"
                 Background="#F2B134"

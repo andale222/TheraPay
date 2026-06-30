@@ -26,6 +26,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
     public RelayCommand NavigateHomeWithoutSavingCommand { get; }
     public RelayCommand SaveAndNavigateHomeCommand { get; }
     public RelayCommand IssueInvoiceCommand { get; }
+    public RelayCommand ExportTestInvoiceCommand { get; }
 
     public string IssueActionText => "Rechnung ausstellen";
 
@@ -304,6 +305,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         NavigateHomeWithoutSavingCommand = new RelayCommand(() => _nav.NavigateTo<HomeViewModel>());
         SaveAndNavigateHomeCommand = new RelayCommand(SaveAndNavigateHome);
         IssueInvoiceCommand = new RelayCommand(async () => await IssueInvoiceWithWarningAsync());
+        ExportTestInvoiceCommand = new RelayCommand(async () => await ExportTestInvoiceAsync());
 
         LoadDefaultsFromSession();
         LoadLatestDraft();
@@ -436,6 +438,38 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         _session.MarkUnsavedChanges();
         StatusMessage = "Draft-Daten gespeichert.";
         _nav.NavigateTo<HomeViewModel>();
+    }
+
+    private async Task ExportTestInvoiceAsync()
+    {
+        if (_currentDraft is null)
+        {
+            await _messageBox.ShowErrorAsync("Test-Rechnung exportieren", "Kein Draft verfuegbar.");
+            return;
+        }
+
+        try
+        {
+            var exportDirectory = await TryPreparePdfExportDirectoryAsync();
+            if (exportDirectory is null)
+            {
+                return;
+            }
+
+            ApplyInvoiceDraftDetails();
+            ApplyPracticeDraftToSession();
+
+            var testInvoiceNumber = "TEST";
+            var exportPath = Path.Combine(exportDirectory, BuildPdfFileName(testInvoiceNumber));
+            _invoiceExporter.Export(_currentDraft, exportPath, IncludeQrCode);
+
+            _session.MarkUnsavedChanges();
+            StatusMessage = $"Test-Rechnung wurde als PDF exportiert: {exportPath}";
+        }
+        catch (Exception ex)
+        {
+            await _messageBox.ShowErrorAsync("Test-Rechnung konnte nicht exportiert werden", ex.Message);
+        }
     }
 
     private async Task IssueInvoiceWithWarningAsync()
