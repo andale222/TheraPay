@@ -49,6 +49,49 @@ public class AppointmentEditViewModel_test
     }
 
     [Fact]
+    public void GivenAppointmentFormData_SaveAndAddAnotherAppointment_SavesAppointmentAndKeepsViewOpen()
+    {
+        // GIVEN
+        var appointmentRepository = new InMemoryAppointmentRepository();
+        var patientRepository = new InMemoryPatientRepository();
+        var patient = new Patient("Ada", "Lovelace", "AL1");
+        patientRepository.Add(patient);
+        var navigationStore = new NavigationStore();
+        var navigationService = new NavigationService(navigationStore, new ServiceCollection().BuildServiceProvider());
+        var appointmentService = new AppointmentService(appointmentRepository);
+        var patientService = new PatientService(patientRepository);
+        var session = new ProjectSession();
+        var viewModel = new AppointmentEditViewModel(
+            appointmentService,
+            new CalendarPanelViewModel(navigationService, appointmentService, session),
+            new PatientPanelViewModel(patientService, navigationService),
+            navigationService,
+            session);
+        navigationStore.Navigate(viewModel);
+
+        viewModel.StartDate = new DateTime(2026, 1, 2);
+        viewModel.StartTime = new TimeSpan(9, 0, 0);
+        viewModel.EndTime = new TimeSpan(10, 0, 0);
+        viewModel.PatientsPanel.SelectPatient(patient.ID);
+        viewModel.DraftDescription = "Folgetermin";
+        viewModel.DraftFactor = "2";
+        viewModel.DraftBaseValue = "50";
+        viewModel.AddBillingNumberCommand.Execute(null);
+
+        // WHEN
+        viewModel.SaveAndAddAnotherAppointmentCommand.Execute(null);
+
+        // THEN
+        Assert.Single(appointmentRepository.GetAll());
+        Assert.True(session.HasUnsavedChanges);
+        Assert.Same(viewModel, navigationStore.CurrentViewModel);
+        Assert.Equal(new DateTime(2026, 1, 2), viewModel.StartDate);
+        Assert.Equal(new TimeSpan(9, 0, 0), viewModel.StartTime);
+        Assert.Equal(new TimeSpan(10, 0, 0), viewModel.EndTime);
+        Assert.Equal(patient.ID, viewModel.PatientsPanel.SelectedPatient!.Id);
+    }
+
+    [Fact]
     public void GivenExistingAppointment_LoadAppointmentForEdit_FillsAppointmentFields()
     {
         // GIVEN

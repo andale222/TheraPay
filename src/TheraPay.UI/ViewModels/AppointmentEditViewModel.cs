@@ -21,6 +21,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
     public RelayCommand NavigateHomeViewCommand { get; }
     public RelayCommand SaveAppointmentCommand { get; }
+    public RelayCommand SaveAndAddAnotherAppointmentCommand { get; }
     public RelayCommand CheckDataCommand { get; }
     public RelayCommand AddBillingNumberCommand { get; }
     public RelayCommand RemoveBillingNumberCommand { get; }
@@ -143,6 +144,7 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
         NavigateHomeViewCommand = new RelayCommand(() => nav.NavigateTo<HomeViewModel>());
         SaveAppointmentCommand = new RelayCommand(SaveAppointment);
+        SaveAndAddAnotherAppointmentCommand = new RelayCommand(SaveAndAddAnotherAppointment);
         CheckDataCommand = new RelayCommand(CheckData);
         AddBillingNumberCommand = new RelayCommand(AddSelectedBillingNumber);
         RemoveBillingNumberCommand = new RelayCommand(RemoveSelectedBillingNumber);
@@ -155,19 +157,36 @@ public sealed class AppointmentEditViewModel : ViewModelBase
 
     private void SaveAppointment()
     {
+        if (TrySaveAppointment(out _))
+        {
+            NavigateHomeViewCommand.Execute(null);
+        }
+    }
+
+    private void SaveAndAddAnotherAppointment()
+    {
+        if (TrySaveAppointment(out var createdAppointment))
+        {
+            ResetFormForNextAppointment(createdAppointment);
+        }
+    }
+
+    private bool TrySaveAppointment(out Appointment? createdAppointment)
+    {
+        createdAppointment = null;
+
         if (StartDate is null || StartTime is null || EndTime is null || DurationInMinutes is null)
         {
-            // ToDo: Fehlermeldung anzeigen, z.B. über MessageBox oder Statusleiste
-            return;
+            StatusMessage = "Bitte Datum, Start- und Endzeit angeben.";
+            return false;
         }
 
         var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
         if (string.IsNullOrWhiteSpace(selectedPatientId))
         {
-            // ToDo: Patient muss ausgewählt sein.
-            return;
+            StatusMessage = "Bitte einen Patienten auswählen.";
+            return false;
         }
-
 
         DateTime startDateTime = StartDate.Value.Date + StartTime.Value;
         var billingNumbers = AssignedBillingNumbers.ToList();
@@ -187,12 +206,23 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         if (!result.Ok)
         {
             StatusMessage = result.Error ?? "Termin konnte nicht gespeichert werden.";
-            return;
+            return false;
         }
 
         _session.MarkUnsavedChanges();
+        createdAppointment = null;
+        return true;
+    }
 
-        NavigateHomeViewCommand.Execute(null);
+    private void ResetFormForNextAppointment(Appointment? createdAppointment)
+    {
+        _editingAppointmentId = null;
+        OnPropertyChanged(nameof(IsEditing));
+        OnPropertyChanged(nameof(ViewTitle));
+        OnPropertyChanged(nameof(SaveButtonText));
+
+        CalendarPanel.ReloadAppointments();
+        StatusMessage = "Termin gespeichert. Sie können direkt einen weiteren anlegen.";
     }
 
     public void LoadAppointmentForEdit(Guid appointmentId)
