@@ -42,10 +42,10 @@
           </dataGrid:DataGrid.Styles>
           <dataGrid:DataGrid.Columns>
             <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
-            <dataGrid:DataGridTextColumn Header="InvoiceID" Binding="{Binding InvoiceId}" Width="*" />
+            <dataGrid:DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
             <dataGrid:DataGridTextColumn Header="Patient" Binding="{Binding Patient}" Width="*" />
             <dataGrid:DataGridTextColumn Header="Gesamtbetrag" Binding="{Binding TotalAmount}" Width="Auto" />
-            <dataGrid:DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+            <dataGrid:DataGridTextColumn Header="InvoiceID" Binding="{Binding InvoiceId}" Width="*" />
           </dataGrid:DataGrid.Columns>
         </dataGrid:DataGrid>
       </StackPanel>
@@ -139,9 +139,9 @@
                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <dataGrid:DataGrid.Columns>
                   <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
-                  <dataGrid:DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*" />
                   <dataGrid:DataGridTextColumn Header="Ziffern" Binding="{Binding BillingNumbers}" Width="Auto" />
                   <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
+                  <dataGrid:DataGridTextColumn Header="ID" Binding="{Binding Position}" Width="*" />
                 </dataGrid:DataGrid.Columns>
               </dataGrid:DataGrid>
             </StackPanel>

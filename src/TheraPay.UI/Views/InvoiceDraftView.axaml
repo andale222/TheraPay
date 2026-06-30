@@ -118,9 +118,9 @@
                              ScrollViewer.VerticalScrollBarVisibility="Auto">
             <dataGrid:DataGrid.Columns>
               <dataGrid:DataGridTextColumn Header="Datum" Binding="{Binding Date}" Width="Auto" />
-              <dataGrid:DataGridTextColumn Header="Termin-ID" Binding="{Binding AppointmentId}" Width="*" />
               <dataGrid:DataGridTextColumn Header="Betrag" Binding="{Binding Amount}" Width="Auto" />
               <dataGrid:DataGridTextColumn Header="Patient-ID" Binding="{Binding PatientId}" Width="Auto" />
+              <dataGrid:DataGridTextColumn Header="Termin-ID" Binding="{Binding AppointmentId}" Width="*" />
             </dataGrid:DataGrid.Columns>
           </dataGrid:DataGrid>
         </StackPanel>
