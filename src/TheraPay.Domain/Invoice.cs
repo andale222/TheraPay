@@ -223,6 +223,7 @@ public sealed record InvoicePatientData
         ? ""
         : $"{PostalCode} {City}".Trim();
     public string Salutation { get; init; } = "";
+    public string ICD10Diagnosis { get; init; } = "";
 
     public static InvoicePatientData FromPatientData(Patient data)
     {
@@ -238,7 +239,9 @@ public sealed record InvoicePatientData
             PostalCode = data.Address?.PostalCode ?? "",
             City = data.Address?.City ?? "",
             Country = data.Address?.Country ?? "",
-            AddressAdditional = data.Address?.Additional ?? ""
+            AddressAdditional = data.Address?.Additional ?? "",
+            Salutation = data.Salutation,
+            ICD10Diagnosis = data.ICD10Diagnosis
         };
     }
 }

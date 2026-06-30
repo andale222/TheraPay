@@ -55,7 +55,7 @@ public class InvoiceModelFactory
                 Subject: invoice.Subject,
                 PatientName: invoice.PatientData.Name,
                 TaxIdNumber: invoice.PracticeDataRecord.TaxNumber,
-                Diagnosis: "F41.3",
+                Diagnosis: invoice.PatientData.ICD10Diagnosis,
                 PatientStreetNr: invoice.PatientData.StreetAndHouseNumber,
                 PatientCityCode: invoice.PatientData.PostalCodeAndCity,
                 Lines: invoiceLines,
@@ -88,7 +88,7 @@ public class InvoiceModelFactory
             Subject: "testsubject",
             PatientName: "Max Mustermann",
             TaxIdNumber: "00/00/000000",
-            Diagnosis: "F41.3",
+            Diagnosis: invoice.PatientData.ICD10Diagnosis,
             PatientStreetNr: "Teststraße 342",
             PatientCityCode: "12345 Teststadt",
             Lines: new List<InvoicePdfLineModel>
