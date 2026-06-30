@@ -151,6 +151,11 @@ public sealed class AppointmentEditViewModel : ViewModelBase
         SelectedBillingNumber = AvailableBillingNumbers.FirstOrDefault();
     }
 
+    public void SelectPatient(string patientId)
+    {
+        PatientsPanel.SelectPatient(patientId);
+    }
+
     private void NotifyCalculated()
         => OnPropertyChanged(nameof(DurationInMinutes));
 

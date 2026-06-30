@@ -47,8 +47,16 @@ public sealed class HomeViewModel : ViewModelBase
         _store.CurrentViewModelChanged += (_, __) => OnPropertyChanged(nameof(CurrentViewModel));
 
         NavigatePatientsCommand  = new RelayCommand(() => nav.NavigateTo<PatientsViewModel>());
-        NavigateEditAppointmentCommand  = new RelayCommand(() => nav.NavigateTo<AppointmentEditViewModel>());
-        NavigateInvoiceCreationCommand  = new RelayCommand(() => nav.NavigateTo<InvoiceCreationViewModel>());
+        NavigateEditAppointmentCommand  = new RelayCommand(() => nav.NavigateTo<AppointmentEditViewModel>(vm =>
+        {
+            if (PatientsPanel.SelectedPatient?.Id is not null)
+                vm.SelectPatient(PatientsPanel.SelectedPatient.Id);
+        }));
+        NavigateInvoiceCreationCommand  = new RelayCommand(() => nav.NavigateTo<InvoiceCreationViewModel>(vm =>
+        {
+            if (PatientsPanel.SelectedPatient?.Id is not null)
+                vm.SelectPatient(PatientsPanel.SelectedPatient.Id);
+        }));
         NavigateInvoicesCommand  = new RelayCommand(() => nav.NavigateTo<InvoicesViewModel>());
         SaveDataCommand  = new RelayCommand(Save);
     }

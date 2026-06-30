@@ -146,6 +146,12 @@ public class InvoiceCreationViewModel : ViewModelBase
         }
     }
 
+    public void SelectPatient(string patientId)
+    {
+        PatientsPanel.SelectPatient(patientId);
+        ReloadAppointments();
+    }
+
     private async Task ContinueToDraftAsync()
     {
         var selectedPatientId = PatientsPanel.SelectedPatient?.Id;
