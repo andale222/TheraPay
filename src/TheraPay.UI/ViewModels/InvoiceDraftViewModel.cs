@@ -286,6 +286,13 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         set { if (_patientAddressAdditional != value) { _patientAddressAdditional = value; OnPropertyChanged(); } }
     }
 
+    private string _patientDiagnosis = "";
+    public string PatientDiagnosis
+    {
+        get => _patientDiagnosis;
+        set { if (_patientDiagnosis != value) { _patientDiagnosis = value; OnPropertyChanged(); } }
+    }
+
     public InvoiceDraftViewModel(
         BillingService billingService,
         IPatientRepository patientRepository,
@@ -643,7 +650,8 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             PostalCode = PatientPostalCode,
             City = PatientCity,
             Country = string.IsNullOrWhiteSpace(PatientCountry) ? "" : PatientCountry,
-            AddressAdditional = string.IsNullOrWhiteSpace(PatientAddressAdditional) ? "" : PatientAddressAdditional
+            AddressAdditional = string.IsNullOrWhiteSpace(PatientAddressAdditional) ? "" : PatientAddressAdditional,
+            ICD10Diagnosis = string.IsNullOrWhiteSpace(PatientDiagnosis) ? "" : PatientDiagnosis
         };
 
         _currentDraft.SetPatientData(updatedPatientData);
@@ -677,6 +685,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
             var patient = _patientRepository.GetById(patientId);
             PatientFirstName = patient.FirstName;
             PatientLastName = patient.LastName;
+            PatientDiagnosis = patient.ICD10Diagnosis;
             if (patient.Address is not null)
             {
                 PatientStreet = patient.Address.Street;
@@ -685,6 +694,23 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
                 PatientCity = patient.Address.City;
                 PatientCountry = patient.Address.Country ?? "";
                 PatientAddressAdditional = patient.Address.Additional ?? "";
+            }
+
+            // Aktualisiere auch den Draft mit den neuesten Patientendaten
+            if (_currentDraft is not null)
+            {
+                var updatedPatientData = _currentDraft.PatientData with
+                {
+                    Name = $"{patient.FirstName} {patient.LastName}".Trim(),
+                    Street = patient.Address?.Street ?? "",
+                    HouseNumber = patient.Address?.HouseNumber ?? "",
+                    PostalCode = patient.Address?.PostalCode ?? "",
+                    City = patient.Address?.City ?? "",
+                    Country = patient.Address?.Country ?? "",
+                    AddressAdditional = patient.Address?.Additional ?? "",
+                    ICD10Diagnosis = patient.ICD10Diagnosis
+                };
+                _currentDraft.SetPatientData(updatedPatientData);
             }
         }
         catch
@@ -701,6 +727,7 @@ public sealed class InvoiceDraftViewModel : ViewModelBase
         PatientCity = patientData.City;
         PatientCountry = patientData.Country;
         PatientAddressAdditional = patientData.AddressAdditional;
+        PatientDiagnosis = patientData.ICD10Diagnosis;
     }
 
     public sealed class InvoiceAppointmentRowVm

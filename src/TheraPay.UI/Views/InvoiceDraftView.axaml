@@ -96,8 +96,11 @@
                 <TextBox Text="{Binding PatientPostalCode}" Width="120" />
                 <TextBox Text="{Binding PatientCity}" Width="240" />
               </StackPanel>
-              <TextBlock Text="Land" />
-              <TextBox Text="{Binding PatientCountry}" />
+                <TextBlock Text="Land und Diagnose (ICD-10)" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding PatientCountry}" Width="180"/>
+                <TextBox Text="{Binding PatientDiagnosis}" Width="180" />
+              </StackPanel>
             </StackPanel>
           </StackPanel>
         </Border>
